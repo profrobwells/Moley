@@ -1,0 +1,372 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+# Scrape Archive.org for Newsweek back issues
+
+## Thanks to Sean Mussenden for his Advanced rvest tutorial, which this is shamelessly and ruthlessly stolen and remixed
+
+https://github.com/smussenden/datajournalismbook
+
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(janitor)
+library(stringr)
+```
+
+
+Example URL of pages I want to scrape
+https://en.wikipedia.org/wiki/List_of_ethnic_slurs
+
+https://www.lotteryinsider.com/lottery/arkansas.htm
+https://www.lotteryinsider.com/lottery/arizona.htm
+
+
+https://archive.org/download/sim_newsweek-us_1948-06-28_31_26/sim_newsweek-us_1948-06-28_31_26.pdf
+
+https://archive.org/download/sim_newsweek-us_1964_63_index/sim_newsweek-us_1964_63_index.pdf
+
+https://archive.org/download/sim_newsweek-us_1945-12-03_26_23/sim_newsweek-us_1945-12-03_26_23.pdf
+Test
+
+```{r}
+url2 <- "https://archive.org/download/sim_newsweek-us_1945-"
+test  <- url2 %>%
+  read_html() %>%
+  html_table() 
+
+
+# Specify the base URL of the webpage you want to scrape
+base_url <- "https://archive.org/details/pub_newsweek-us?and%5B%5D=year%3A%221938%22&and%5B%5D=year%3A%5B1937+TO+1969%5D"
+
+
+
+# Read the HTML code from the website
+webpage <- read_html(base_url)
+
+# Use CSS selectors to scrape the links to the files
+file_urls <- webpage %>%
+  html_nodes("a") %>%
+  html_attr("href")
+
+# Filter the URLs to include only those that start with 'sim_newsweek-us_'
+newsweek_urls <- file_urls[str_detect(file_urls, "^sim_newsweek-us_")]
+
+# Append the base URL to each of the Newsweek URLs
+newsweek_urls <- paste0(base_url, newsweek_urls)
+
+# Print the Newsweek URLs
+print(newsweek_urls)
+
+#Part 2 - works
+
+# Specify the base URL
+base_url <- "https://archive.org/download/sim_newsweek-us_"
+
+# Specify the dates of the issues you're interested in
+dates <- c("1948-06-28_31_26", "1948-07-05_31_27")  # Add more dates as needed
+
+# Generate the URLs
+urls <- paste0(base_url, dates, "/sim_newsweek-us_", dates, ".pdf")
+
+# Print the URLs
+print(urls)
+
+```
+#from this tutorialL https://github.com/hrbrmstr/wayback
+```{r}
+devtools::install_github("hrbrmstr/wayback")
+
+
+
+```
+```{r}
+library(wayback)
+library(tidyverse)
+
+# current verison
+packageVersion("wayback")
+
+
+```
+```{r}
+archive_available("https://archive.org/download/pub_newsweek-us/pub_newsweek-us_files.xml")
+
+get_mementos("https://archive.org/download/pub_newsweek-us/pub_newsweek-us_files.xml")
+
+
+newsweek_timemap <- get_timemap("https://archive.org/download/pub_newsweek-us/pub_newsweek-us_files.xml")
+
+cdx_basic_query("https://archive.org/download/pub_newsweek-us/pub_newsweek-us_files.xml", limit = 10) %>% 
+  glimpse()
+
+mem <- read_memento("https://www.r-project.org/news.html")
+res <- stringi::stri_split_lines(mem)[[1]]
+cat(paste0(res[187:200], collaspe="\n"))
+
+glimpse(
+  ia_scrape("lemon curry")
+)
+
+
+(newsweek<- ia_scrape("identifier:pub_newsweek-us", count=100L))
+
+## <ia_scrape object>
+## Cursor: W3siaWRlbnRpZmllciI6IjAzLTEwLTE4X1NwYWNlLXRvLUdyb3VuZHMuemlwIn1d
+
+(item <- ia_retrieve(newsweek$identifier[1]))
+
+write.csv(item, "/Users/robwells/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/newsweek_data.csv")
+
+download.file(item$link[1], file.path("~/Library/CloudStorage/Dropbox/Classes_Teaching_Archive/Data Journalism Classes/Data-Analysis-Class-Jour-405v-5003", item$file[1]))
+
+
+
+```
+
+
+
+```{r}
+archive_available("https://www.r-project.org/news.html")
+
+get_mementos("https://www.r-project.org/news.html")
+
+
+get_timemap("https://www.r-project.org/news.html")
+
+cdx_basic_query("https://www.r-project.org/news.html", limit = 10) %>% 
+  glimpse()
+
+mem <- read_memento("https://www.r-project.org/news.html")
+res <- stringi::stri_split_lines(mem)[[1]]
+cat(paste0(res[187:200], collaspe="\n"))
+
+glimpse(
+  ia_scrape("lemon curry")
+)
+
+
+(nasa <- ia_scrape("collection:nasa", count=100L))
+
+## <ia_scrape object>
+## Cursor: W3siaWRlbnRpZmllciI6IjAzLTEwLTE4X1NwYWNlLXRvLUdyb3VuZHMuemlwIn1d
+
+(item <- ia_retrieve(nasa$identifier[1]))
+
+download.file(item$link[1], file.path("~/Library/CloudStorage/Dropbox/Classes_Teaching_Archive/Data Journalism Classes/Data-Analysis-Class-Jour-405v-5003", item$file[1]))
+
+
+
+```
+
+
+```{r}
+#this pulls in data from a specific site
+
+url2 <- "https://en.wikipedia.org/wiki/List_of_ethnic_slurs"
+test  <- url2 %>%
+  read_html() %>%
+  html_table() 
+
+test1 <- test[[1]] %>%
+  clean_names() 
+
+#I want to create an empty container and loop it 1-24 to capture all of the data
+
+
+DT <- tibble::enframe(test)
+
+DT2 <- tidyr::unnest(DT)
+
+DT3 <- DT2 %>% 
+  select(1:5) %>% 
+  clean_names() %>% 
+  filter(!is.na(term)) 
+
+#write.csv(DT3, "../output/racistterms_all.csv")
+
+racist <- filter(DT3, grepl("United States", location_or_origin))
+racist1 <- filter(racist, grepl("Black|African", targets))
+# write.csv(racist1, "../output/racist_terms_us_may3.csv")
+
+racist_dictionary <- rio::import("../output/racist_dictionary.csv")
+
+```
+
+
+# NOTES BELOW: FAILED ATTEMPT TO SCRAPE THE WIKIPAGE
+```{r}
+page <- read_html("https://en.wikipedia.org/wiki/List_of_ethnic_slurs")
+table <- page %>% html_node("table") %>% html_table() %>% 
+    clean_names() 
+
+slurs <- data.frame()
+
+# Scrape the page for each letter from A to Z
+for (i in LETTERS) {
+  # Use tryCatch to catch errors
+  tryCatch({
+    page <- read_html(paste0("https://en.wikipedia.org/wiki/List_of_ethnic_slurs_(%22", i, "%22)"))
+    table <- page %>% html_node("table") %>% html_table()
+    slur_letter <- table %>%
+      slice(-1) %>% # Remove the header row
+      select(term, location_or_origin, targets, meaning_origin_and_notes) %>%
+      filter(!is.na(term)) # Remove rows with missing slurs
+    slurs <- rbind(slurs, slur_letter) # Add to the main data frame
+  }, error = function(e){})
+}
+
+
+```
+
+#notes from previous scraper
+
+```{r}
+#this pulls in data from a specific site
+
+url2 <- "https://www.lotteryinsider.com/lottery/arkansas.htm"
+test  <- url2 %>%
+  read_html() %>%
+  html_table()
+
+test <- test[[1]] %>%
+  clean_names() %>%
+  slice(4:30) %>% 
+  select(x1, x2)
+
+arkansas <- test
+```
+
+
+#Following the advancedrevest tutorial
+
+```{r}
+# Define parent url of page we want to scrape
+
+url <- "https://www.lotteryinsider.com/lottery/index.htm#us"
+
+# Read in all html from table, store all tables on page as nested list of dataframes.
+lottery_industry  <- url %>%
+  read_html() %>%
+  html_table()
+
+# Just keep the second dataframe in our list, standardize column headers, remove last row
+```
+
+#build a list of the states, urls
+```{r}
+lottery_industry <- lottery_industry[[1]] %>%
+  clean_names() %>%
+  slice(150:205)
+
+states <- lottery_industry %>% 
+  select(x1) %>% 
+  rename(state = x1)
+  
+states$state <- tolower(states$state)
+states$state2 <- states$state
+
+#rename to align with state abbreviations on lottery website
+states <- states %>%
+    mutate(state = case_when(
+    str_detect(state, "california") ~ "califor",   
+    str_detect(state, "connecticut") ~ "connect",                         
+    str_detect(state, "district of columbia") ~ "dc", 
+    str_detect(state, "indiana") ~ "hoosier",
+    str_detect(state, "louisiana") ~ "louisana",
+    str_detect(state, "new hampshire") ~ "newham",
+    str_detect(state, "new jersey") ~ "njersey",
+    str_detect(state, "new mexico") ~ "newmex",
+    str_detect(state, "new york") ~ "newyork",
+    str_detect(state, "north carolina") ~ "ntcarol",
+    str_detect(state, "north dakota") ~ "ntdakota",
+    str_detect(state, "massachusetts") ~ "massach",
+    str_detect(state, "minnesota") ~ "minnesot",
+    str_detect(state, "mississippi") ~ "missip",
+    str_detect(state, "pennsylvania") ~ "penvania",
+    str_detect(state, "rhode island") ~ "rhode",
+    str_detect(state, "south carolina") ~ "carol",
+    str_detect(state, "south dakota") ~ "sdakota",
+    str_detect(state, "virgin islands") ~ "virgin",
+    str_detect(state, "washington") ~ "wash",
+    str_detect(state, "west virginia") ~ "westvirg",
+    str_detect(state, "wisconsin") ~ "wiscon",
+    TRUE ~ state
+  ))
+
+
+#Eliminate jurisdictions
+
+junk <- c("atlantic", "british columbia", "manitoba", "ontario", "quebec", "western canada", "lottery associations")
+
+states <- states %>% 
+  filter(!state %in% junk)
+
+```
+Example URL
+https://www.lotteryinsider.com/lottery/arizona.htm
+
+```{r}
+
+# Make a column with URL for each sector. 
+state_links <- states %>%
+  mutate(sector_url = paste0("https://www.lotteryinsider.com/lottery/",states$state,".htm"))
+
+# Display it
+state_links
+
+state_links2 <- state_links %>% 
+  select(sector_url)
+```
+
+#xpath
+#I don't see a standardized  xpath structure to use to build the scraper.
+
+```{r}
+#/html/body/table/tbody/tr/td/table/tbody/tr[2]/td[2]/table[2]/tbody/tr/td/table[12]
+
+# Define url of the page we want to get
+url2 <- "https://www.lotteryinsider.com/lottery/index.htm#us"
+
+# Get employment html page and select only the table with employment information, then transform it from html to a table.
+lottery_info2 <- url2 %>%
+  read_html() %>%
+  html_element(xpath = '//*["/html/body/table/tbody/tr/td/table/tbody/tr[2]/td[2]/table[2]/tbody/tr/td/table[12]/tbody/tr[4]"]') #%>%
+ # html_table() 
+
+
+```
+
+
+#Scraping the lottery website
+```{r}
+# For loop, iterating over each row 
+
+for(row_number in 1:nrow(state_links2)) {
+    
+    # Keep only the row for a given row number, get rid of every other row
+   each_row_df <- state_links2 %>%
+    slice(row_number) 
+      
+    # Define url of page to get
+   url <- each_row_df$sector_url
+    
+    # Define id of table to ingest
+# xpath_lottery_table <- paste0('//*[@id="',each_row_df$sector_xpath_id,'"]')
+    
+    # Get employment table from each page by going to each url defined above, reading in the html with read_html(), extracting the table with the id generated by the xpath code using html_elements), and then turning the html into a proper dataframe using html_table(). The dataframe is in a nested list, which we'll have to extract in the next step.
+  lottery_info <- url %>%
+    read_html() %>%
+    html_table() 
+    
+    # To help us see what's happening as we build this, we're going to print the thing we're creating.  
+  print(lottery_info)
+    
+}      
+```
+
+To this point, lottery_info has loaded everything into a list file
+--it seems the list just contains the last value scraped, wyomong, and none of the other states.

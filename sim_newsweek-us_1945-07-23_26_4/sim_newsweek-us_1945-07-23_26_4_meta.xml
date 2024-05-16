@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <identifier>sim_newsweek-us_1945-07-23_26_4</identifier>
+  <adaptive_ocr>true</adaptive_ocr>
+  <auditor>associate-ruel-eldian@archive.org</auditor>
+  <betterpdf>true</betterpdf>
+  <boxid>IA1643324</boxid>
+  <canister>IA1643324-06</canister>
+  <collection>pub_newsweek-us</collection>
+  <collection>sim_microfilm</collection>
+  <collection>periodicals</collection>
+  <contrast_max>240</contrast_max>
+  <contrast_min>1</contrast_min>
+  <contributor>Internet Archive</contributor>
+  <copies>4</copies>
+  <date>1945-07-23</date>
+  <derive_version>0.0.20a</derive_version>
+  <description>Newsweek (US Edition) 1945-07-23: &lt;a href="https://archive.org/search.php?query=sim_pubid%3A2234%20AND%20volume%3A26" rel="nofollow"&gt;Volume 26&lt;/a&gt;, Issue 4.&lt;br /&gt;Digitized from &lt;a href="https://archive.org/details/sim_raw_scan_IA1643324-06/page/n2096" rel="nofollow"&gt;IA1643324-06&lt;/a&gt;.&lt;br /&gt;Previous issue: &lt;a href="https://archive.org/details/sim_newsweek-us_1945-07-16_26_3" rel="nofollow"&gt;sim_newsweek-us_1945-07-16_26_3&lt;/a&gt;.&lt;br /&gt;Next issue: &lt;a href="https://archive.org/details/sim_newsweek-us_1945-07-30_26_5" rel="nofollow"&gt;sim_newsweek-us_1945-07-30_26_5&lt;/a&gt;.</description>
+  <issn>0028-9604</issn>
+  <issue>4</issue>
+  <language>English</language>
+  <mediatype>texts</mediatype>
+  <metadata_operator>associate-jullyann-guisadio@archive.org</metadata_operator>
+  <next_item>sim_newsweek-us_1945-07-30_26_5</next_item>
+  <ppi>400</ppi>
+  <previous_item>sim_newsweek-us_1945-07-16_26_3</previous_item>
+  <pub_type>Magazines</pub_type>
+  <publisher>Newsweek Media Group Inc</publisher>
+  <scanner>SCAN02.cebu.archive.org</scanner>
+  <scanningcenter>cebu</scanningcenter>
+  <sim_pubid>2234</sim_pubid>
+  <software_version>nextStar 4.5.0.20626</software_version>
+  <source>IA1643324-06</source>
+  <source>microfilm</source>
+  <subject>General Interest Periodicals--United States</subject>
+  <subject>Political Science</subject>
+  <subject>Magazines</subject>
+  <subject>microfilm</subject>
+  <title>Newsweek (US Edition)  1945-07-23: Vol 26 Iss 4</title>
+  <volume>26</volume>
+  <uploader>arthur+microfilm02@archive.org</uploader>
+  <publicdate>2022-04-07 11:05:48</publicdate>
+  <addeddate>2022-04-07 11:05:48</addeddate>
+  <identifier-access>http://archive.org/details/sim_newsweek-us_1945-07-23_26_4</identifier-access>
+  <identifier-ark>ark:/13960/s2btnzvgs6f</identifier-ark>
+  <imagecount>100</imagecount>
+  <ocr>tesseract 5.0.0-1-g862e</ocr>
+  <ocr_parameters>-l eng</ocr_parameters>
+  <ocr_module_version>0.0.15</ocr_module_version>
+  <ocr_detected_script>Latin</ocr_detected_script>
+  <ocr_detected_script_conf>0.6994</ocr_detected_script_conf>
+  <ocr_detected_lang>en</ocr_detected_lang>
+  <ocr_detected_lang_conf>1.0000</ocr_detected_lang_conf>
+  <page_number_confidence>55</page_number_confidence>
+  <foldoutcount>0</foldoutcount>
+  <page_number_module_version>1.0.5</page_number_module_version>
+  <pdf_module_version>0.0.23</pdf_module_version>
+</metadata>

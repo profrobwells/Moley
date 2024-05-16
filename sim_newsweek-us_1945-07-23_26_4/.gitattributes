@@ -1,0 +1,1 @@
+sim_newsweek-us_1945-07-23_26_4_jp2.zip filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files>
+  <file name="__ia_thumb.jpg" source="original">
+    <mtime>1693209701</mtime>
+    <size>12023</size>
+    <md5>d33ac75ce3e20fdc47679f9c5e641565</md5>
+    <crc32>3be6326f</crc32>
+    <sha1>8c7fea4a7f7115fde44a448a89ee4664c3b7d237</sha1>
+    <format>Item Tile</format>
+    <rotation>0</rotation>
+  </file>
+  <file name="header/header_0000.jp2" source="original">
+    <mtime>1649329555</mtime>
+    <size>3431787</size>
+    <md5>b0c2b39412bf4e8683070c6cdea6cd17</md5>
+    <crc32>934f509a</crc32>
+    <sha1>b7516f0f76037cf3f294fbac1976202bf4b62ec4</sha1>
+    <format>JPEG 2000</format>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4.pdf" source="derivative">
+    <pdf_module_version>0.0.23</pdf_module_version>
+    <format>Text PDF</format>
+    <original>sim_newsweek-us_1945-07-23_26_4_page_numbers.json</original>
+    <mtime>1710029230</mtime>
+    <size>57555956</size>
+    <md5>425bdb05cf86905a657e2da3c3a273af</md5>
+    <crc32>cf012e1c</crc32>
+    <sha1>483f5303f8b3a743565b8c2b773243c8b4b98c53</sha1>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_archive.torrent" source="metadata">
+    <btih>da42897b8b03033fb060058e23222e4cb2e6b701</btih>
+    <mtime>1710029354</mtime>
+    <size>16792</size>
+    <md5>2a6b48f5d92367f590a3a685a862437e</md5>
+    <crc32>923b2257</crc32>
+    <sha1>3507244f3d816c8d9487c8dbadf4fd808b58857d</sha1>
+    <format>Archive BitTorrent</format>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_chocr.html.gz" source="derivative">
+    <ocr>tesseract 5.0.0-1-g862e</ocr>
+    <ocr_parameters>-l eng</ocr_parameters>
+    <ocr_module_version>0.0.15</ocr_module_version>
+    <ocr_detected_script>Latin</ocr_detected_script>
+    <ocr_detected_script_conf>0.6994</ocr_detected_script_conf>
+    <ocr_detected_lang>en</ocr_detected_lang>
+    <ocr_detected_lang_conf>1.0000</ocr_detected_lang_conf>
+    <format>chOCR</format>
+    <original>sim_newsweek-us_1945-07-23_26_4_jp2.zip</original>
+    <mtime>1649331214</mtime>
+    <size>4759155</size>
+    <md5>14b053f96b84218394efba34870030c5</md5>
+    <crc32>b00e50bb</crc32>
+    <sha1>e3b9b9ed7f56fa9b22a2f3976f46344d3baa48ac</sha1>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_djvu.txt" source="derivative">
+    <format>DjVuTXT</format>
+    <original>sim_newsweek-us_1945-07-23_26_4_djvu.xml</original>
+    <mtime>1649331484</mtime>
+    <size>347862</size>
+    <md5>29e8b18792df9c035eef9963d0dc5a69</md5>
+    <crc32>67ddbaf2</crc32>
+    <sha1>d506007060a6932b36071ad4094ed40c2fc0cfdd</sha1>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_djvu.xml" source="derivative">
+    <format>Djvu XML</format>
+    <original>sim_newsweek-us_1945-07-23_26_4_hocr.html</original>
+    <mtime>1649331302</mtime>
+    <size>4746411</size>
+    <md5>e3d63e93961dd3650533b05ec58956dd</md5>
+    <crc32>f9650ac9</crc32>
+    <sha1>b7c8756f9dbfc9c496c692834b7e0212aeebba10</sha1>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_files.xml" source="original">
+    <format>Metadata</format>
+    <md5>88d221f36d981700aabe5e2a80156261</md5>
+    <summation>md5</summation>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_frame-md.json" source="original">
+    <mtime>1649329550</mtime>
+    <size>237</size>
+    <md5>ff99a3a22be80646a587d5ab00fdfd75</md5>
+    <crc32>df57ef84</crc32>
+    <sha1>eb303f7343f9a9a5fa744aa5fe2cb9516dcc589a</sha1>
+    <format>JSON</format>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_hocr.html" source="derivative">
+    <hocr_char_to_word_module_version>1.1.0</hocr_char_to_word_module_version>
+    <hocr_char_to_word_hocr_version>1.1.15</hocr_char_to_word_hocr_version>
+    <ocr_parameters>-l eng</ocr_parameters>
+    <ocr_module_version>0.0.15</ocr_module_version>
+    <ocr_detected_script>Latin</ocr_detected_script>
+    <ocr_detected_script_conf>0.6994</ocr_detected_script_conf>
+    <ocr_detected_lang>en</ocr_detected_lang>
+    <ocr_detected_lang_conf>1.0000</ocr_detected_lang_conf>
+    <format>hOCR</format>
+    <original>sim_newsweek-us_1945-07-23_26_4_chocr.html.gz</original>
+    <mtime>1649331274</mtime>
+    <size>9437774</size>
+    <md5>b038f363ce7e0e5b8d795cf37d5e492e</md5>
+    <crc32>00a63aef</crc32>
+    <sha1>4afcdf20dc931aa8b903fcf8ea28400d5221fd34</sha1>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_hocr_pageindex.json.gz" source="derivative">
+    <hocr_pageindex_module_version>1.0.0</hocr_pageindex_module_version>
+    <hocr_pageindex_hocr_version>1.1.15</hocr_pageindex_hocr_version>
+    <format>OCR Page Index</format>
+    <original>sim_newsweek-us_1945-07-23_26_4_hocr.html</original>
+    <mtime>1649331379</mtime>
+    <size>1213</size>
+    <md5>33764d3109bee6a08128e9e4860f21e1</md5>
+    <crc32>8c53cf03</crc32>
+    <sha1>8110d6c59a977ea305dceb1ea41e8b33af474f77</sha1>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_hocr_searchtext.txt.gz" source="derivative">
+    <hocr_fts_text_module_version>1.1.0</hocr_fts_text_module_version>
+    <hocr_fts_text_hocr_version>1.1.15</hocr_fts_text_hocr_version>
+    <word_conf_0_10>771</word_conf_0_10>
+    <word_conf_11_20>341</word_conf_11_20>
+    <word_conf_21_30>414</word_conf_21_30>
+    <word_conf_31_40>551</word_conf_31_40>
+    <word_conf_41_50>523</word_conf_41_50>
+    <word_conf_51_60>480</word_conf_51_60>
+    <word_conf_61_70>684</word_conf_61_70>
+    <word_conf_71_80>1004</word_conf_71_80>
+    <word_conf_81_90>2796</word_conf_81_90>
+    <word_conf_91_100>49693</word_conf_91_100>
+    <format>OCR Search Text</format>
+    <original>sim_newsweek-us_1945-07-23_26_4_hocr.html</original>
+    <mtime>1649331461</mtime>
+    <size>148575</size>
+    <md5>16db4633e27ff1389421d6402d41605e</md5>
+    <crc32>0f999c35</crc32>
+    <sha1>e216b64c152c5d583f7b2d0ef3387ea2561b89bb</sha1>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_itemimage.png" source="original">
+    <mtime>1649329553</mtime>
+    <size>482207</size>
+    <md5>c847104de98a8876bba0ee6a7605bed5</md5>
+    <crc32>4e83d188</crc32>
+    <sha1>955d7ad321972bdf5f9a1ea97fa86d9a6b5e1c27</sha1>
+    <format>Item Image</format>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_jp2.zip" source="original">
+    <mtime>1649329536</mtime>
+    <size>239139403</size>
+    <md5>1c8ca895250c648c657b69a9c2ac08e2</md5>
+    <crc32>43456a87</crc32>
+    <sha1>9c8845fe00084b942eb50086b0e6f5cde05338d7</sha1>
+    <preview-image>n0</preview-image>
+    <format>Single Page Processed JP2 ZIP</format>
+    <filecount>100</filecount>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_meta.sqlite" source="original">
+    <mtime>1649329570</mtime>
+    <size>40960</size>
+    <md5>41180dc12cb3d3a05b9b2e4c315d3b6c</md5>
+    <crc32>0db0f2e8</crc32>
+    <sha1>b0e6fe99f96828821224706ab29ac74ee2e5a682</sha1>
+    <format>Metadata</format>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_meta.xml" source="original">
+    <mtime>1710029269</mtime>
+    <size>3073</size>
+    <md5>fbb2395db5ab2fabedd4c1aff2484ea4</md5>
+    <crc32>52467453</crc32>
+    <sha1>840931e2fca985a7cc9b2fc50ead1a9a2b5c55e6</sha1>
+    <format>Metadata</format>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_page_numbers.json" source="derivative">
+    <hocr_pagenumber_module_version>1.0.5</hocr_pagenumber_module_version>
+    <hocr_pagenumber_hocr_version>1.1.54</hocr_pagenumber_hocr_version>
+    <hocr_pagenumber_confidence>55</hocr_pagenumber_confidence>
+    <format>Page Numbers JSON</format>
+    <original>sim_newsweek-us_1945-07-23_26_4_hocr.html</original>
+    <mtime>1710028382</mtime>
+    <size>17111</size>
+    <md5>3939dd37b06f84340e9f14d1e7821a7b</md5>
+    <crc32>600d5ffd</crc32>
+    <sha1>dae278d0c7c28ec8bc2d32e5d0a6f70459667e01</sha1>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_rotations.json" source="original">
+    <mtime>1649329547</mtime>
+    <size>5607</size>
+    <md5>10d886ae03020dbded4d53aa21ff48e3</md5>
+    <crc32>6b316b81</crc32>
+    <sha1>f067ec65933d7c668a964066c835554f72b749f0</sha1>
+    <format>JSON</format>
+  </file>
+  <file name="sim_newsweek-us_1945-07-23_26_4_scandata.xml" source="derivative">
+    <format>Scandata</format>
+    <original>sim_newsweek-us_1945-07-23_26_4_djvu.xml</original>
+    <mtime>1710028382</mtime>
+    <size>34790</size>
+    <md5>0fd9eabdfd8b5f158beed44b57d47c12</md5>
+    <crc32>8a2fe205</crc32>
+    <sha1>aed13162df503d1fb20dd36adfbd42423172bf1f</sha1>
+  </file>
+</files>
