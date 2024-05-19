@@ -3,6 +3,13 @@ output:
   html_document: default
   pdf_document: default
 ---
+
+
+
+
+
+
+
 # Scrape Archive.org for Newsweek back issues
 
 ## Thanks to Sean Mussenden for his Advanced rvest tutorial, which this is shamelessly and ruthlessly stolen and remixed
@@ -16,6 +23,129 @@ library(rvest)
 library(janitor)
 library(stringr)
 ```
+#Stratified sample generator in R
+```{r}
+# Provided list of issues
+
+results <- c(
+"sim_newsweek-us_1952-01-07_39_1",
+"sim_newsweek-us_1952-01-14_39_2",
+"sim_newsweek-us_1952-01-21_39_3",
+"sim_newsweek-us_1952-01-28_39_4",
+"sim_newsweek-us_1952-02-04_39_5",
+"sim_newsweek-us_1952-02-11_39_6",
+"sim_newsweek-us_1952-02-18_39_7",
+"sim_newsweek-us_1952-02-25_39_8",
+"sim_newsweek-us_1952-03-03_39_9",
+"sim_newsweek-us_1952-03-10_39_10",
+"sim_newsweek-us_1952-03-17_39_11",
+"sim_newsweek-us_1952-03-24_39_12",
+"sim_newsweek-us_1952-03-31_39_13",
+"sim_newsweek-us_1952-04-07_39_14",
+"sim_newsweek-us_1952-04-14_39_15",
+"sim_newsweek-us_1952-04-21_39_16",
+"sim_newsweek-us_1952-04-28_39_17",
+"sim_newsweek-us_1952-05-05_39_18",
+"sim_newsweek-us_1952-05-12_39_19",
+"sim_newsweek-us_1952-05-19_39_20",
+"sim_newsweek-us_1952-05-26_39_21",
+"sim_newsweek-us_1952-06-02_39_22",
+"sim_newsweek-us_1952-06-09_39_23",
+"sim_newsweek-us_1952-06-16_39_24",
+"sim_newsweek-us_1952-06-23_39_25",
+"sim_newsweek-us_1952-06-30_39_26",
+"sim_newsweek-us_1952-07-07_40_1",
+"sim_newsweek-us_1952-07-14_40_2",
+"sim_newsweek-us_1952-07-21_40_3",
+"sim_newsweek-us_1952-07-28_40_4",
+"sim_newsweek-us_1952-08-04_40_5",
+"sim_newsweek-us_1952-08-11_40_6",
+"sim_newsweek-us_1952-08-18_40_7",
+"sim_newsweek-us_1952-08-25_40_8",
+"sim_newsweek-us_1952-09-01_40_9",
+"sim_newsweek-us_1952-09-08_40_10",
+"sim_newsweek-us_1952-09-15_40_11",
+"sim_newsweek-us_1952-09-22_40_12",
+"sim_newsweek-us_1952-09-29_40_13",
+"sim_newsweek-us_1952-10-06_40_14",
+"sim_newsweek-us_1952-10-13_40_15",
+"sim_newsweek-us_1952-10-20_40_16",
+"sim_newsweek-us_1952-10-27_40_17",
+"sim_newsweek-us_1952-11-03_40_18",
+"sim_newsweek-us_1952-11-10_40_19",
+"sim_newsweek-us_1952-11-17_40_21",
+"sim_newsweek-us_1952-11-24_40_22",
+"sim_newsweek-us_1952-12-01_40_23",
+"sim_newsweek-us_1952-12-08_40_24",
+"sim_newsweek-us_1952-12-15_40_25",
+"sim_newsweek-us_1952-12-22_40_26",
+"sim_newsweek-us_1952-12-29_40_27"
+)
+
+# Create a function to generate a stratified sample
+stratified_sample_generator <- function(issue_list) {
+  library(dplyr)
+  library(stringr)
+  
+  # Convert issue_list to a data frame
+  issues_df <- data.frame(issue = issue_list, stringsAsFactors = FALSE)
+  
+  # Extract year and month
+  issues_df <- issues_df %>%
+    mutate(date_part = str_extract(issue, "\\d{4}-\\d{2}"),
+           month = str_sub(date_part, 1, 7))
+  
+  # Group by month and sample one issue per month
+  stratified_sample <- issues_df %>%
+    group_by(month) %>%
+    sample_n(1) %>%
+    pull(issue)
+  
+  return(stratified_sample)
+}
+
+# Generate the stratified sample
+sample <- stratified_sample_generator(results)
+
+print(sample)
+
+
+
+
+```
+
+
+```{}
+#1948 sample
+"sim_newsweek-us_1948-01-26_31_4" 
+"sim_newsweek-us_1948-02-09_31_6" 
+"sim_newsweek-us_1948-03-01_31_9" 
+"sim_newsweek-us_1948-04-19_31_16"
+"sim_newsweek-us_1948-05-10_31_19"
+"sim_newsweek-us_1948-06-07_31_23"
+"sim_newsweek-us_1948-07-26_32_4" 
+"sim_newsweek-us_1948-08-09_32_6" 
+"sim_newsweek-us_1948-09-06_32_10"
+"sim_newsweek-us_1948-10-18_32_16"
+"sim_newsweek-us_1948-11-15_32_20"
+"sim_newsweek-us_1948-12-06_32_23"
+
+#1952 sample
+"sim_newsweek-us_1952-01-21_39_3", 
+"sim_newsweek-us_1952-02-18_39_7" ,
+"sim_newsweek-us_1952-03-03_39_9", 
+"sim_newsweek-us_1952-04-14_39_15",
+"sim_newsweek-us_1952-05-19_39_20",
+"sim_newsweek-us_1952-06-23_39_25",
+"sim_newsweek-us_1952-07-21_40_3", 
+"sim_newsweek-us_1952-08-18_40_7", 
+"sim_newsweek-us_1952-09-22_40_12",
+"sim_newsweek-us_1952-10-27_40_17",
+"sim_newsweek-us_1952-11-24_40_22",
+"sim_newsweek-us_1952-12-29_40_27"
+
+```
+
 
 
 Example URL of pages I want to scrape
