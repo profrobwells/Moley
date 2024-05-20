@@ -4,7 +4,7 @@ output:
   pdf_document: default
 ---
 
-
+#stratified sample generator
 
 
 
