@@ -2,7 +2,7 @@
 #Data Mining the Internet Archive Collection
 #https://programminghistorian.org/en/lessons/data-mining-the-internet-archive
 
-
+#Run in terminal
 sudo pip install internetarchive
 sudo pip install pymarc
 sudo pip install pandas
@@ -37,24 +37,39 @@ import internetarchive
 from requests.exceptions import ReadTimeout
 
 # Define the stratified sample
+# sample = [
+#       "sim_newsweek-us_1952-01-21_39_3", 
+#       "sim_newsweek-us_1952-02-18_39_7" ,
+#       "sim_newsweek-us_1952-03-03_39_9", 
+#       "sim_newsweek-us_1952-04-14_39_15",
+#       "sim_newsweek-us_1952-05-19_39_20",
+#       "sim_newsweek-us_1952-06-23_39_25",
+#       "sim_newsweek-us_1952-07-21_40_3", 
+#       "sim_newsweek-us_1952-08-18_40_7", 
+#       "sim_newsweek-us_1952-09-22_40_12",
+#       "sim_newsweek-us_1952-10-27_40_17",
+#       "sim_newsweek-us_1952-11-24_40_22",
+#       "sim_newsweek-us_1952-12-29_40_27"
+# ]
 sample = [
-      "sim_newsweek-us_1952-01-21_39_3", 
-      "sim_newsweek-us_1952-02-18_39_7" ,
-      "sim_newsweek-us_1952-03-03_39_9", 
-      "sim_newsweek-us_1952-04-14_39_15",
-      "sim_newsweek-us_1952-05-19_39_20",
-      "sim_newsweek-us_1952-06-23_39_25",
-      "sim_newsweek-us_1952-07-21_40_3", 
-      "sim_newsweek-us_1952-08-18_40_7", 
-      "sim_newsweek-us_1952-09-22_40_12",
-      "sim_newsweek-us_1952-10-27_40_17",
-      "sim_newsweek-us_1952-11-24_40_22",
-      "sim_newsweek-us_1952-12-29_40_27"
+  "sim_newsweek-us_1956-01-30_47_5",  
+"sim_newsweek-us_1956-02-06_47_6", 
+"sim_newsweek-us_1956-03-05_47_10", 
+"sim_newsweek-us_1956-04-02_47_14",
+"sim_newsweek-us_1956-05-21_47_21", 
+"sim_newsweek-us_1956-06-18_47_25",
+"sim_newsweek-us_1956-07-30_48_5",  
+"sim_newsweek-us_1956-08-13_48_7", 
+"sim_newsweek-us_1956-09-10_48_11", 
+"sim_newsweek-us_1956-10-22_48_17",
+"sim_newsweek-us_1956-11-05_48_19", 
+"sim_newsweek-us_1956-12-10_48_24"
 ]
+
 
 # Define the directory where you want to save the files within your home directory
 home_directory = os.path.expanduser("~")
-download_directory = os.path.join(home_directory, 'Code', 'Moley', 'Newsweek_52')
+download_directory = os.path.join(home_directory, 'Code', 'Moley', 'Newsweek_56')
 
 if not os.path.exists(download_directory):
     os.makedirs(download_directory)

@@ -3,6 +3,117 @@ output:
   html_document: default
   pdf_document: default
 ---
+
+# Scrapes and extracts the Moley column
+```{r}
+library(pdftools)
+library(stringr)
+library(httr)
+
+url <- "https://archive.org/download/sim_newsweek-us_1956-01-30_47_5/sim_newsweek-us_1956-01-30_47_5.pdf"
+temp_pdf <- tempfile(fileext = ".pdf")
+
+# Retry download if it fails
+max_retries <- 3
+retry_count <- 0
+
+download_file <- function(url, destfile) {
+  response <- GET(url, write_disk(destfile, overwrite = TRUE),
+                  timeout(300), # Increase timeout to 5 minutes
+                  progress())
+  return(response$status_code == 200)
+}
+
+while (retry_count < max_retries) {
+  tryCatch({
+    success <- download_file(url, temp_pdf)
+    
+    if (success && file.exists(temp_pdf) && file.info(temp_pdf)$size > 1000000) { # Check if file is larger than 1MB
+      message("Download successful")
+      break
+    } else {
+      stop("Download incomplete or file too small")
+    }
+  }, error = function(e) {
+    retry_count <<- retry_count + 1
+    if (retry_count < max_retries) {
+      message(paste("Download failed. Attempt", retry_count, "of", max_retries))
+      Sys.sleep(5) # Wait 5 seconds before retrying
+    } else {
+      stop("Download failed after maximum retries.")
+    }
+  })
+}
+
+if (file.exists(temp_pdf)) {
+  # Extract all text
+  text <- pdf_text(temp_pdf)
+  
+  # Find page with "Perspective by Ray Moley"
+  page_num <- which(str_detect(text, regex("Perspective", ignore_case = TRUE)))
+  
+  # Extract the specific page
+  if (length(page_num) > 0) {
+    pdf_subset(temp_pdf, pages = page_num, output = "perspective_page.pdf")
+    print(paste("Perspective page extracted successfully! Page number:", page_num))
+  } else {
+    print("Perspective by Raymond Moley not found in the document.")
+  }
+} else {
+  print("Failed to download the PDF file.")
+}
+
+# Clean up
+unlink(temp_pdf)
+```
+
+# Extracts the Moley column from a folder of pdfs
+
+```{r}
+library(pdftools)
+library(stringr)
+library(fs)
+
+# Specify the folder containing the PDF files
+pdf_folder <- "/Users/robwells/Downloads/test"
+
+# Get a list of all PDF files in the folder
+pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
+
+# Function to extract perspective page
+extract_perspective <- function(pdf_path) {
+  tryCatch({
+    # Extract all text
+    text <- pdf_text(pdf_path)
+    
+    # Find page with both "perspective" and "Moley"
+    page_num <- which(str_detect(text, regex("Perspective", ignore_case = FALSE)) &
+                      str_detect(text, regex("Moley", ignore_case = FALSE))  |
+                      str_detect(text, regex("by Raymond", ignore_case = FALSE)))
+    
+    # Extract the specific page
+    if (length(page_num) > 0) {
+      output_file <- paste0("Moley_column_", basename(pdf_path))
+      pdf_subset(pdf_path, pages = page_num, output = output_file)
+      return(paste("Perspective page extracted successfully from", basename(pdf_path), "! Page number:", page_num))
+    } else {
+      return(paste("Perspective not found in", basename(pdf_path)))
+    }
+  }, error = function(e) {
+    return(paste("Error processing", basename(pdf_path), ":", e$message))
+  })
+}
+
+# Process each PDF file
+results <- sapply(pdf_files, extract_perspective)
+
+# Print results
+for (result in results) {
+  cat(result, "\n")
+}
+```
+
+
 # Scrape Wiki page for racist terms
 
 ## Thanks to Sean Mussenden for his Advanced rvest tutorial, which this is shamelessly and ruthlessly stolen and remixed
