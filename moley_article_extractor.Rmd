@@ -1,8 +1,55 @@
 ---
+title: Moley Article Extractor - using archive.org 
 output:
   html_document: default
   pdf_document: default
 ---
+# Extracts the Moley column from a folder of pdfs
+
+```{r}
+library(pdftools)
+library(stringr)
+library(fs)
+
+# Specify the folder containing the PDF files
+pdf_folder <- "/Users/robwells/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Newsweek_60"
+
+# Get a list of all PDF files in the folder
+pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
+
+# Function to extract perspective page
+extract_perspective <- function(pdf_path) {
+  tryCatch({
+    # Extract all text
+    text <- pdf_text(pdf_path)
+    
+    # Find page with both "perspective" and "Moley"
+    page_num <- which(str_detect(text, regex("Perspective", ignore_case = FALSE)) &
+                      str_detect(text, regex("Moley", ignore_case = FALSE))  |
+                      str_detect(text, regex("by Raymond", ignore_case = FALSE)))
+    
+    # Extract the specific page
+    if (length(page_num) > 0) {
+      output_file <- paste0("Moley_column_", basename(pdf_path))
+      pdf_subset(pdf_path, pages = page_num, output = output_file)
+      return(paste("Perspective page extracted successfully from", basename(pdf_path), "! Page number:", page_num))
+    } else {
+      return(paste("Perspective not found in", basename(pdf_path)))
+    }
+  }, error = function(e) {
+    return(paste("Error processing", basename(pdf_path), ":", e$message))
+  })
+}
+
+# Process each PDF file
+results <- sapply(pdf_files, extract_perspective)
+
+# Print results
+for (result in results) {
+  cat(result, "\n")
+}
+```
+
 
 # Scrapes and extracts the Moley column
 ```{r}
@@ -10,7 +57,10 @@ library(pdftools)
 library(stringr)
 library(httr)
 
-url <- "https://archive.org/download/sim_newsweek-us_1956-01-30_47_5/sim_newsweek-us_1956-01-30_47_5.pdf"
+# url <- "https://archive.org/download/sim_newsweek-us_1956-01-30_47_5/sim_newsweek-us_1956-01-30_47_5.pdf"
+# temp_pdf <- tempfile(fileext = ".pdf")
+
+url <- "https://archive.org/download/sim_newsweek-us_1960-07-18_56_3/sim_newsweek-us_1960-07-18_56_3.pdf"
 temp_pdf <- tempfile(fileext = ".pdf")
 
 # Retry download if it fails
@@ -49,12 +99,14 @@ if (file.exists(temp_pdf)) {
   # Extract all text
   text <- pdf_text(temp_pdf)
   
-  # Find page with "Perspective by Ray Moley"
-  page_num <- which(str_detect(text, regex("Perspective", ignore_case = TRUE)))
+     # Find page with both "perspective" and "Moley"
+    page_num <- which(str_detect(text, regex("Perspective", ignore_case = FALSE)) &
+                      str_detect(text, regex("Moley", ignore_case = FALSE))  |
+                      str_detect(text, regex("by Raymond", ignore_case = FALSE)))
   
   # Extract the specific page
   if (length(page_num) > 0) {
-    pdf_subset(temp_pdf, pages = page_num, output = "perspective_page.pdf")
+    pdf_subset(temp_pdf, pages = page_num, output = "Moley_column.pdf")
     print(paste("Perspective page extracted successfully! Page number:", page_num))
   } else {
     print("Perspective by Raymond Moley not found in the document.")
@@ -67,51 +119,7 @@ if (file.exists(temp_pdf)) {
 unlink(temp_pdf)
 ```
 
-# Extracts the Moley column from a folder of pdfs
 
-```{r}
-library(pdftools)
-library(stringr)
-library(fs)
-
-# Specify the folder containing the PDF files
-pdf_folder <- "/Users/robwells/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Newsweek_56"
-
-# Get a list of all PDF files in the folder
-pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
-
-# Function to extract perspective page
-extract_perspective <- function(pdf_path) {
-  tryCatch({
-    # Extract all text
-    text <- pdf_text(pdf_path)
-    
-    # Find page with both "perspective" and "Moley"
-    page_num <- which(str_detect(text, regex("Perspective", ignore_case = FALSE)) &
-                      str_detect(text, regex("Moley", ignore_case = FALSE))  |
-                      str_detect(text, regex("by Raymond", ignore_case = FALSE)))
-    
-    # Extract the specific page
-    if (length(page_num) > 0) {
-      output_file <- paste0("Moley_column_", basename(pdf_path))
-      pdf_subset(pdf_path, pages = page_num, output = output_file)
-      return(paste("Perspective page extracted successfully from", basename(pdf_path), "! Page number:", page_num))
-    } else {
-      return(paste("Perspective not found in", basename(pdf_path)))
-    }
-  }, error = function(e) {
-    return(paste("Error processing", basename(pdf_path), ":", e$message))
-  })
-}
-
-# Process each PDF file
-results <- sapply(pdf_files, extract_perspective)
-
-# Print results
-for (result in results) {
-  cat(result, "\n")
-}
-```
 
 
 # Scrape Wiki page for racist terms
