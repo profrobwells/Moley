@@ -37,39 +37,28 @@ import internetarchive
 from requests.exceptions import ReadTimeout
 
 # Define the stratified sample
-# sample = [
-#       "sim_newsweek-us_1952-01-21_39_3", 
-#       "sim_newsweek-us_1952-02-18_39_7" ,
-#       "sim_newsweek-us_1952-03-03_39_9", 
-#       "sim_newsweek-us_1952-04-14_39_15",
-#       "sim_newsweek-us_1952-05-19_39_20",
-#       "sim_newsweek-us_1952-06-23_39_25",
-#       "sim_newsweek-us_1952-07-21_40_3", 
-#       "sim_newsweek-us_1952-08-18_40_7", 
-#       "sim_newsweek-us_1952-09-22_40_12",
-#       "sim_newsweek-us_1952-10-27_40_17",
-#       "sim_newsweek-us_1952-11-24_40_22",
-#       "sim_newsweek-us_1952-12-29_40_27"
-# ]
+
+
 sample = [
-  "sim_newsweek-us_1956-01-30_47_5",  
-"sim_newsweek-us_1956-02-06_47_6", 
-"sim_newsweek-us_1956-03-05_47_10", 
-"sim_newsweek-us_1956-04-02_47_14",
-"sim_newsweek-us_1956-05-21_47_21", 
-"sim_newsweek-us_1956-06-18_47_25",
-"sim_newsweek-us_1956-07-30_48_5",  
-"sim_newsweek-us_1956-08-13_48_7", 
-"sim_newsweek-us_1956-09-10_48_11", 
-"sim_newsweek-us_1956-10-22_48_17",
-"sim_newsweek-us_1956-11-05_48_19", 
-"sim_newsweek-us_1956-12-10_48_24"
+  "sim_newsweek-us_1960-01-18_55_3", 
+"sim_newsweek-us_1960-02-29_55_9", 
+"sim_newsweek-us_1960-03-21_55_12", 
+"sim_newsweek-us_1960-04-25_55_17", 
+"sim_newsweek-us_1960-05-09_55_19", 
+"sim_newsweek-us_1960-06-06_55_23", 
+"sim_newsweek-us_1960-07-18_56_3", 
+"sim_newsweek-us_1960-08-22_56_8", 
+"sim_newsweek-us_1960-09-26_56_13", 
+"sim_newsweek-us_1960-10-24_56_17", 
+"sim_newsweek-us_1960-11-21_56_21", 
+"sim_newsweek-us_1960-12-12_56_24"
 ]
+
 
 
 # Define the directory where you want to save the files within your home directory
 home_directory = os.path.expanduser("~")
-download_directory = os.path.join(home_directory, 'Code', 'Moley', 'Newsweek_56')
+download_directory = os.path.join(home_directory, 'Code', 'Moley', 'Newsweek_60')
 
 if not os.path.exists(download_directory):
     os.makedirs(download_directory)
@@ -103,6 +92,40 @@ for result in search:
 
 
  #--------------
+ 
+1956 sample
+sample = [
+  "sim_newsweek-us_1956-01-30_47_5",  
+"sim_newsweek-us_1956-02-06_47_6", 
+"sim_newsweek-us_1956-03-05_47_10", 
+"sim_newsweek-us_1956-04-02_47_14",
+"sim_newsweek-us_1956-05-21_47_21", 
+"sim_newsweek-us_1956-06-18_47_25",
+"sim_newsweek-us_1956-07-30_48_5",  
+"sim_newsweek-us_1956-08-13_48_7", 
+"sim_newsweek-us_1956-09-10_48_11", 
+"sim_newsweek-us_1956-10-22_48_17",
+"sim_newsweek-us_1956-11-05_48_19", 
+"sim_newsweek-us_1956-12-10_48_24"
+]
+
+1952 sample
+# sample = [
+#       "sim_newsweek-us_1952-01-21_39_3", 
+#       "sim_newsweek-us_1952-02-18_39_7" ,
+#       "sim_newsweek-us_1952-03-03_39_9", 
+#       "sim_newsweek-us_1952-04-14_39_15",
+#       "sim_newsweek-us_1952-05-19_39_20",
+#       "sim_newsweek-us_1952-06-23_39_25",
+#       "sim_newsweek-us_1952-07-21_40_3", 
+#       "sim_newsweek-us_1952-08-18_40_7", 
+#       "sim_newsweek-us_1952-09-22_40_12",
+#       "sim_newsweek-us_1952-10-27_40_17",
+#       "sim_newsweek-us_1952-11-24_40_22",
+#       "sim_newsweek-us_1952-12-29_40_27"
+# ]
+
+ 
  1937 sample
  sample = [
     "sim_newsweek-us_1937-01-09_9_2",
@@ -146,6 +169,9 @@ import internetarchive
 
 # Date range (modify if needed)
 start_date = "19480101" 
+end_date = "19680101"
+
+start_date = "19620101" 
 end_date = "19680101"
 
 #search = internetarchive.search_items('collection:pub_newsweek-us') 

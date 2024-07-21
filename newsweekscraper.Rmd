@@ -5,16 +5,7 @@ output:
 ---
 
 #stratified sample generator
-
-
-
-
-
 # Scrape Archive.org for Newsweek back issues
-
-## Thanks to Sean Mussenden for his Advanced rvest tutorial, which this is shamelessly and ruthlessly stolen and remixed
-
-https://github.com/smussenden/datajournalismbook
 
 
 ```{r}
@@ -23,6 +14,32 @@ library(rvest)
 library(janitor)
 library(stringr)
 ```
+
+#Import spreadsheet of Newsweek back issuez
+```{r}
+newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_48_68_results")
+
+newsweek1960 <- newsweek %>% 
+  filter(str_detect(identifier, "1960")) 
+
+newsweek1960_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek1960)
+
+
+
+# Split the string into a vector based on ", "
+newsweek1960_list <- unlist(strsplit(newsweek1960_clean, ", "))
+
+newsweek1960_list <- gsub("\\\"", "", newsweek1960_list)
+
+head(newsweek1960_list)
+
+
+results <- newsweek1960_list
+
+```
+
+
+
 #Stratified sample generator in R
 ```{r}
 # Provided list of issues
@@ -81,6 +98,9 @@ results <- c(
 "sim_newsweek-us_1952-12-22_40_26",
 "sim_newsweek-us_1952-12-29_40_27"
 )
+```
+
+```{r}
 
 # Create a function to generate a stratified sample
 stratified_sample_generator <- function(issue_list) {
@@ -109,9 +129,21 @@ sample <- stratified_sample_generator(results)
 
 print(sample)
 
+```
+```{r}
+# Clean the text
+cleaned_text <- gsub("^\\[\\d+\\]\\s*\"|\"$", "", sample)
+cleaned_text <- gsub("\n\\s+", "\n", cleaned_text)
+items <- unlist(strsplit(cleaned_text, "\\r?\\n"))
 
 
+# Enclose each string in quotes and add a comma
+formatted_items <- paste0("\"", items, "\",")
 
+# Print each formatted item
+for (item in formatted_items) {
+  cat(item, "\n")
+}
 ```
 
 
@@ -209,10 +241,8 @@ print(urls)
 #from this tutorialL https://github.com/hrbrmstr/wayback
 ```{r}
 devtools::install_github("hrbrmstr/wayback")
-
-
-
 ```
+
 ```{r}
 library(wayback)
 library(tidyverse)
@@ -220,9 +250,6 @@ library(tidyverse)
 # current verison
 packageVersion("wayback")
 
-
-```
-```{r}
 archive_available("https://archive.org/download/pub_newsweek-us/pub_newsweek-us_files.xml")
 
 get_mementos("https://archive.org/download/pub_newsweek-us/pub_newsweek-us_files.xml")
@@ -252,8 +279,6 @@ glimpse(
 write.csv(item, "/Users/robwells/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/newsweek_data.csv")
 
 download.file(item$link[1], file.path("~/Library/CloudStorage/Dropbox/Classes_Teaching_Archive/Data Journalism Classes/Data-Analysis-Class-Jour-405v-5003", item$file[1]))
-
-
 
 ```
 
@@ -500,3 +525,7 @@ for(row_number in 1:nrow(state_links2)) {
 
 To this point, lottery_info has loaded everything into a list file
 --it seems the list just contains the last value scraped, wyomong, and none of the other states.
+
+## Thanks to Sean Mussenden for his Advanced rvest tutorial, which this is shamelessly and ruthlessly stolen and remixed
+
+https://github.com/smussenden/datajournalismbook
