@@ -1,10 +1,11 @@
 ---
+name: Archive.org scraper, extractor
 output:
   html_document: default
   pdf_document: default
 ---
 
-#stratified sample generator
+
 # Scrape Archive.org for Newsweek back issues
 
 
@@ -15,32 +16,210 @@ library(janitor)
 library(stringr)
 ```
 
-#Import spreadsheet of Newsweek back issuez
+#Import spreadsheet of Newsweek back issues
 ```{r}
 newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_48_68_results")
 
-newsweek1960 <- newsweek %>% 
-  filter(str_detect(identifier, "1960")) 
+newsweek1958 <- newsweek %>% 
+  filter(str_detect(identifier, "1958")) 
 
-newsweek1960_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek1960)
+newsweek1958_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek1958)
 
+x_clean <- newsweek1958_clean
 
 
 # Split the string into a vector based on ", "
-newsweek1960_list <- unlist(strsplit(newsweek1960_clean, ", "))
+x_list <- unlist(strsplit(x_clean, ", "))
 
-newsweek1960_list <- gsub("\\\"", "", newsweek1960_list)
+x_list <- gsub("\\\"", "", x_list)
 
-head(newsweek1960_list)
+head(x_list)
 
 
-results <- newsweek1960_list
+results <- x_list
 
 ```
 
 
 
 #Stratified sample generator in R
+
+```{r}
+
+# Create a function to generate a stratified sample
+stratified_sample_generator <- function(issue_list) {
+  library(dplyr)
+  library(stringr)
+  
+  # Convert issue_list to a data frame
+  issues_df <- data.frame(issue = issue_list, stringsAsFactors = FALSE)
+  
+  # Extract year and month
+  issues_df <- issues_df %>%
+    mutate(date_part = str_extract(issue, "\\d{4}-\\d{2}"),
+           month = str_sub(date_part, 1, 7))
+  
+  # Group by month and sample one issue per month
+  stratified_sample <- issues_df %>%
+    group_by(month) %>%
+    sample_n(1) %>%
+    pull(issue)
+  
+  return(stratified_sample)
+}
+
+# Generate the stratified sample
+sample <- stratified_sample_generator(results)
+
+print(sample)
+
+```
+
+
+
+
+```{r}
+# Clean the text
+cleaned_text <- gsub("^\\[\\d+\\]\\s*\"|\"$", "", sample)
+cleaned_text <- gsub("\n\\s+", "\n", cleaned_text)
+items <- unlist(strsplit(cleaned_text, "\\r?\\n"))
+
+
+# Enclose each string in quotes and add a comma
+formatted_items <- paste0("\"", items, "\",")
+
+# Print each formatted item
+for (item in formatted_items) {
+  cat(item, "\n")
+}
+```
+
+#Article extractor
+```{r}
+# Install required packages if not already installed
+# if (!requireNamespace("internetarchive", quietly = TRUE)) {
+#   remotes::install_github("ropensci/internetarchive")
+# }
+# if (!requireNamespace("httr", quietly = TRUE)) {
+#   install.packages("httr")
+# }
+# if (!requireNamespace("purrr", quietly = TRUE)) {
+#   install.packages("purrr")
+# }
+library(httr)
+library(jsonlite)
+library(purrr)
+
+
+# Function to download item with retry mechanism
+download_item <- function(identifier, destdir, retries = 3) {
+  url <- paste0("https://archive.org/download/", identifier, "/", identifier, ".pdf")
+  file_path <- file.path(destdir, paste0(identifier, ".pdf"))
+  
+  for (attempt in 1:retries) {
+    tryCatch({
+      GET(url, write_disk(file_path, overwrite = TRUE))
+      print(paste("Downloaded", identifier, "to", destdir))
+      break
+    }, error = function(e) {
+      if (attempt < retries) {
+        print(paste("Error occurred, retrying...", attempt, "/", retries))
+      } else {
+        print(paste("Failed to download", identifier, "after", retries, "attempts"))
+      }
+    })
+  }
+}
+
+# Define the sample
+sample <- c(
+"sim_newsweek-us_1958-01-27_51_4", 
+"sim_newsweek-us_1958-02-17_51_7", 
+"sim_newsweek-us_1958-03-24_51_12", 
+"sim_newsweek-us_1958-04-07_51_14", 
+"sim_newsweek-us_1958-05-12_51_19", 
+"sim_newsweek-us_1958-06-16_51_24", 
+"sim_newsweek-us_1958-07-21_52_3", 
+"sim_newsweek-us_1958-08-25_52_8", 
+"sim_newsweek-us_1958-09-22_52_12", 
+"sim_newsweek-us_1958-10-13_52_15", 
+"sim_newsweek-us_1958-11-17_52_20", 
+"sim_newsweek-us_1958-12-08_52_23"
+)
+
+# Set up the download directory
+download_directory <- file.path(path.expand("~"), 'Code', 'Moley', 'Newsweek_58')
+if (!dir.exists(download_directory)) {
+  dir.create(download_directory, recursive = TRUE)
+}
+
+# Perform the download for the sample items
+walk(sample, ~download_item(.x, download_directory))
+```
+
+
+# Extracts the Moley column from a folder of pdfs
+
+```{r}
+library(pdftools)
+library(stringr)
+library(fs)
+
+# Specify the folder containing the PDF files
+pdf_folder <- "/Users/robwells/Code/Moley/Newsweek_58"
+
+# Get a list of all PDF files in the folder
+pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
+
+# Function to extract perspective page
+extract_perspective <- function(pdf_path) {
+  tryCatch({
+    # Extract all text
+    text <- pdf_text(pdf_path)
+    
+    # Find page with both "perspective" and "Moley"
+    page_num <- which(str_detect(text, regex("Perspective", ignore_case = FALSE)) &
+                      str_detect(text, regex("Moley", ignore_case = FALSE))  |
+                      str_detect(text, regex("by Raymond", ignore_case = FALSE)))
+    
+    # Extract the specific page
+    if (length(page_num) > 0) {
+      output_file <- paste0("Moley_column_", basename(pdf_path))
+      pdf_subset(pdf_path, pages = page_num, output = output_file)
+      return(paste("Perspective page extracted successfully from", basename(pdf_path), "! Page number:", page_num))
+    } else {
+      return(paste("Perspective not found in", basename(pdf_path)))
+    }
+  }, error = function(e) {
+    return(paste("Error processing", basename(pdf_path), ":", e$message))
+  })
+}
+
+# Process each PDF file
+results <- sapply(pdf_files, extract_perspective)
+
+# Print results
+for (result in results) {
+  cat(result, "\n")
+}
+```
+
+
+# NOTES
+```{r}
+Here's a quick recap of what we did to solve the problem:
+
+We replaced the ia_download function with a custom download_item function.
+We used httr::GET to download the PDF files directly from the Internet Archive.
+We constructed the URL for each PDF based on the item identifier.
+We maintained the retry mechanism for robustness.
+
+This solution gives you more control over the download process and eliminates dependencies on potentially problematic packages.
+
+```
+
+
+
 ```{r}
 # Provided list of issues
 
@@ -100,67 +279,27 @@ results <- c(
 )
 ```
 
-```{r}
 
-# Create a function to generate a stratified sample
-stratified_sample_generator <- function(issue_list) {
-  library(dplyr)
-  library(stringr)
-  
-  # Convert issue_list to a data frame
-  issues_df <- data.frame(issue = issue_list, stringsAsFactors = FALSE)
-  
-  # Extract year and month
-  issues_df <- issues_df %>%
-    mutate(date_part = str_extract(issue, "\\d{4}-\\d{2}"),
-           month = str_sub(date_part, 1, 7))
-  
-  # Group by month and sample one issue per month
-  stratified_sample <- issues_df %>%
-    group_by(month) %>%
-    sample_n(1) %>%
-    pull(issue)
-  
-  return(stratified_sample)
-}
-
-# Generate the stratified sample
-sample <- stratified_sample_generator(results)
-
-print(sample)
-
-```
-```{r}
-# Clean the text
-cleaned_text <- gsub("^\\[\\d+\\]\\s*\"|\"$", "", sample)
-cleaned_text <- gsub("\n\\s+", "\n", cleaned_text)
-items <- unlist(strsplit(cleaned_text, "\\r?\\n"))
-
-
-# Enclose each string in quotes and add a comma
-formatted_items <- paste0("\"", items, "\",")
-
-# Print each formatted item
-for (item in formatted_items) {
-  cat(item, "\n")
-}
-```
-
-
+# Past Samples
 ```{}
-#1948 sample
-"sim_newsweek-us_1948-01-26_31_4" 
-"sim_newsweek-us_1948-02-09_31_6" 
-"sim_newsweek-us_1948-03-01_31_9" 
-"sim_newsweek-us_1948-04-19_31_16"
-"sim_newsweek-us_1948-05-10_31_19"
-"sim_newsweek-us_1948-06-07_31_23"
-"sim_newsweek-us_1948-07-26_32_4" 
-"sim_newsweek-us_1948-08-09_32_6" 
-"sim_newsweek-us_1948-09-06_32_10"
-"sim_newsweek-us_1948-10-18_32_16"
-"sim_newsweek-us_1948-11-15_32_20"
-"sim_newsweek-us_1948-12-06_32_23"
+
+
+
+#1954 sample
+sample <- c(
+"sim_newsweek-us_1954-01-25_43_4", 
+"sim_newsweek-us_1954-02-01_43_5", 
+"sim_newsweek-us_1954-03-29_43_13", 
+"sim_newsweek-us_1954-04-19_43_16", 
+"sim_newsweek-us_1954-05-17_43_20", 
+"sim_newsweek-us_1954-06-14_43_24", 
+"sim_newsweek-us_1954-07-05_44_1", 
+"sim_newsweek-us_1954-08-09_44_6", 
+"sim_newsweek-us_1954-09-13_44_11", 
+"sim_newsweek-us_1954-10-25_44_17", 
+"sim_newsweek-us_1954-11-08_44_19", 
+"sim_newsweek-us_1954-12-27_44_26"
+)
 
 #1952 sample
 "sim_newsweek-us_1952-01-21_39_3", 
@@ -175,6 +314,22 @@ for (item in formatted_items) {
 "sim_newsweek-us_1952-10-27_40_17",
 "sim_newsweek-us_1952-11-24_40_22",
 "sim_newsweek-us_1952-12-29_40_27"
+
+#1948 sample
+"sim_newsweek-us_1948-01-26_31_4" 
+"sim_newsweek-us_1948-02-09_31_6" 
+"sim_newsweek-us_1948-03-01_31_9" 
+"sim_newsweek-us_1948-04-19_31_16"
+"sim_newsweek-us_1948-05-10_31_19"
+"sim_newsweek-us_1948-06-07_31_23"
+"sim_newsweek-us_1948-07-26_32_4" 
+"sim_newsweek-us_1948-08-09_32_6" 
+"sim_newsweek-us_1948-09-06_32_10"
+"sim_newsweek-us_1948-10-18_32_16"
+"sim_newsweek-us_1948-11-15_32_20"
+"sim_newsweek-us_1948-12-06_32_23"
+
+
 
 ```
 
