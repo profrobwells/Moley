@@ -168,11 +168,11 @@ sample = [
 import internetarchive
 
 # Date range (modify if needed)
-start_date = "19480101" 
-end_date = "19680101"
-
 start_date = "19620101" 
-end_date = "19680101"
+end_date = "19690101"
+
+# start_date = "19620101" 
+# end_date = "19680101"
 
 #search = internetarchive.search_items('collection:pub_newsweek-us') 
 search = internetarchive.search_items(f'(collection:pub_newsweek-us) AND date:[{start_date} TO {end_date}]')
@@ -188,7 +188,7 @@ data = {'identifier': [result['identifier'] for result in search]}
 df = pd.DataFrame(data)
 
 # Save DataFrame to CSV file
-df.to_csv('newsweek_index_48_68_results.csv', index=False)
+df.to_csv('newsweek_index_62_69_results.csv', index=False)
 
 
  

@@ -18,14 +18,23 @@ library(stringr)
 
 #Import spreadsheet of Newsweek back issues
 ```{r}
-newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_48_68_results")
+newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_37_61")
 
-newsweek1958 <- newsweek %>% 
-  filter(str_detect(identifier, "1958")) 
+newsweek1960s <- newsweek %>% 
+  filter(str_detect(identifier, "1960$")) 
 
-newsweek1958_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek1958)
 
-x_clean <- newsweek1958_clean
+newsweek1960s <- newsweek %>%
+  mutate(year = as.numeric(str_extract(identifier, "19\\d{2}"))) %>%  # Extract year as numeric
+  filter(year >= 1962 & year <= 1969) %>%                             # Filter on year range
+  select(-year)       
+
+# newsweek1962 <- all_results %>% 
+#   filter(str_detect(identifier, "1962")) 
+
+newsweek1946_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek1946)
+
+x_clean <- newsweek1946_clean
 
 
 # Split the string into a vector based on ", "
@@ -133,22 +142,24 @@ download_item <- function(identifier, destdir, retries = 3) {
 
 # Define the sample
 sample <- c(
-"sim_newsweek-us_1958-01-27_51_4", 
-"sim_newsweek-us_1958-02-17_51_7", 
-"sim_newsweek-us_1958-03-24_51_12", 
-"sim_newsweek-us_1958-04-07_51_14", 
-"sim_newsweek-us_1958-05-12_51_19", 
-"sim_newsweek-us_1958-06-16_51_24", 
-"sim_newsweek-us_1958-07-21_52_3", 
-"sim_newsweek-us_1958-08-25_52_8", 
-"sim_newsweek-us_1958-09-22_52_12", 
-"sim_newsweek-us_1958-10-13_52_15", 
-"sim_newsweek-us_1958-11-17_52_20", 
-"sim_newsweek-us_1958-12-08_52_23"
+  "sim_newsweek-us_1962_59_index",                  
+ "sim_newsweek-us_1962_60_index",                   
+ "sim_newsweek-us_1963_61_index" ,                  
+ "sim_newsweek-us_1963_62_index",                   
+ "sim_newsweek-us_1964_63_index",                   
+ "sim_newsweek-us_1964_64_index" ,                  
+ "sim_newsweek-us_1965_65_index" ,                  
+ "sim_newsweek-us_1965_66_index" ,                  
+ "sim_newsweek-us_1966_67_index"  ,                 
+ "sim_newsweek-us_1966_68_index" ,                  
+ "sim_newsweek-us_january-1-june-24-1968_71_index" ,
+ "sim_newsweek-us_january-2-june-1967_69_index",    
+ "sim_newsweek-us_july-1-december-30-1968_72_index",
+ "sim_newsweek-us_july-3-december-25-1967_70_index"  
 )
 
 # Set up the download directory
-download_directory <- file.path(path.expand("~"), 'Code', 'Moley', 'Newsweek_58')
+download_directory <- file.path(path.expand("~"), 'Code', 'Moley', 'Newsweek_1960_indexes')
 if (!dir.exists(download_directory)) {
   dir.create(download_directory, recursive = TRUE)
 }
@@ -166,7 +177,7 @@ library(stringr)
 library(fs)
 
 # Specify the folder containing the PDF files
-pdf_folder <- "/Users/robwells/Code/Moley/Newsweek_58"
+pdf_folder <- "/Users/robwells/Code/Moley/Newsweek_46"
 
 # Get a list of all PDF files in the folder
 pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
@@ -178,8 +189,9 @@ extract_perspective <- function(pdf_path) {
     text <- pdf_text(pdf_path)
     
     # Find page with both "perspective" and "Moley"
-    page_num <- which(str_detect(text, regex("Perspective", ignore_case = FALSE)) &
-                      str_detect(text, regex("Moley", ignore_case = FALSE))  |
+    #In case it is case sensitive, change PERSPECTIVE and MOLEY
+    page_num <- which(str_detect(text, regex("PERSPECTIVE", ignore_case = FALSE)) |
+                      str_detect(text, regex("MOLEY", ignore_case = FALSE))  |
                       str_detect(text, regex("by Raymond", ignore_case = FALSE)))
     
     # Extract the specific page
@@ -283,7 +295,21 @@ results <- c(
 # Past Samples
 ```{}
 
-
+#1958 sample
+sample <- c(
+"sim_newsweek-us_1958-01-27_51_4", 
+"sim_newsweek-us_1958-02-17_51_7", 
+"sim_newsweek-us_1958-03-24_51_12", 
+"sim_newsweek-us_1958-04-07_51_14", 
+"sim_newsweek-us_1958-05-12_51_19", 
+"sim_newsweek-us_1958-06-16_51_24", 
+"sim_newsweek-us_1958-07-21_52_3", 
+"sim_newsweek-us_1958-08-25_52_8", 
+"sim_newsweek-us_1958-09-22_52_12", 
+"sim_newsweek-us_1958-10-13_52_15", 
+"sim_newsweek-us_1958-11-17_52_20", 
+"sim_newsweek-us_1958-12-08_52_23"
+)
 
 #1954 sample
 sample <- c(
@@ -330,24 +356,56 @@ sample <- c(
 "sim_newsweek-us_1948-12-06_32_23"
 
 
+#1946 sample
+"sim_newsweek-us_1946-01-21_27_3", 
+"sim_newsweek-us_1946-02-04_27_5", 
+"sim_newsweek-us_1946-03-11_27_10", 
+"sim_newsweek-us_1946-04-29_27_17", 
+"sim_newsweek-us_1946-05-13_27_19", 
+"sim_newsweek-us_1946-06-24_27_25", 
+"sim_newsweek-us_1946-07-08_28_2", 
+"sim_newsweek-us_1946-08-19_28_8", 
+"sim_newsweek-us_1946-09-16_28_12", 
+"sim_newsweek-us_1946-10-14_28_16", 
+"sim_newsweek-us_1946-11-11_28_20", 
+"sim_newsweek-us_1946-12-09_28_24"
+
+#1942 sample
+  
+  
+"sim_newsweek-us_1942-01-19_19_3", 
+"sim_newsweek-us_1942-02-02_19_5", 
+"sim_newsweek-us_1942-03-23_19_12", 
+"sim_newsweek-us_1942-04-20_19_16", 
+"sim_newsweek-us_1942-05-11_19_19", 
+"sim_newsweek-us_1942-06-01_19_22", 
+"sim_newsweek-us_1942-07-06_20_1", 
+"sim_newsweek-us_1942-08-24_20_8", 
+"sim_newsweek-us_1942-09-28_20_13", 
+"sim_newsweek-us_1942-10-19_20_16", 
+"sim_newsweek-us_1942-11-16_20_20", 
+"sim_newsweek-us_1942-12-07_20_23"
+
+ 1937 sample
+ sample = [
+    "sim_newsweek-us_1937-01-09_9_2",
+    "sim_newsweek-us_1937-02-27_9_9",
+    "sim_newsweek-us_1937-03-13_9_11",
+    "sim_newsweek-us_1937-04-10_9_15",
+    "sim_newsweek-us_1937-05-22_9_21",
+    "sim_newsweek-us_1937-06-05_9_23",
+    "sim_newsweek-us_1937-07-31_10_5",
+    "sim_newsweek-us_1937-08-14_10_7",
+    "sim_newsweek-us_1937-09-06_10_10",
+    "sim_newsweek-us_1937-10-25_10_17",
+    "sim_newsweek-us_1937-11-15_10_20",
+    "sim_newsweek-us_1937-12-06_10_23"
+]
+
 
 ```
 
 
-
-Example URL of pages I want to scrape
-https://en.wikipedia.org/wiki/List_of_ethnic_slurs
-
-https://www.lotteryinsider.com/lottery/arkansas.htm
-https://www.lotteryinsider.com/lottery/arizona.htm
-
-
-https://archive.org/download/sim_newsweek-us_1948-06-28_31_26/sim_newsweek-us_1948-06-28_31_26.pdf
-
-https://archive.org/download/sim_newsweek-us_1964_63_index/sim_newsweek-us_1964_63_index.pdf
-
-https://archive.org/download/sim_newsweek-us_1945-12-03_26_23/sim_newsweek-us_1945-12-03_26_23.pdf
-Test
 
 ```{r}
 url2 <- "https://archive.org/download/sim_newsweek-us_1945-"
@@ -437,250 +495,231 @@ download.file(item$link[1], file.path("~/Library/CloudStorage/Dropbox/Classes_Te
 
 ```
 
-
-
 ```{r}
-archive_available("https://www.r-project.org/news.html")
 
-get_mementos("https://www.r-project.org/news.html")
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(lubridate)
 
-
-get_timemap("https://www.r-project.org/news.html")
-
-cdx_basic_query("https://www.r-project.org/news.html", limit = 10) %>% 
-  glimpse()
-
-mem <- read_memento("https://www.r-project.org/news.html")
-res <- stringi::stri_split_lines(mem)[[1]]
-cat(paste0(res[187:200], collaspe="\n"))
-
-glimpse(
-  ia_scrape("lemon curry")
-)
-
-
-(nasa <- ia_scrape("collection:nasa", count=100L))
-
-## <ia_scrape object>
-## Cursor: W3siaWRlbnRpZmllciI6IjAzLTEwLTE4X1NwYWNlLXRvLUdyb3VuZHMuemlwIn1d
-
-(item <- ia_retrieve(nasa$identifier[1]))
-
-download.file(item$link[1], file.path("~/Library/CloudStorage/Dropbox/Classes_Teaching_Archive/Data Journalism Classes/Data-Analysis-Class-Jour-405v-5003", item$file[1]))
-
-
-
-```
-
-
-```{r}
-#this pulls in data from a specific site
-
-url2 <- "https://en.wikipedia.org/wiki/List_of_ethnic_slurs"
-test  <- url2 %>%
-  read_html() %>%
-  html_table() 
-
-test1 <- test[[1]] %>%
-  clean_names() 
-
-#I want to create an empty container and loop it 1-24 to capture all of the data
-
-
-DT <- tibble::enframe(test)
-
-DT2 <- tidyr::unnest(DT)
-
-DT3 <- DT2 %>% 
-  select(1:5) %>% 
-  clean_names() %>% 
-  filter(!is.na(term)) 
-
-#write.csv(DT3, "../output/racistterms_all.csv")
-
-racist <- filter(DT3, grepl("United States", location_or_origin))
-racist1 <- filter(racist, grepl("Black|African", targets))
-# write.csv(racist1, "../output/racist_terms_us_may3.csv")
-
-racist_dictionary <- rio::import("../output/racist_dictionary.csv")
-
-```
-
-
-# NOTES BELOW: FAILED ATTEMPT TO SCRAPE THE WIKIPAGE
-```{r}
-page <- read_html("https://en.wikipedia.org/wiki/List_of_ethnic_slurs")
-table <- page %>% html_node("table") %>% html_table() %>% 
-    clean_names() 
-
-slurs <- data.frame()
-
-# Scrape the page for each letter from A to Z
-for (i in LETTERS) {
-  # Use tryCatch to catch errors
-  tryCatch({
-    page <- read_html(paste0("https://en.wikipedia.org/wiki/List_of_ethnic_slurs_(%22", i, "%22)"))
-    table <- page %>% html_node("table") %>% html_table()
-    slur_letter <- table %>%
-      slice(-1) %>% # Remove the header row
-      select(term, location_or_origin, targets, meaning_origin_and_notes) %>%
-      filter(!is.na(term)) # Remove rows with missing slurs
-    slurs <- rbind(slurs, slur_letter) # Add to the main data frame
-  }, error = function(e){})
+get_newsweek_issues <- function(year) {
+  url <- "https://archive.org/advancedsearch.php"
+  
+  query <- list(
+    q = paste0('collection:pub_newsweek-us AND date:[', year, ' TO ', year, ']'),
+   fl = paste(c("identifier", "date", "title"), collapse = ","),
+    sort = c("date asc"),
+    output = "json",
+    rows = 1000  # Adjust this if you need more results per year
+  )
+  
+  response <- GET(url, query = query)
+  
+  if (status_code(response) != 200) {
+    warning(paste("Failed to retrieve data for year", year))
+    return(NULL)
+  }
+  
+  content <- content(response, "text")
+  data <- fromJSON(content)
+  
+  if (length(data$response$docs) == 0) {
+    warning(paste("No results found for year", year))
+    return(NULL)
+  }
+  
+  results <- as_tibble(data$response$docs)
+  results$year <- year
+  
+  Sys.sleep(1)  # Add delay to avoid rate limiting
+  
+  return(results)
 }
 
+# Get results for each year from 1962 to 1969
+start_year <- 1962
+end_year <- 1969
 
+all_results <- map_dfr(start_year:end_year, get_newsweek_issues)
+
+# Process results
+processed_results <- all_results %>%
+  mutate(date = as_date(date)) %>%
+  filter(!is.na(date)) %>%
+  arrange(date)
+
+# Display the first few results
+head(processed_results)
+
+# Save results to a CSV file
+write_csv(processed_results, "newsweek_issues.csv")
 ```
 
-#notes from previous scraper
 
 ```{r}
-#this pulls in data from a specific site
+library(httr)
+library(rvest)
+library(tidyverse)
+library(lubridate)
 
-url2 <- "https://www.lotteryinsider.com/lottery/arkansas.htm"
-test  <- url2 %>%
-  read_html() %>%
-  html_table()
-
-test <- test[[1]] %>%
-  clean_names() %>%
-  slice(4:30) %>% 
-  select(x1, x2)
-
-arkansas <- test
-```
-
-
-#Following the advancedrevest tutorial
-
-```{r}
-# Define parent url of page we want to scrape
-
-url <- "https://www.lotteryinsider.com/lottery/index.htm#us"
-
-# Read in all html from table, store all tables on page as nested list of dataframes.
-lottery_industry  <- url %>%
-  read_html() %>%
-  html_table()
-
-# Just keep the second dataframe in our list, standardize column headers, remove last row
-```
-
-#build a list of the states, urls
-```{r}
-lottery_industry <- lottery_industry[[1]] %>%
-  clean_names() %>%
-  slice(150:205)
-
-states <- lottery_industry %>% 
-  select(x1) %>% 
-  rename(state = x1)
+get_newsweek_issues <- function(year) {
+  url <- paste0("https://archive.org/search.php?query=collection%3A%28pub_newsweek-us%29%20AND%20date%3A", year, "&sort=-date")
   
-states$state <- tolower(states$state)
-states$state2 <- states$state
+  page <- read_html(url)
+  
+  titles <- page %>% html_nodes(".item-title") %>% html_text()
+  dates <- page %>% html_nodes(".item-date") %>% html_text()
+  identifiers <- page %>% html_nodes(".item-ia") %>% html_attr("data-id")
+  
+  if (length(titles) == 0) {
+    warning(paste("No results found for year", year))
+    return(NULL)
+  }
+  
+  results <- tibble(
+    title = titles,
+    date = dates,
+    identifier = identifiers,
+    year = year,
+    url = paste0("https://archive.org/details/", identifiers)
+  ) %>%
+    mutate(date = as_date(date)) %>%
+    filter(!str_detect(identifier, "_index")) %>%
+    arrange(date)
+  
+  Sys.sleep(2)  # Add delay to avoid rate limiting
+  
+  return(results)
+}
 
-#rename to align with state abbreviations on lottery website
-states <- states %>%
-    mutate(state = case_when(
-    str_detect(state, "california") ~ "califor",   
-    str_detect(state, "connecticut") ~ "connect",                         
-    str_detect(state, "district of columbia") ~ "dc", 
-    str_detect(state, "indiana") ~ "hoosier",
-    str_detect(state, "louisiana") ~ "louisana",
-    str_detect(state, "new hampshire") ~ "newham",
-    str_detect(state, "new jersey") ~ "njersey",
-    str_detect(state, "new mexico") ~ "newmex",
-    str_detect(state, "new york") ~ "newyork",
-    str_detect(state, "north carolina") ~ "ntcarol",
-    str_detect(state, "north dakota") ~ "ntdakota",
-    str_detect(state, "massachusetts") ~ "massach",
-    str_detect(state, "minnesota") ~ "minnesot",
-    str_detect(state, "mississippi") ~ "missip",
-    str_detect(state, "pennsylvania") ~ "penvania",
-    str_detect(state, "rhode island") ~ "rhode",
-    str_detect(state, "south carolina") ~ "carol",
-    str_detect(state, "south dakota") ~ "sdakota",
-    str_detect(state, "virgin islands") ~ "virgin",
-    str_detect(state, "washington") ~ "wash",
-    str_detect(state, "west virginia") ~ "westvirg",
-    str_detect(state, "wisconsin") ~ "wiscon",
-    TRUE ~ state
-  ))
+# Get results for each year from 1962 to current year
+start_year <- 1962
+end_year <- 1969
 
+all_results <- map_dfr(start_year:end_year, get_newsweek_issues)
 
-#Eliminate jurisdictions
+# Display the first few results
+print(head(all_results))
 
-junk <- c("atlantic", "british columbia", "manitoba", "ontario", "quebec", "western canada", "lottery associations")
-
-states <- states %>% 
-  filter(!state %in% junk)
-
+# Save results to a CSV file
+write_csv(all_results, "newsweek_issues.csv")
 ```
-Example URL
-https://www.lotteryinsider.com/lottery/arizona.htm
+
+#after much difficulty... index 1962-1969
 
 ```{r}
 
-# Make a column with URL for each sector. 
-state_links <- states %>%
-  mutate(sector_url = paste0("https://www.lotteryinsider.com/lottery/",states$state,".htm"))
+library(tidyverse)
+library(lubridate)
 
-# Display it
-state_links
+generate_newsweek_issues <- function(start_year, end_year) {
+  all_issues <- tibble(
+    date = as.Date(character()),
+    identifier = character(),
+    title = character(),
+    year = integer(),
+    url = character()
+  )
+  
+  for (year in start_year:end_year) {
+    for (month in 1:12) {
+      for (day in 1:31) {
+        date <- ymd(sprintf("%04d-%02d-%02d", year, month, day))
+        
+        if (is.na(date) || month(date) != month) next  # Skip invalid dates
+        
+        volume <- 59 + (year - 1962)  # Assuming volume increments each year
+        issue <- 1 + as.integer(date - ymd(sprintf("%04d-01-01", year))) %/% 7  # Assuming weekly issues
+        
+        identifier <- sprintf("sim_newsweek-us_%04d-%02d-%02d_%d_%d", year, month, day, volume, issue)
+        url <- paste0("https://archive.org/details/", identifier)
+        
+        all_issues <- all_issues %>% 
+          add_row(
+            date = date,
+            identifier = identifier,
+            title = sprintf("Newsweek %04d-%02d-%02d", year, month, day),
+            year = year,
+            url = url
+          )
+      }
+    }
+  }
+  
+  return(all_issues)
+}
 
-state_links2 <- state_links %>% 
-  select(sector_url)
+# Generate results for each year from 1962 to current year
+start_year <- 1962
+end_year <- 1969
+
+all_results <- generate_newsweek_issues(start_year, end_year)
+
+# Display the first few results
+print(head(all_results))
+
+# Save results to a CSV file
+write_csv(all_results, "newsweek_issues.csv")
 ```
 
-#xpath
-#I don't see a standardized  xpath structure to use to build the scraper.
 
 ```{r}
-#/html/body/table/tbody/tr/td/table/tbody/tr[2]/td[2]/table[2]/tbody/tr/td/table[12]
+library(tidyverse)
+library(lubridate)
+library(httr)
 
-# Define url of the page we want to get
-url2 <- "https://www.lotteryinsider.com/lottery/index.htm#us"
+generate_newsweek_issues <- function(start_year, end_year) {
+  all_issues <- tibble(
+    date = as.Date(character()),
+    identifier = character(),
+    title = character(),
+    year = integer(),
+    url = character()
+  )
+  
+  for (year in start_year:end_year) {
+    for (month in 1:12) {
+      for (day in 1:31) {
+        date <- ymd(sprintf("%04d-%02d-%02d", year, month, day))
+        
+        if (is.na(date) || month(date) != month) next # Skip invalid dates
+        
+        volume <- 59 + (year - 1962) # Assuming volume increments each year
+        issue <- 1 + as.integer(date - ymd(sprintf("%04d-01-01", year))) %/% 7 # Assuming weekly issues
+        
+        identifier <- sprintf("sim_newsweek-us_%04d-%02d-%02d_%d_%d", year, month, day, volume, issue)
+        url <- paste0("https://archive.org/details/", identifier)
+        
+        response <- HEAD(url)
+        
+        if (status_code(response) == 200) {
+          all_issues <- all_issues %>%
+            add_row(
+              date = date,
+              identifier = identifier,
+              title = sprintf("Newsweek %04d-%02d-%02d", year, month, day),
+              year = year,
+              url = url
+            )
+        }
+      }
+    }
+  }
+  
+  return(all_issues)
+}
 
-# Get employment html page and select only the table with employment information, then transform it from html to a table.
-lottery_info2 <- url2 %>%
-  read_html() %>%
-  html_element(xpath = '//*["/html/body/table/tbody/tr/td/table/tbody/tr[2]/td[2]/table[2]/tbody/tr/td/table[12]/tbody/tr[4]"]') #%>%
- # html_table() 
+# Generate results for each year from 1962 to the current year
+start_year <- 1962
+end_year <- 1963
 
+all_results <- generate_newsweek_issues(start_year, end_year)
+
+# Display the first few results
+print(head(all_results))
+
+# Save results to a CSV file
+write_csv(all_results, "newsweek_issues.csv")
 
 ```
 
-
-#Scraping the lottery website
-```{r}
-# For loop, iterating over each row 
-
-for(row_number in 1:nrow(state_links2)) {
-    
-    # Keep only the row for a given row number, get rid of every other row
-   each_row_df <- state_links2 %>%
-    slice(row_number) 
-      
-    # Define url of page to get
-   url <- each_row_df$sector_url
-    
-    # Define id of table to ingest
-# xpath_lottery_table <- paste0('//*[@id="',each_row_df$sector_xpath_id,'"]')
-    
-    # Get employment table from each page by going to each url defined above, reading in the html with read_html(), extracting the table with the id generated by the xpath code using html_elements), and then turning the html into a proper dataframe using html_table(). The dataframe is in a nested list, which we'll have to extract in the next step.
-  lottery_info <- url %>%
-    read_html() %>%
-    html_table() 
-    
-    # To help us see what's happening as we build this, we're going to print the thing we're creating.  
-  print(lottery_info)
-    
-}      
-```
-
-To this point, lottery_info has loaded everything into a list file
---it seems the list just contains the last value scraped, wyomong, and none of the other states.
-
-## Thanks to Sean Mussenden for his Advanced rvest tutorial, which this is shamelessly and ruthlessly stolen and remixed
-
-https://github.com/smussenden/datajournalismbook
