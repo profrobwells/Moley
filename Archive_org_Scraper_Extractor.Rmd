@@ -142,10 +142,6 @@ download_item <- function(identifier, destdir, retries = 3) {
 
 # Define the sample
 sample <- c(
-  "sim_newsweek-us_1962_59_index",                  
- "sim_newsweek-us_1962_60_index",                   
- "sim_newsweek-us_1963_61_index" ,                  
- "sim_newsweek-us_1963_62_index",                   
  "sim_newsweek-us_1964_63_index",                   
  "sim_newsweek-us_1964_64_index" ,                  
  "sim_newsweek-us_1965_65_index" ,                  
@@ -215,6 +211,78 @@ for (result in results) {
   cat(result, "\n")
 }
 ```
+
+#Formats the index
+```{r}
+index <- c("
+Taxation as Discipline Ja 2: 68;
+Coordinating the GOP Ja 9: 72;
+It was No Monolith J 23: 104;
+Unfair Tax-Rates: F 6: 108;
+Wilson, Bullitt, Freud F 20: 104;
+Creative Federalism Mr 6. 100;
+Free for Whom? Mr 20: 112;
+Wallace Threat Ap 3: 100;
+Campaign Agonies Ap 17: 120;
+Mr O'Briens Leviathan My 1: 96;
+A New Electric Age My 15: 108;
+The Battleship Returns My 29: 104;
+The US, UN and UK Je 12: 104;
+Ass in Lions Skin Je 26: 80;
+Titan Unbound, I Jl 24: 80;
+Tit Unbound, II Ag 7: 84;
+What Kind of City? Ag 21: 72;
+Rockfeller-Reagan S 18: 112;
+Subsidy or Windfall O 2: 100;
+Those Alleged Postal Subsidies O 16: 112;
+Portrait of the GOP O 30: 108;
+The GOP Mainstream N 13: 126;
+A Look Beyond the War N 27: 108;
+Romney the Incredible D 11: 116;
+A Personal Note, Last column for Newsweek D 25: 76;
+")
+
+
+
+
+  # Split the index string into individual lines
+index_lines <- str_split(index, ";\\s*")[[1]]
+
+# Initialize an empty data frame with consistent data types
+df <- data.frame(year = character(), title = character(), date = character(), volume = numeric(), stringsAsFactors = FALSE)
+
+# Define a function to parse a line
+parse_line <- function(line) {
+  # Extract the title
+  title <- str_trim(str_extract(line, "^[^\\.]+"))
+  
+  # Extract the date and volume
+  date_volume <- str_extract(line, "[A-Za-z]+\\s[0-9]+:\\s*[0-9]+")
+  date <- str_trim(str_extract(date_volume, "^[A-Za-z]+\\s[0-9]+"))
+  volume <- as.numeric(str_extract(date_volume, "[0-9]+$"))
+  
+  year <- "1967"
+  
+  return(data.frame(year = year, title = title, date = date, volume = volume, stringsAsFactors = FALSE))
+}
+
+# Parse each line and append to the data frame
+for (line in index_lines) {
+  # Only process non-empty lines
+  if (nchar(line) > 0 && !is.na(line)) {
+    parsed_line <- parse_line(line)
+    
+    # Append the parsed line to the data frame if it contains valid data
+    if (!is.na(parsed_line$title) && !is.na(parsed_line$date) && !is.na(parsed_line$volume)) {
+      df <- bind_rows(df, parsed_line)
+    }
+  }
+}
+
+write.csv(df, "df_index.csv")
+
+```
+
 
 
 # NOTES
