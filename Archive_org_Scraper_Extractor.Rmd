@@ -9,7 +9,7 @@ output:
 # Scrape Archive.org for Newsweek back issues
 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(rvest)
 library(janitor)
@@ -19,22 +19,25 @@ library(stringr)
 #Import spreadsheet of Newsweek back issues
 ```{r}
 newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_37_61")
-
-newsweek1960s <- newsweek %>% 
-  filter(str_detect(identifier, "1960$")) 
+```
 
 
-newsweek1960s <- newsweek %>%
+#Filter for 1938-1941
+```{r}
+newsweek_1938_41 <- newsweek %>%
   mutate(year = as.numeric(str_extract(identifier, "19\\d{2}"))) %>%  # Extract year as numeric
-  filter(year >= 1962 & year <= 1969) %>%                             # Filter on year range
+  filter(year >= 1938 & year <= 1941) %>%                             # Filter on year range
   select(-year)       
 
 # newsweek1962 <- all_results %>% 
 #   filter(str_detect(identifier, "1962")) 
 
-newsweek1946_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek1946)
+newsweek_1938_41_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek_1938_41)
+```
 
-x_clean <- newsweek1946_clean
+#Cleaning sequence
+```{r}
+x_clean <- newsweek_1938_41_clean
 
 
 # Split the string into a vector based on ", "
@@ -46,6 +49,40 @@ head(x_list)
 
 
 results <- x_list
+
+```
+
+
+#Original _ Import spreadsheet of Newsweek back issues
+```{r}
+# newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_37_61")
+# 
+# newsweek1960s <- newsweek %>% 
+#   filter(str_detect(identifier, "1960$")) 
+# 
+# 
+# newsweek1960s <- newsweek %>%
+#   mutate(year = as.numeric(str_extract(identifier, "19\\d{2}"))) %>%  # Extract year as numeric
+#   filter(year >= 1962 & year <= 1969) %>%                             # Filter on year range
+#   select(-year)       
+# 
+# # newsweek1962 <- all_results %>% 
+# #   filter(str_detect(identifier, "1962")) 
+# 
+# newsweek1946_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek1946)
+# 
+# x_clean <- newsweek1946_clean
+# 
+# 
+# # Split the string into a vector based on ", "
+# x_list <- unlist(strsplit(x_clean, ", "))
+# 
+# x_list <- gsub("\\\"", "", x_list)
+# 
+# head(x_list)
+# 
+# 
+# results <- x_list
 
 ```
 
@@ -81,6 +118,11 @@ stratified_sample_generator <- function(issue_list) {
 sample <- stratified_sample_generator(results)
 
 print(sample)
+
+sample_df <- sample %>% 
+  as.data.frame()
+
+#write.csv(sample_df, "newsweek_sample_1938-41.csv")
 
 ```
 
@@ -141,21 +183,22 @@ download_item <- function(identifier, destdir, retries = 3) {
 }
 
 # Define the sample
-sample <- c(
- "sim_newsweek-us_1964_63_index",                   
- "sim_newsweek-us_1964_64_index" ,                  
- "sim_newsweek-us_1965_65_index" ,                  
- "sim_newsweek-us_1965_66_index" ,                  
- "sim_newsweek-us_1966_67_index"  ,                 
- "sim_newsweek-us_1966_68_index" ,                  
- "sim_newsweek-us_january-1-june-24-1968_71_index" ,
- "sim_newsweek-us_january-2-june-1967_69_index",    
- "sim_newsweek-us_july-1-december-30-1968_72_index",
- "sim_newsweek-us_july-3-december-25-1967_70_index"  
-)
+
+# sample <- c(
+#  "sim_newsweek-us_1964_63_index",                   
+#  "sim_newsweek-us_1964_64_index" ,                  
+#  "sim_newsweek-us_1965_65_index" ,                  
+#  "sim_newsweek-us_1965_66_index" ,                  
+#  "sim_newsweek-us_1966_67_index"  ,                 
+#  "sim_newsweek-us_1966_68_index" ,                  
+#  "sim_newsweek-us_january-1-june-24-1968_71_index" ,
+#  "sim_newsweek-us_january-2-june-1967_69_index",    
+#  "sim_newsweek-us_july-1-december-30-1968_72_index",
+#  "sim_newsweek-us_july-3-december-25-1967_70_index"  
+# )
 
 # Set up the download directory
-download_directory <- file.path(path.expand("~"), 'Code', 'Moley', 'Newsweek_1960_indexes')
+download_directory <- file.path(path.expand("~"), 'Code', 'Moley', 'Newsweek_1938_41')
 if (!dir.exists(download_directory)) {
   dir.create(download_directory, recursive = TRUE)
 }
