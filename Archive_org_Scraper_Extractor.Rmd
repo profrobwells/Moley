@@ -22,24 +22,24 @@ newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_37_61
 ```
 
 
-#Filter for 1938-1941
+#Filter for 1943-1945
 ```{r}
-newsweek_41 <- newsweek %>%
+newsweek_43_45 <- newsweek %>%
   mutate(year = as.numeric(str_extract(identifier, "19\\d{2}"))) %>%  # Extract year as numeric
   #filter(year >= 1938 & year <= 1941) %>%   
-  filter(year == 1941) %>%   
+  filter(year >= 1943 & year <= 1945) %>%   
     # Filter on year range
   select(-year)       
 
 # newsweek1962 <- all_results %>% 
 #   filter(str_detect(identifier, "1962")) 
 
-newsweek_41_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek_41)
+newsweek_43_45_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek_43_45)
 ```
 
 #Cleaning sequence
 ```{r}
-x_clean <- newsweek_41_clean
+x_clean <- newsweek_43_45_clean
 
 
 # Split the string into a vector based on ", "
@@ -124,15 +124,16 @@ print(sample)
 sample_df <- sample %>% 
   as.data.frame()
 
-#write.csv(sample_df, "newsweek_sample_1938-41.csv")
+#write.csv(sample_df, "newsweek_sample_1943-45.csv")
 
 ```
 
+#for a specific sample
 ```{r}
-sample2 <- c("sim_newsweek-us_1941-09-29_18_13",
-"sim_newsweek-us_1941-10-27_18_17",
-"sim_newsweek-us_1941-11-03_18_18",
-"sim_newsweek-us_1941-12-29_18_26")
+# sample2 <- c("sim_newsweek-us_1941-09-29_18_13",
+# "sim_newsweek-us_1941-10-27_18_17",
+# "sim_newsweek-us_1941-11-03_18_18",
+# "sim_newsweek-us_1941-12-29_18_26")
 ```
 
 
@@ -207,7 +208,7 @@ download_item <- function(identifier, destdir, retries = 3) {
 # )
 
 # Set up the download directory
-download_directory <- file.path(path.expand("~"), 'Code', 'Moley', 'Newsweek_1938_41')
+download_directory <- file.path(path.expand("~"), 'Code', 'Moley', 'Newsweek_1941_pt2')
 if (!dir.exists(download_directory)) {
   dir.create(download_directory, recursive = TRUE)
 }
@@ -225,7 +226,7 @@ library(stringr)
 library(fs)
 
 # Specify the folder containing the PDF files
-pdf_folder <- "/Users/robwells/Code/Moley/Newsweek_46"
+pdf_folder <- "/Users/robwells/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Newsweek/Newsweek_1938_41"
 
 # Get a list of all PDF files in the folder
 pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
