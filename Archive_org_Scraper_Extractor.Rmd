@@ -37,6 +37,34 @@ file <- newsweek %>%
 file_clean <- gsub("c\\(\"|\"\\)|\\n", "", file)
 ```
 
+
+# Filter for index- Nov 1
+```{r}
+file <- newsweek %>%
+    mutate(year = as.numeric(str_extract(identifier, "19\\d{2}"))) %>%  # Extract year as numeric
+  #filter(year >= 1938 & year <= 1941) %>%   
+  # filter(year == 1947 | year == 1949 | year == 1950 | year == 1951) 
+  filter(year == 1953 | year == 1955 | year == 1957 | year == 1959) %>%  
+   filter(str_detect(identifier, "index")) |> 
+    select(-year)      
+
+# newsweek1962 <- all_results %>% 
+#   filter(str_detect(identifier, "1962")) 
+
+file_clean <- gsub("c\\(\"|\"\\)|\\n", "", file)
+x_clean <- file_clean
+# Split the string into a vector based on ", "
+x_list <- unlist(strsplit(x_clean, ", "))
+x_list <- gsub("\\\"", "", x_list)
+
+head(x_list)
+results <- x_list
+
+#This skips to line 160, extractor
+```
+
+
+
 #Cleaning sequence
 
 ```{r}
@@ -89,14 +117,14 @@ print(sample)
 sample_df <- sample %>% 
   as.data.frame()
 
-write.csv(sample_df, "~/Code/Moley/moley_newsweek/newsweek_sample_1953_55_57_59.csv")
+# write.csv(sample_df, "~/Code/Moley/moley_newsweek/newsweek_sample_1953_55_57_59.csv")
 # 
 # sample_1951<- sample_df |> 
 #   filter(grepl("1951",.))
 
 ```
 
-#for a specific sample
+# Code for a specific sample
 
 ```{r}
 # sample_1951 <- read.csv("~/Code/Moley/moley_newsweek/newsweek_sample_1947_49_50_51.csv")
@@ -190,6 +218,7 @@ if (!dir.exists(download_directory)) {
 
 # Perform the download for the sample items
 walk(sample, ~download_item(.x, download_directory))
+#walk(results, ~download_item(.x, download_directory))
 ```
 
 # Extracts the Moley column from a folder of pdfs
@@ -200,7 +229,7 @@ library(stringr)
 library(fs)
 
 # Specify the folder containing the PDF files
-pdf_folder <- "~/Code/Moley/Newsweek_47_49_50_51"
+pdf_folder <- "~/Code/Moley/Newsweek_1953_55_57_59"
 
 # Get a list of all PDF files in the folder
 pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
@@ -213,9 +242,13 @@ extract_perspective <- function(pdf_path) {
     
     # Find page with both "perspective" and "Moley"
     #In case it is case sensitive, change PERSPECTIVE and MOLEY
-    page_num <- which(str_detect(text, regex("PERSPECTIVE", ignore_case = FALSE)) |
-                      str_detect(text, regex("MOLEY", ignore_case = FALSE))  |
-                      str_detect(text, regex("by Raymond", ignore_case = FALSE)))
+    # page_num <- which(str_detect(text, regex("PERSPECTIVE", ignore_case = FALSE)) |
+    #                   str_detect(text, regex("MOLEY", ignore_case = FALSE))  |
+    #                   str_detect(text, regex("by Raymond", ignore_case = FALSE)))
+    
+    #FOR THE INDEX ONLY
+    page_num <- which(str_detect(text, regex("Perspective Articles", ignore_case = FALSE)) |
+                      str_detect(text, regex("MOLEY, RAYMOND", ignore_case = FALSE))) 
     
     # Extract the specific page
     if (length(page_num) > 0) {
@@ -311,9 +344,72 @@ write.csv(df, "df_index.csv")
 
 ```
 
+
+Notes on 1951-1959 issues (and possibly beyond) - they are no longer available for download
+Fix:
+Download the yearly indexes
+https://archive.org/details/sim_newsweek-us_1959_54_index/page/n33/mode/2up
+Search for the Moley "Perspective Articles" entry
+scrape that page
+compile into an index
+take the page numbers and add to specific urls
+https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up
+Use the screenshot capture below to extract the text
+
+
+# Screenshot capture
+captureScreenshot(): This function captures the entire page content as an image, allowing you to retain visual elements like images.
+
+PNG Format: Saving as a .png file maintains the quality of the screenshot.
+
+
+
+```{r}
+library(chromote)
+library(base64enc)  # For base64 decoding
+
+# Initialize the Chromote browser
+b <- Chromote$new()
+
+# List of URLs to capture as images
+urls <- c(
+  "https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up",
+  "https://archive.org/details/sim_newsweek-us_1959-11-02_54_18/page/108/mode/2up"
+)
+
+# Loop through each URL and save it as an image
+for (i in seq_along(urls)) {
+  url <- urls[i]
+  filename <- paste0("newsweek_page_", i, ".png")
+
+  # Open a new session for each URL
+  session <- b$new_session()
+
+  # Navigate to the URL
+  session$Page$navigate(url)
+  session$Page$loadEventFired()  # Wait until the initial page load event fires
+  
+  Sys.sleep(5)  # Wait an additional 5 seconds for content to load completely
+
+  # Capture the page as a screenshot
+  screenshot_data <- session$Page$captureScreenshot()  # Get the screenshot binary data
+  writeBin(base64decode(screenshot_data$data), filename)  # Save binary data to an image file
+
+  cat(paste0("Downloaded screenshot: ", filename, "\n"))
+
+  # Close the session
+  session$close()
+}
+
+# Close the Chromote browser
+b$close()
+
+
+```
+
 # NOTES
 
-#Original \_ Import spreadsheet of Newsweek back issues
+#Original Import spreadsheet of Newsweek back issues
 
 ```{r}
 # newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_37_61")
@@ -697,6 +793,9 @@ sample <- c(
 ]
 ```
 
+
+# NOTES - OLD CODE
+
 ```{r}
 url2 <- "https://archive.org/download/sim_newsweek-us_1945-"
 test  <- url2 %>%
@@ -1033,10 +1132,10 @@ if (status_code(response) == 200) {
 ```
 
 ```{r}
-# install.packages("chromote")
-# library(chromote)
+library(chromote)
+library(base64enc)  # For base64 decoding
 
-# Initialize the chromote browser
+# Initialize the Chromote browser
 b <- Chromote$new()
 
 # List of URLs to download as PDFs
@@ -1050,19 +1149,66 @@ for (i in seq_along(urls)) {
   url <- urls[i]
   filename <- paste0("newsweek_page_", i, ".pdf")
 
-  # Open the page
-  b$Page$navigate(url)$wait()  # Navigate and wait until the page loads
+  # Open a new session for each URL
+  session <- b$new_session()
+
+  # Navigate to the URL
+  session$Page$navigate(url)
+  session$Page$loadEventFired()  # Wait until the page fully loads
 
   # Save the page as a PDF
-  pdf_data <- b$Page$printToPDF()$wait()  # Get the PDF binary data
-  writeBin(pdf_data$data, filename)  # Save the binary data to a PDF file
+  pdf_data <- session$Page$printToPDF()  # Get the PDF binary data
+  writeBin(base64decode(pdf_data$data), filename)  # Save binary data to a PDF file
 
   cat(paste0("Downloaded: ", filename, "\n"))
+
+  # Close the session
+  session$close()
 }
 
-# Close the chromote session
+# Close the Chromote browser
 b$close()
 
+
+```
+#This one yields something but not the article
+```{r}
+library(chromote)
+library(base64enc)  # Ensure this is loaded for base64 decoding
+
+# Initialize the Chromote browser
+b <- Chromote$new()
+
+# List of URLs to download as PDFs
+urls <- c(
+  "https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up",
+  "https://archive.org/details/sim_newsweek-us_1959-11-02_54_18/page/108/mode/2up"
+)
+
+# Loop through each URL and save it as a PDF
+for (i in seq_along(urls)) {
+  url <- urls[i]
+  filename <- paste0("newsweek_page_", i, ".pdf")
+
+  # Open a new session for each URL
+  session <- b$new_session()
+
+  # Navigate to the URL and wait for the page to load
+  session$Page$navigate(url)
+  session$Page$loadEventFired()  # Wait until the page is fully loaded
+
+  # Save the page as a PDF
+  pdf_data <- session$Page$printToPDF()  # Get the PDF binary data
+  writeBin(base64decode(pdf_data$data), filename)  # Save the binary data to a PDF file
+
+  cat(paste0("Downloaded: ", filename, "\n"))
+
+  # Close the session
+  session$close()
+}
+
+# Close the Chromote browser
+b$close()
 
 ```
 

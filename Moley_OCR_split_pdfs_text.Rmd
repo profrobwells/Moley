@@ -17,7 +17,8 @@ Using 10 articles downloaded from NexisUni for Kemi Busari's research
 #Using pdftools package. Good for basic PDF extraction
 
 
-text <- pdf_text("Moley_newsweek_1956-12-10_48_24 copy.pdf")
+#text <- pdf_text("Moley_newsweek_1956-12-10_48_24 copy.pdf")
+text <- pdf_text("Moley_column_sim_newsweek-us_1953_41_index.pdf")
 #pdf_text reads the text from a PDF file.
 writeLines(text, "moley_text.txt")
 #writeLines writes this text to a text file
@@ -66,6 +67,57 @@ cleaned_text <- sapply(pdf_info, function(page) filter_columns(page))
 
 # Save the cleaned text to a file
 writeLines(cleaned_text, "cleaned_perspective2.txt")
+
+```
+
+#Scraping the Index
+
+
+```{r}
+# Key Points:
+# Column Boundaries: The page is divided into three columns based on x positions:
+# 
+# The second and third columns are processed in order, preserving the separation.
+# Preserving Order: By concatenating the text in the correct sequence (column 2 followed by column 3), you avoid intermingling text from different columns.
+# 
+# Flexible Column Boundaries: You can adjust the cutoff values (0.33 * page_width and 0.66 * page_width) if the columns aren’t perfectly aligned across different articles.
+# 
+# This approach should keep the text from the second and third columns separate and avoid any intermingling of content.
+
+# Extract text with spatial information
+pdf_info <- pdf_data("Moley_column_sim_newsweek-us_1953_41_index.pdf")
+
+# Function to segment columns and remove the first column
+filter_columns <- function(page_data) {
+  # Get the width of the page
+  page_width <- max(page_data$x + page_data$width)
+  
+  # Define column boundaries
+  column_1_cutoff <- 0.33 * page_width  # Left column
+  column_2_cutoff <- 0.66 * page_width  # Middle column
+
+  # Split the text into three columns based on x-coordinates
+  column_1 <- page_data %>% filter(x <= column_1_cutoff) %>% arrange(y)
+  column_2 <- page_data %>% filter(x > column_1_cutoff & x <= column_2_cutoff) %>% arrange(y)
+  column_3 <- page_data %>% filter(x > column_2_cutoff) %>% arrange(y)
+  
+  
+  # Combine the text from each column separately, line by line, to preserve order
+  col1_text <- paste(column_1$text, collapse = " ")
+  col2_text <- paste(column_2$text, collapse = " ")
+  col3_text <- paste(column_3$text, collapse = " ")
+  
+  # Combine the text from columns 2 and 3
+  full_text <- paste(col1_text, col2_text, col3_text, sep = " ")
+  
+  return(full_text)
+}
+
+# Apply the function to each page in the PDF
+cleaned_text <- sapply(pdf_info, function(page) filter_columns(page))
+
+# Save the cleaned text to a file
+writeLines(cleaned_text, "moley_index.txt")
 
 ```
 
@@ -243,3 +295,54 @@ system("pdftotext /Users/robwells/Code/CompText_Jour/exercises/split_file/kemi.P
 ```
 
 
+# NOTES
+### an attempt to extract just the moley text
+```{r}
+library(pdftools)
+library(dplyr)
+library(stringr)
+
+# Load the PDF data with spatial information
+pdf_info <- pdf_data("Moley_column_sim_newsweek-us_1953_41_index.pdf")
+
+# Function to extract and filter text specific to "MOLEY, RAYMOND"
+filter_columns_moley <- function(page_data) {
+  # Get the width of the page
+  page_width <- max(page_data$x + page_data$width)
+  
+  # Define column boundaries
+  column_1_cutoff <- 0.33 * page_width  # Left column
+  column_2_cutoff <- 0.66 * page_width  # Middle column
+
+  # Split the text into three columns and sort by 'y' coordinate
+  column_1 <- page_data %>% filter(x <= column_1_cutoff) %>% arrange(y)
+  column_2 <- page_data %>% filter(x > column_1_cutoff & x <= column_2_cutoff) %>% arrange(y)
+  column_3 <- page_data %>% filter(x > column_2_cutoff) %>% arrange(y)
+
+  # Define a function to extract lines starting from "MOLEY, RAYMOND"
+  extract_moley <- function(column) {
+    # Try different patterns if "MOLEY, RAYMOND" is not found exactly
+    start <- which(str_detect(column$text, "MOLEY.*RAYMOND"))
+    if (length(start) == 0) return(NULL)  # No "MOLEY, RAYMOND" entry in this column
+    
+    # Extract text from the "MOLEY, RAYMOND" entry to the end of the column
+    moley_text <- paste(column$text[start:length(column$text)], collapse = " ")
+    return(moley_text)
+  }
+
+  # Apply extraction to each column
+  moley_entry <- c(extract_moley(column_1), extract_moley(column_2), extract_moley(column_3))
+  
+  # Remove NULL values and combine results
+  moley_entry <- moley_entry[!is.null(moley_entry)]
+  return(paste(moley_entry, collapse = " "))
+}
+
+# Apply the function to each page in the PDF
+moley_text <- sapply(pdf_info, function(page) filter_columns_moley(page))
+
+# Save the filtered text to a file
+writeLines(moley_text, "moley_entry.txt")
+
+
+```
