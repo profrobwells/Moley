@@ -362,6 +362,76 @@ captureScreenshot(): This function captures the entire page content as an image,
 
 PNG Format: Saving as a .png file maintains the quality of the screenshot.
 
+# Import sample article index
+```{r}
+
+sample <- read_csv("moley_newsweek/newsweek_sample_1953_55_57_59.csv") |> 
+  rename(list = 2, index = 1)
+
+#filtering
+sample <- sample |> 
+  filter(str_detect(list,"_1959")) |> 
+   mutate(date2 = str_extract(list, "\\d{4}-\\d{2}-\\d{2}")) |> 
+  mutate(date2 = lubridate::ymd(date2))
+
+```
+
+
+
+# Compile Perspective Entries into an index
+```{r}
+library(googlesheets4)
+googlesheets4::gs4_deauth()
+index <- read_sheet("https://docs.google.com/spreadsheets/d/1GCvfNHgEN_TP1KA6YdpBf-Bp0YdwGOeG8x9uSzjHvGI/edit?usp=sharing")
+
+#replace question marks for column splitting
+index <- index |> 
+  mutate(Text = str_replace_all(Text, "\\?", "."))
+#split column on period
+
+index1 <- separate(index, col = Text, into = c("column2", "column3"), sep = "\\.")
+
+index <- separate(index1, col = column3, into = c("date", "page"), sep = "\\:")  
+
+library(stringr)
+
+# Define the month abbreviation mapping
+month_lookup <- c("Ja" = "01", "F" = "02", "Mr" = "03", "Ap" = "04",
+                  "My" = "05", "Jn" = "06", "Jl" = "07", "Ag" = "08",
+                  "S" = "09", "O" = "10", "N" = "11", "D" = "12")
+
+# Create the `date2` column
+index <- index %>%
+  mutate(
+    # Extract month abbreviation and replace using lookup
+    month = str_extract(date, "[A-Za-z]+"),
+    day = str_extract(date, "\\d+"),
+    month_num = month_lookup[month],
+    # Format `date2` as "YYYY-MM-DD_page"
+    date2 = sprintf("%s-%s-%02d", Year, month_num, as.integer(day))) |> 
+  mutate(date2 = lubridate::ymd(date2)) |> 
+  mutate(page = str_squish(page)) |> 
+  mutate(real_page = as.numeric(page)) |> 
+  mutate(real_page = (real_page + 1)) 
+ 
+
+```
+
+
+# Join index and sample
+```{r}
+index1 <- index |> 
+  inner_join(sample, by=c("date2")) |> 
+  mutate(URL = paste0("https://archive.org/details/", list, "/","page","/n",real_page,"/","mode/2up"))
+
+
+```
+
+https://archive.org/details/sim_newsweek-us_1959-07-06_54_1/page/16/mode/2up
+
+https://archive.org/details/sim_newsweek-us_1959-07-06_54_1/page/88/mode/2up
+
+https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up
 
 
 ```{r}
@@ -372,10 +442,12 @@ library(base64enc)  # For base64 decoding
 b <- Chromote$new()
 
 # List of URLs to capture as images
-urls <- c(
-  "https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up",
-  "https://archive.org/details/sim_newsweek-us_1959-11-02_54_18/page/108/mode/2up"
-)
+# urls <- c(
+#   "https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up",
+#   "https://archive.org/details/sim_newsweek-us_1959-11-02_54_18/page/108/mode/2up"
+# )
+
+urls <- index1$URL
 
 # Loop through each URL and save it as an image
 for (i in seq_along(urls)) {
