@@ -12,7 +12,6 @@ library(pdftools)
 
 # Convert PDF to text
 
-Using 10 articles downloaded from NexisUni for Kemi Busari's research
 ```{r}
 #Using pdftools package. Good for basic PDF extraction
 
@@ -66,7 +65,7 @@ filter_columns <- function(page_data) {
 cleaned_text <- sapply(pdf_info, function(page) filter_columns(page))
 
 # Save the cleaned text to a file
-writeLines(cleaned_text, "cleaned_perspective2.txt")
+#writeLines(cleaned_text, "cleaned_perspective2.txt")
 
 ```
 
@@ -117,7 +116,7 @@ filter_columns <- function(page_data) {
 cleaned_text <- sapply(pdf_info, function(page) filter_columns(page))
 
 # Save the cleaned text to a file
-writeLines(cleaned_text, "moley_index.txt")
+#writeLines(cleaned_text, "moley_index.txt")
 
 ```
 
@@ -346,3 +345,46 @@ writeLines(moley_text, "moley_entry.txt")
 
 
 ```
+
+
+## Scraping the .png files
+
+
+# Processing PNG Files
+#Install Required Tools
+```{r}
+system("brew install tesseract")
+system("brew install xpdf")
+system("xcode-select --install")
+system("brew install libtiff")
+system("brew install ghostscript")
+system("brew install imagemagick")
+```
+
+
+```{r}
+# Install tesseract if not already installed
+#system("brew install tesseract")
+
+# Convert PNG to searchable PDF
+system("tesseract ~/Code/Moley/newsweek_nov6page_1.png output.pdf")
+
+# # Convert the searchable PDF to text
+system("pdftotext output.pdf output.txt")
+
+
+```
+
+
+
+
+```{r}
+
+#text <- pdf_text("Moley_newsweek_1956-12-10_48_24 copy.pdf")
+text <- pdf_text("newsweek_page_1.png")
+#pdf_text reads the text from a PDF file.
+writeLines(text, "moley_text.txt")
+#writeLines writes this text to a text file
+
+```
+

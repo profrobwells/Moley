@@ -433,7 +433,7 @@ https://archive.org/details/sim_newsweek-us_1959-07-06_54_1/page/88/mode/2up
 
 https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up
 
-
+# Capture to PNG
 ```{r}
 library(chromote)
 library(base64enc)  # For base64 decoding
@@ -452,7 +452,7 @@ urls <- index1$URL
 # Loop through each URL and save it as an image
 for (i in seq_along(urls)) {
   url <- urls[i]
-  filename <- paste0("newsweek_page_", i, ".png")
+  filename <- paste0("newsweek_nov6page_", i, ".png")
 
   # Open a new session for each URL
   session <- b$new_session()
@@ -462,6 +462,14 @@ for (i in seq_along(urls)) {
   session$Page$loadEventFired()  # Wait until the initial page load event fires
   
   Sys.sleep(5)  # Wait an additional 5 seconds for content to load completely
+
+    # Set viewport size and device scale factor for higher resolution
+  session$Emulation$setDeviceMetricsOverride(
+    width = 1920,        # Width in pixels
+    height = 1080,       # Height in pixels
+    deviceScaleFactor = 2,  # Increase the pixel density (higher means higher resolution)
+    mobile = FALSE
+  )
 
   # Capture the page as a screenshot
   screenshot_data <- session$Page$captureScreenshot()  # Get the screenshot binary data
@@ -478,6 +486,107 @@ b$close()
 
 
 ```
+
+# Capture to PDF
+
+```{r}
+library(chromote)
+library(base64enc)  # For base64 decoding
+
+# Initialize the Chromote browser
+b <- Chromote$new()
+
+# List of URLs to capture as PDFs
+# urls <- c(
+#   "https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up",
+#   "https://archive.org/details/sim_newsweek-us_1959-11-02_54_18/page/108/mode/2up"
+# )
+
+urls <- index1$URL
+
+# Loop through each URL and save it as a PDF
+for (i in seq_along(urls)) {
+  url <- urls[i]
+  filename <- paste0("newsweek_nov6page_", i, ".pdf")
+
+  # Open a new session for each URL
+  session <- b$new_session()
+
+  # Navigate to the URL
+  session$Page$navigate(url)
+  session$Page$loadEventFired()  # Wait until the initial page load event fires
+  
+  Sys.sleep(5)  # Wait an additional 5 seconds for content to load completely
+
+  # Capture the page as a PDF
+  pdf_data <- session$Page$printToPDF(
+    printBackground = TRUE,  # Include background graphics
+    preferCSSPageSize = TRUE # Use CSS-defined page sizes
+  )
+  
+  writeBin(base64decode(pdf_data$data), filename)  # Save binary data to a PDF file
+
+  cat(paste0("Downloaded PDF: ", filename, "\n"))
+
+  # Close the session
+  session$close()
+}
+
+# Close the Chromote browser
+b$close()
+
+```
+
+# HTML scraping
+```{r}
+# Load required libraries
+library(rvest)
+library(grid)
+
+# URL of the page to scrape
+url <- "https://archive.org/details/sim_newsweek-us_1959-07-06_54_1/page/n89/mode/2up"
+
+# Read the HTML content of the page
+page <- read_html(url)
+
+
+# Delay for 5 seconds to allow the page to fully load
+Sys.sleep(5)
+
+
+# Locate the "Perspective" article - adjust selector as needed
+article_text <- page %>%
+  html_nodes("div") %>%  # Adjust this selector based on inspection
+  html_text() 
+
+# Filter to include only the relevant text containing "Perspective"
+perspective_text <- grep("Perspective", article_text, value = TRUE)
+
+# Combine text if it's in multiple elements
+perspective_text <- paste(perspective_text, collapse = "\n\n")
+
+# Wrap text to ensure it fits within PDF dimensions
+lines <- strwrap(perspective_text, width = 80)
+
+# Create PDF and set text layout with grid
+pdf_file <- "Perspective_Article.pdf"
+pdf(pdf_file, width = 8.5, height = 11)
+
+# Start grid and draw text line by line
+grid.newpage()
+y_position <- 0.9  # Start near the top of the page
+
+for (line in lines) {
+  grid.text(line, x = 0.1, y = y_position, just = "left", gp = gpar(fontsize = 10))
+  y_position <- y_position - 0.03  # Move down for each line
+}
+
+dev.off()
+
+cat(paste0("PDF saved as: ", pdf_file))
+
+```
+
 
 # NOTES
 
