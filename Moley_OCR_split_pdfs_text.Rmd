@@ -353,21 +353,21 @@ writeLines(moley_text, "moley_entry.txt")
 # Processing PNG Files
 #Install Required Tools
 ```{r}
-system("brew install tesseract")
-system("brew install xpdf")
-system("xcode-select --install")
-system("brew install libtiff")
-system("brew install ghostscript")
-system("brew install imagemagick")
+# system("brew install tesseract")
+# system("brew install xpdf")
+# system("xcode-select --install")
+# system("brew install libtiff")
+# system("brew install ghostscript")
+# system("brew install imagemagick")
 ```
 
-
+# Scans PNG files to text
 ```{r}
 # Install tesseract if not already installed
 #system("brew install tesseract")
 
 # Convert PNG to searchable PDF
-system("tesseract ~/Code/Moley/newsweek_nov6page_1.png output.pdf")
+system("tesseract ~/Code/Moley/perspective_1959_1.png output")
 
 # # Convert the searchable PDF to text
 system("pdftotext output.pdf output.txt")

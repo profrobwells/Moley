@@ -487,6 +487,214 @@ b$close()
 
 ```
 
+# Scraping, screenshot and cropping png
+
+```{r}
+library(chromote)
+library(base64enc)  # For base64 decoding
+library(magick)     # For image cropping
+
+# Initialize the Chromote browser
+b <- Chromote$new()
+
+urls <- index1$URL
+# List of URLs to capture as images
+# urls <- index1 |>
+#   filter(month == "Jl") |>
+#   select(URL) |>
+#   as.character()
+
+# Loop through each URL and save it as an image
+for (i in seq_along(urls)) {
+  url <- urls[i]
+  filename <- paste0("perspective_1959_", i, ".png")
+
+  # Open a new session for each URL
+  session <- b$new_session()
+
+  # Navigate to the URL
+  session$Page$navigate(url)
+  session$Page$loadEventFired()  # Wait until the initial page load event fires
+  
+  Sys.sleep(8)  # Wait an additional time for full content loading
+
+  # Set viewport size and device scale factor for higher resolution
+  session$Emulation$setDeviceMetricsOverride(
+    width = 180,         # Width approximating columns 2 and 3
+    height = 700,        # Height capturing the middle 50% of the page
+    deviceScaleFactor = 6,  
+    mobile = FALSE
+  )
+
+  # Capture the page as a screenshot
+  screenshot_data <- session$Page$captureScreenshot()  # Get the screenshot binary data
+  writeBin(base64decode(screenshot_data$data), filename)  # Save binary data to an image file
+
+  # Load the saved image for further cropping
+  img <- image_read(filename)
+
+  # Get the image dimensions
+  img_width <- image_info(img)$width
+  img_height <- image_info(img)$height
+
+  # Calculate the regions to keep based on image dimensions
+  # Removing top 20%, preserving columns 2 and 3, and removing bottom 25%
+
+  # 1. Calculate the vertical crop:
+  # Top 20% removal
+  top_crop_height <- round(img_height * 0.2)
+  # Bottom 25% removal
+  bottom_crop_height <- round(img_height * 0.25)
+
+  # Define the new height by excluding top and bottom crop
+  new_height <- img_height - top_crop_height - bottom_crop_height
+
+  # 2. Calculate the horizontal crop to isolate columns 2 and 3:
+  # Assuming columns 2 and 3 are the central 33-66% of the image width
+  left_crop_width <- round(img_width * 0.37)
+  new_width <- round(img_width * 0.55)
+
+  # Apply cropping: remove top 20%, bottom 25%, and crop horizontally to columns 2 and 3
+  img_cropped <- image_crop(
+    img,
+    geometry = sprintf("%dx%d+%d+%d", 
+                       new_width,             # Width of columns 2 and 3
+                       new_height,            # Height after top and bottom removal
+                       left_crop_width,       # Offset from the left to start at column 2
+                       top_crop_height)       # Offset from the top to skip 20%
+  )
+
+  # Save the final cropped image
+  image_write(img_cropped, filename)
+
+  cat(paste0("Downloaded and cropped screenshot: ", filename, "\n"))
+
+  # Close the session
+  session$close()
+}
+
+# Close the Chromote browser
+b$close()
+
+```
+
+
+
+#Cropping PNG
+```{r}
+library(chromote)
+library(base64enc)  # For base64 decoding
+#install.packages("magick")
+library(magick)     # For image cropping
+
+# Initialize the Chromote browser
+b <- Chromote$new()
+
+# List of URLs to capture as images
+# urls <- c(
+#   "https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up",
+#   "https://archive.org/details/sim_newsweek-us_1959-11-02_54_18/page/108/mode/2up"
+# )
+
+# urls <- index1$URL
+urls <- index1 |>
+  filter(month == "Jl") |>
+  select(URL) |>
+  as.character()
+
+# Loop through each URL and save it as an image
+for (i in seq_along(urls)) {
+  url <- urls[i]
+  filename <- paste0("perspective_1959_", i, ".png")
+
+  # Open a new session for each URL
+  session <- b$new_session()
+
+  # Navigate to the URL
+  session$Page$navigate(url)
+  session$Page$loadEventFired()  # Wait until the initial page load event fires
+  
+  Sys.sleep(8)  # Wait an additional 5 seconds for content to load completely
+
+  # Set viewport size and device scale factor for higher resolution
+  # Approximate columns 2 and 3 and middle 50% height
+  session$Emulation$setDeviceMetricsOverride(
+    width = 180,         # 640 Width approximating columns 2 and 3
+    height = 700,        # 540 Height capturing the middle 50% of the page
+    deviceScaleFactor = 6,  
+    mobile = FALSE
+  )
+
+  # Capture the page as a screenshot
+  screenshot_data <- session$Page$captureScreenshot()  # Get the screenshot binary data
+  writeBin(base64decode(screenshot_data$data), filename)  # Save binary data to an image file
+
+  # # Further crop the saved image to fine-tune top/bottom 25% removal
+# img <- image_read(filename)
+# img <- image_crop(img, "1340x740+0+435")  # Crop to middle 50%
+# image_write(img, filename)
+img <- image_read(filename)
+img <- image_crop(img, "1840x2500+0+835")  # Crop to middle 50%
+
+image_write(img, filename)
+
+  cat(paste0("Downloaded and cropped screenshot: ", filename, "\n"))
+
+  # Close the session
+  session$close()
+}
+
+# Close the Chromote browser
+b$close()
+
+```
+
+#Further cropping
+```{r}
+library(magick)
+
+# Load the image
+img <- image_read("Xperspective_1959_1.png")
+
+# Get the image dimensions
+img_width <- image_info(img)$width
+img_height <- image_info(img)$height
+
+# Calculate the regions to keep based on image dimensions
+# Removing top 20%, preserving columns 2 and 3, and removing bottom 25%
+
+# 1. Calculate the vertical crop:
+# Top 20% removal
+top_crop_height <- round(img_height * 0.2)
+# Bottom 25% removal
+bottom_crop_height <- round(img_height * 0.25)
+
+# Define the new height by excluding top and bottom crop
+new_height <- img_height - top_crop_height - bottom_crop_height
+
+# 2. Calculate the horizontal crop to isolate columns 2 and 3:
+# Assuming columns 2 and 3 are the central 33-66% of the image width
+left_crop_width <- round(img_width * 0.37)
+new_width <- round(img_width * 0.55)
+
+# Apply cropping: remove top 20%, bottom 25%, and crop horizontally to columns 2 and 3
+img_cropped <- image_crop(
+  img,
+  geometry = sprintf("%dx%d+%d+%d", 
+                     new_width,             # Width of columns 2 and 3
+                     new_height,            # Height after top and bottom removal
+                     left_crop_width,       # Offset from the left to start at column 2
+                     top_crop_height)       # Offset from the top to skip 20%
+)
+
+# Save or display the cropped image
+image_write(img_cropped, "cropped_image.png")
+print(img_cropped)
+
+
+```
+
+
 # Capture to PDF
 
 ```{r}
