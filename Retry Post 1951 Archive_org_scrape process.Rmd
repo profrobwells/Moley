@@ -1,0 +1,1472 @@
+---
+name: Archive.org scraper, extractor
+output:
+  html_document: default
+  pdf_document: default
+---
+
+This code scrapes Archive.org from 1951 forward for Newsweek back issues and extracts the Raymond Moley articles
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(rvest)
+library(janitor)
+library(stringr)
+library(chromote)
+library(base64enc)  # For base64 decoding
+# Install required packages if not already installed
+# if (!requireNamespace("internetarchive", quietly = TRUE)) {
+#   remotes::install_github("ropensci/internetarchive")
+# }
+# if (!requireNamespace("httr", quietly = TRUE)) {
+#   install.packages("httr")
+# }
+# if (!requireNamespace("purrr", quietly = TRUE)) {
+#   install.packages("purrr")
+# }
+library(httr)
+library(jsonlite)
+library(purrr)
+library(pdftools)
+library(stringr)
+library(fs)
+library(chromote)
+library(base64enc)  # For base64 decoding
+library(magick)     # For image cropping
+```
+
+# Part 1: Import index, create sample
+
+Notes on 1951-1959 issues (and possibly beyond) - they are no longer available for download Fix: Download the yearly indexes <https://archive.org/details/sim_newsweek-us_1959_54_index/page/n33/mode/2up> Search for the Moley "Perspective Articles" entry scrape that page compile into an index
+
+#Import spreadsheet of Newsweek back issues
+
+```{r}
+newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_37_61")
+```
+
+### Filter for index
+
+```{r}
+file <- newsweek %>%
+    mutate(year = as.numeric(str_extract(identifier, "19\\d{2}"))) %>%  # Extract year as numeric
+  #filter(year >= 1938 & year <= 1941) %>%   
+  # filter(year == 1947 | year == 1949 | year == 1950 | year == 1951) 
+  filter(year == 1953 | year == 1955 | year == 1957 | year == 1959) %>%  
+   filter(str_detect(identifier, "index")) |> 
+    select(-year)      
+
+# newsweek1962 <- all_results %>% 
+#   filter(str_detect(identifier, "1962")) 
+
+file_clean <- gsub("c\\(\"|\"\\)|\\n", "", file)
+x_clean <- file_clean
+# Split the string into a vector based on ", "
+x_list <- unlist(strsplit(x_clean, ", "))
+x_list <- gsub("\\\"", "", x_list)
+
+head(x_list)
+results <- x_list
+
+#This skips to line 160, extractor
+```
+
+### Stratified sample generator in R
+
+```{r}
+stratified_sample_generator <- function(issue_list) {
+  library(dplyr)
+  library(stringr)
+  
+  # Convert issue_list to a data frame
+  issues_df <- data.frame(issue = issue_list, stringsAsFactors = FALSE)
+  
+  # Extract year and month
+  issues_df <- issues_df %>%
+    mutate(date_part = str_extract(issue, "\\d{4}-\\d{2}"),
+           month = str_sub(date_part, 1, 7))
+  
+  # Group by month and sample one issue per month
+  stratified_sample <- issues_df %>%
+    group_by(month) %>%
+    sample_n(1) %>%
+    pull(issue)
+  
+  return(stratified_sample)
+}
+
+sample <- stratified_sample_generator(results)
+
+print(sample)
+
+sample_df <- sample %>% 
+  as.data.frame()
+
+# write.csv(sample_df, "~/Code/Moley/moley_newsweek/newsweek_sample_1953_55_57_59.csv")
+```
+
+### Cleaning sequence
+
+```{r}
+x_clean <- file_clean
+# Split the string into a vector based on ", "
+x_list <- unlist(strsplit(x_clean, ", "))
+x_list <- gsub("\\\"", "", x_list)
+head(x_list)
+results <- x_list
+
+```
+
+```{r}
+# Clean the text
+cleaned_text <- gsub("^\\[\\d+\\]\\s*\"|\"$", "", sample)
+cleaned_text <- gsub("\n\\s+", "\n", cleaned_text)
+items <- unlist(strsplit(cleaned_text, "\\r?\\n"))
+
+
+# Enclose each string in quotes and add a comma
+formatted_items <- paste0("\"", items, "\",")
+
+# Print each formatted item
+for (item in formatted_items) {
+  cat(item, "\n")
+}
+```
+
+### Download Archive.org index
+
+```{r}
+download_item <- function(identifier, destdir, retries = 3) {
+  url <- paste0("https://archive.org/download/", identifier, "/", identifier, ".pdf")
+  file_path <- file.path(destdir, paste0(identifier, ".pdf"))
+  
+  for (attempt in 1:retries) {
+    tryCatch({
+      GET(url, write_disk(file_path, overwrite = TRUE))
+      print(paste("Downloaded", identifier, "to", destdir))
+      break
+    }, error = function(e) {
+      if (attempt < retries) {
+        print(paste("Error occurred, retrying...", attempt, "/", retries))
+      } else {
+        print(paste("Failed to download", identifier, "after", retries, "attempts"))
+      }
+    })
+  }
+}
+
+download_directory <- file.path(path.expand("~"), 'Code', 'Moley', 'Newsweek_1953_55_57_59')
+if (!dir.exists(download_directory)) {
+  dir.create(download_directory, recursive = TRUE)
+}
+
+# Perform the download for the sample items
+walk(sample, ~download_item(.x, download_directory))
+#walk(results, ~download_item(.x, download_directory))
+```
+
+### Extracts Moley entries from index
+
+```{r}
+
+
+# Specify the folder containing the PDF files
+pdf_folder <- "~/Code/Moley/Newsweek_1953_55_57_59"
+
+# Get a list of all PDF files in the folder
+pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
+
+# Function to extract perspective page
+extract_perspective <- function(pdf_path) {
+  tryCatch({
+    # Extract all text
+    text <- pdf_text(pdf_path)
+    
+    # Find page with both "perspective" and "Moley"
+    #In case it is case sensitive, change PERSPECTIVE and MOLEY
+    # page_num <- which(str_detect(text, regex("PERSPECTIVE", ignore_case = FALSE)) |
+    #                   str_detect(text, regex("MOLEY", ignore_case = FALSE))  |
+    #                   str_detect(text, regex("by Raymond", ignore_case = FALSE)))
+    
+    #FOR THE INDEX ONLY
+    page_num <- which(str_detect(text, regex("Perspective Articles", ignore_case = FALSE)) |
+                      str_detect(text, regex("MOLEY, RAYMOND", ignore_case = FALSE))) 
+    
+    # Extract the specific page
+    if (length(page_num) > 0) {
+      output_file <- paste0("Moley_column_", basename(pdf_path))
+      pdf_subset(pdf_path, pages = page_num, output = output_file)
+      return(paste("Perspective page extracted successfully from", basename(pdf_path), "! Page number:", page_num))
+    } else {
+      return(paste("Perspective not found in", basename(pdf_path)))
+    }
+  }, error = function(e) {
+    return(paste("Error processing", basename(pdf_path), ":", e$message))
+  })
+}
+
+# Process each PDF file
+results <- sapply(pdf_files, extract_perspective)
+
+# Print results
+for (result in results) {
+  cat(result, "\n")
+}
+```
+
+# Part 2: Extract Specific Articles 
+
+Take the page numbers and add to specific urls <https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up>
+
+### Import sample article index
+
+```{r}
+
+sample <- read_csv("moley_newsweek/newsweek_sample_1953_55_57_59.csv") |> 
+  rename(list = 2, index = 1) |> 
+  mutate(date2 = str_extract(list, "\\d{4}-\\d{2}-\\d{2}")) |> 
+  mutate(date2 = lubridate::ymd(date2))
+
+#filtering
+# sample <- sample |> 
+#   #filter(str_detect(list,"_1959")) |> 
+#    mutate(date2 = str_extract(list, "\\d{4}-\\d{2}-\\d{2}")) |> 
+#   mutate(date2 = lubridate::ymd(date2))
+
+```
+
+### Clean, Compile Perspective Entries into an index
+
+Takes the Google sheet with hand copied and pasted raw text from the Newsweek index pdfs and cleans it into an index dataframe
+
+```{r}
+library(googlesheets4)
+googlesheets4::gs4_deauth()
+index <- read_sheet("https://docs.google.com/spreadsheets/d/1GCvfNHgEN_TP1KA6YdpBf-Bp0YdwGOeG8x9uSzjHvGI/edit?usp=sharing")
+
+
+index_cleaned <- index %>%
+  mutate(Text = str_split(Text, "(?<=\\d{1,2}: \\d{1,3})\\s+")) %>%
+  unnest(Text) |> 
+  mutate(Text = str_squish(Text)) |> 
+  mutate(Text = case_when( #specific junk in index cleaned. only for 1950s
+       str_detect(Text, 
+                  "After Little Rock\\?\\s*O\\s*7\\s*112") ~ "After Little Rock? O 7: 112",  
+        str_detect(Text, "Laski: Politician, Educator. Mr 30: 100") ~ "Laski Politician, Educator. Mr 30: 100",
+                     TRUE ~ Text))
+
+
+# My strategy to deal with non-standardized errors: drop them into a separate dataframe and clean them separately, rejoin with the main df
+index_messy <- index_cleaned %>%
+  mutate(
+    # Check for rows with multiple colons
+    colon_count = str_count(Text, ":")) %>%
+  unnest(Text) %>%
+  filter(colon_count > 1) |> # any column with 2 or more columns is kept
+  slice(-c(1,6)) #specific to this data, may cut for future
+
+# process rows that still contain more than one colon
+index_cleaned2 <- index_messy %>%
+  mutate(
+    # Check for rows with multiple colons
+    colon_count = str_count(Text, ":"),
+    # Further split only those rows that still have multiple colons
+    Text = if_else(
+      colon_count > 1,
+      # Split by the "Day: Page" pattern, but only if multiple entries are found
+      map(Text, ~ str_split(.x, "(?<=\\d{1,2}:\\d{1,3})\\s+")[[1]]),
+      list(Text) # Wrap single entries in a list for consistency
+    )
+  ) %>%
+  unnest(Text) %>%
+    distinct() %>%    
+  select(-colon_count)
+# Split Entries: The regular expression (?<=\\d{1,2}: \\d{1,3})\\s+ captures points after each "Day: Page" format in Text and splits entries accordingly.
+# Unnest Rows: After splitting, unnest(Text) expands each article entry into a new row.
+
+index_cleaned2 <- index_cleaned2 %>%
+  mutate(Text = case_when( #specific string cleaning. 
+       str_detect(Text, 
+                  "My 23: 56; Rept from England: part 2. My 30: 34; with Attlee; pic. Je 13: 17") ~ "Rept from England part 2. My 30: 34",  
+        str_detect(Text, "BritainStaysRight.O19:56") ~ "BritainStaysRight. O 19: 56",
+       str_detect(Text, "Announcement of upcoming Byrd articles, Ag 5: 100; Ag 12: 100; Ag 19: 96; Ag") ~ "Announcement of upcoming Byrd articles, Ag 5: 100",
+                     TRUE ~ Text))
+
+
+index_cleaned3 <- index_cleaned %>%
+  mutate(
+    # Check for rows with multiple colons
+    colon_count = str_count(Text, ":")) %>%
+  unnest(Text) %>%
+  filter(colon_count == 1) |> 
+    select(-colon_count)
+
+index <- rbind(index_cleaned3, index_cleaned2) 
+
+
+#replace question marks for column splitting
+index <- index |> 
+  mutate(Text = str_replace_all(Text, "\\?", "."))
+#split column on period
+
+index1 <- separate(index, col = Text, into = c("column2", "column3"), sep = "\\.")
+
+index <- separate(index1, col = column3, into = c("date", "page"), sep = "\\:")  
+```
+
+
+```{r}
+# Define month lookup to handle all cases, including variants like "J1" and "J]"
+month_lookup <- c(
+  "Ja" = "01", "F" = "02", "Mr" = "03", "Ap" = "04", "My" = "05",
+  "Je" = "06", "Jl" = "07", "J1" = "07", "J\\]" = "07", "Ag" = "08",
+  "S" = "09", "O" = "10", "0" = "10", "N" = "11", "D" = "12"
+)
+
+index_cleaned <- index %>%
+  mutate(
+    # Extract month abbreviation, replacing edge cases using lookup
+    month = str_extract(date, "[A-Za-z]+"),
+    day = str_extract(date, "\\d+"),
+    month_num = month_lookup[month],  # Replace using month lookup
+    # Ensure day is numeric and set any invalid days to NA for consistency
+    day = ifelse(!is.na(day), as.integer(day), NA_integer_),
+    # Construct `date2` with cleaned year, month, and day values
+    date2 = ifelse(!is.na(month_num) & !is.na(day),
+                   sprintf("%s-%s-%02d", Year, month_num, day),
+                   NA_character_)
+  ) %>%
+  # Convert `date2` to Date format
+  mutate(date2 = lubridate::ymd(date2)) %>%
+  # Clean and convert `page` column if present
+  mutate(real_page = as.numeric(str_squish(page)),
+         real_page = ifelse(!is.na(real_page), real_page + 1, NA_real_))
+```
+```{r}
+index5 <- index_cleaned |> 
+  filter(is.na(date2)) |> 
+  mutate(date = str_squish(date)) |> 
+  mutate(month_num = case_when(
+    # Check if "J" is in the string (covering all instances like J, J1, Jl, etc.)
+    str_detect(date, "J") ~ "07",
+    # Handle other months explicitly
+    str_detect(date, "O") ~ "10",  
+    str_detect(date, "0") ~ "10",  
+    TRUE ~ month)) |> 
+  mutate(page = case_when(
+    str_detect(page, "92; Irs") ~ "92",
+    str_detect(page, "124;") ~ "124",
+    TRUE ~ page)) |> 
+    mutate(date1 = date) |> 
+    separate(date1, into = c("crap", "day"), sep = " ") |> 
+    select(-crap) |> 
+    mutate(day = ifelse(!is.na(day), as.integer(day), NA_integer_),
+    # Construct `date2` with cleaned year, month, and day values
+    date2 = ifelse(!is.na(month_num) & !is.na(day),
+                   sprintf("%s-%s-%02d", Year, month_num, day),
+                   NA_character_)
+  ) %>%
+  # Convert `date2` to Date format
+  mutate(date2 = lubridate::ymd(date2)) %>%
+  # Clean and convert `page` column if present
+  mutate(real_page = as.numeric(str_squish(page)),
+         real_page = ifelse(!is.na(real_page), real_page + 1, NA_real_))
+
+index6 <- index5 %>%
+  filter(month_num %in% c("07", "10"))
+
+#the fields with no dates whatsoever
+index_awful <- index5 %>%
+  filter(!month_num %in% c("07", "10"))
+# write.csv(index_awful, "index_awful.csv")
+
+index_cleaned4 <- index_cleaned |> 
+  filter(!is.na(date2))
+
+index_final <- rbind(index_cleaned4, index6)
+
+library(tidyr)
+index_final <- index_final |> 
+  separate(page, into =c("page1", "crap"), sep = ";")
+
+index_final <- index_final |> 
+ mutate(
+    real_page = as.character(real_page), # Convert to character if necessary
+    page1 = as.character(page1)         # Ensure page1 is also character
+  ) %>%
+  mutate(real_page = if_else(is.na(real_page), page1, real_page)) |> 
+  mutate(real_page = str_squish(real_page)) |> 
+  mutate(real_page = case_when(
+    real_page == "%" ~ "96",
+     TRUE ~ real_page
+  )) |> 
+  rename(page = real_page, date_new = date2) 
+
+write.csv(index_final, "cleaned_moley_1950s_index.csv")
+
+```
+
+### Build index
+#rebuilt with clean index nov 25
+```{r}
+index1 <- index_final |> 
+  inner_join(sample, by=c("date_new"="date2")) |> 
+  mutate(URL = paste0("https://archive.org/details/", list, "/","page","/n",page,"/","mode/2up")) |> 
+  distinct() |> 
+  mutate(index = row_number()) 
+
+#write.csv(index1, "the_95_moley_articles_extracted_nov_20.csv")
+
+```
+
+
+join with the list of bad articles
+```{r}
+index_bad <- read.csv("./cropped_perspective_articles/the_95_moley_articles_extracted_nov_20.csv") |> 
+  filter(bad_scan =="x") |> 
+  select(Year, column2, date)
+
+#index of 19 articles that didn't scan before
+retry_scans <- index1 |> 
+  inner_join(index_bad, by=c("Year", "column2"))
+
+write.csv(retry_scans, "retry_scans_nov_25.csv")
+```
+
+# Part 3: Scraping, screenshot and cropping png 
+
+### Screen Grab, Crop Articles, Capture to PNG
+
+Use the screenshot capture below to extract the text captureScreenshot(): This function captures the entire page content as an image, allowing you to retain visual elements like images.
+
+PNG Format: Saving as a .png file maintains the quality of the screenshot.
+
+Screen Grab the Article Pages \# this is duplicated / improved below with Cropping PNG
+
+```{r}
+# Initialize the Chromote browser
+b <- Chromote$new()
+
+urls <- retry_scans$URL
+#urls <- index1$URL
+# List of URLs to capture as images
+# urls <- index1 |>
+#   filter(month == "Jl") |>
+#   select(URL) |>
+#   as.character()
+
+# Loop through each URL and save it as an image
+for (i in seq_along(urls)) {
+  url <- urls[i]
+  filename <- paste0("retry_perspective_", i, ".png")
+
+  # Open a new session for each URL
+  session <- b$new_session()
+
+  # Navigate to the URL
+  session$Page$navigate(url)
+  session$Page$loadEventFired()  # Wait until the initial page load event fires
+  
+  Sys.sleep(8)  # Wait an additional time for full content loading
+
+  # Set viewport size and device scale factor for higher resolution
+  session$Emulation$setDeviceMetricsOverride(
+    width = 180,         # Width approximating columns 2 and 3
+    height = 700,        # Height capturing the middle 50% of the page
+    deviceScaleFactor = 6,  
+    mobile = FALSE
+  )
+
+  # Capture the page as a screenshot
+  screenshot_data <- session$Page$captureScreenshot()  # Get the screenshot binary data
+  writeBin(base64decode(screenshot_data$data), filename)  # Save binary data to an image file
+
+  # Load the saved image for further cropping
+  img <- image_read(filename)
+
+  # Get the image dimensions
+  img_width <- image_info(img)$width
+  img_height <- image_info(img)$height
+
+  # Calculate the regions to keep based on image dimensions
+  # Removing top 20%, preserving columns 2 and 3, and removing bottom 25%
+
+  # 1. Calculate the vertical crop:
+  # Top 20% removal
+  top_crop_height <- round(img_height * 0.2)
+  # Bottom 25% removal
+  bottom_crop_height <- round(img_height * 0.25)
+
+  # Define the new height by excluding top and bottom crop
+  new_height <- img_height - top_crop_height - bottom_crop_height
+
+  # 2. Calculate the horizontal crop to isolate columns 2 and 3:
+  # Assuming columns 2 and 3 are the central 33-66% of the image width
+  left_crop_width <- round(img_width * 0.37)
+  new_width <- round(img_width * 0.55)
+
+  # Apply cropping: remove top 20%, bottom 25%, and crop horizontally to columns 2 and 3
+  img_cropped <- image_crop(
+    img,
+    geometry = sprintf("%dx%d+%d+%d", 
+                       new_width,             # Width of columns 2 and 3
+                       new_height,            # Height after top and bottom removal
+                       left_crop_width,       # Offset from the left to start at column 2
+                       top_crop_height)       # Offset from the top to skip 20%
+  )
+
+  # Save the final cropped image
+  image_write(img_cropped, filename)
+
+  cat(paste0("Downloaded and cropped screenshot: ", filename, "\n"))
+
+  # Close the session
+  session$close()
+}
+
+# Close the Chromote browser
+b$close()
+
+```
+
+# List extracted files - Stopped Wednesday
+
+```{r}
+
+files <- list.files("./cropped_perspective_articles", pattern="*.png") %>% 
+  as.data.frame() |> 
+  rename(filename = 1) |> 
+  #create an index with the file name
+ mutate(index = str_extract(filename, "(?<=_)\\d+(?=\\.png|\\.txt)")) |> 
+  mutate(index = as.numeric(index))
+
+
+index1a <- index1 |> 
+  mutate(index_new = row_number())
+
+```
+
+### Join index and sample
+
+#### Resuming with processed data
+```{r}
+
+
+#need to use index_final, with 222 entries that has clean date fields
+#Line 388
+index_finalx <- read.csv("~/Code/Moley/cleaned_moley_1950s_index.csv") |> 
+    mutate(date2 = lubridate::ymd(date2)) 
+    
+# index_final <- read.csv("~/Code/Moley/Newsweek_1953_55_57_59_indexes/newsweek_moley_53_55_57_59.csv") |> 
+#    mutate(date2 = lubridate::ymd(date2)) - #
+
+sample <- read_csv("moley_newsweek/newsweek_sample_1953_55_57_59.csv") |> 
+  rename(list = 2, index = 1) |> 
+  mutate(date2 = str_extract(list, "\\d{4}-\\d{2}-\\d{2}")) |> 
+  mutate(date2 = lubridate::ymd(date2))
+
+```
+
+
+
+### List extracted articles
+```{r}
+
+files <- list.files("moley_extracted_perspective_AI_text/", pattern="*.txt") %>% 
+  as.data.frame() |> 
+  rename(filename = 1) |> 
+  #create an index with the file name
+ mutate(index = str_extract(filename, "\\d+")) |> 
+  mutate(index = as.numeric(index))
+
+```
+
+### join index with extracted articles
+```{r}
+extracted_AI_moley_index <- index1 |> 
+  inner_join(files, by= c("index"))
+
+write.csv(extracted_AI_moley_index, "extracted_AI_moley_index_nov_20.csv")
+
+
+```
+
+
+
+#\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\* \# \# NOTES \# #\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*
+
+#Original Import spreadsheet of Newsweek back issues
+
+```{r}
+# newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_37_61")
+# 
+# newsweek1960s <- newsweek %>% 
+#   filter(str_detect(identifier, "1960$")) 
+# 
+# 
+# newsweek1960s <- newsweek %>%
+#   mutate(year = as.numeric(str_extract(identifier, "19\\d{2}"))) %>%  # Extract year as numeric
+#   filter(year >= 1962 & year <= 1969) %>%                             # Filter on year range
+#   select(-year)       
+# 
+# # newsweek1962 <- all_results %>% 
+# #   filter(str_detect(identifier, "1962")) 
+# 
+# newsweek1946_clean <- gsub("c\\(\"|\"\\)|\\n", "", newsweek1946)
+# 
+# x_clean <- newsweek1946_clean
+# 
+# 
+# # Split the string into a vector based on ", "
+# x_list <- unlist(strsplit(x_clean, ", "))
+# 
+# x_list <- gsub("\\\"", "", x_list)
+# 
+# head(x_list)
+# 
+# 
+# results <- x_list
+
+```
+
+```{r}
+Here's a quick recap of what we did to solve the problem:
+
+We replaced the ia_download function with a custom download_item function.
+We used httr::GET to download the PDF files directly from the Internet Archive.
+We constructed the URL for each PDF based on the item identifier.
+We maintained the retry mechanism for robustness.
+
+This solution gives you more control over the download process and eliminates dependencies on potentially problematic packages.
+
+```
+
+```{r}
+# Provided list of issues
+
+results <- c(
+"sim_newsweek-us_1952-01-07_39_1",
+"sim_newsweek-us_1952-01-14_39_2",
+"sim_newsweek-us_1952-01-21_39_3",
+"sim_newsweek-us_1952-01-28_39_4",
+"sim_newsweek-us_1952-02-04_39_5",
+"sim_newsweek-us_1952-02-11_39_6",
+"sim_newsweek-us_1952-02-18_39_7",
+"sim_newsweek-us_1952-02-25_39_8",
+"sim_newsweek-us_1952-03-03_39_9",
+"sim_newsweek-us_1952-03-10_39_10",
+"sim_newsweek-us_1952-03-17_39_11",
+"sim_newsweek-us_1952-03-24_39_12",
+"sim_newsweek-us_1952-03-31_39_13",
+"sim_newsweek-us_1952-04-07_39_14",
+"sim_newsweek-us_1952-04-14_39_15",
+"sim_newsweek-us_1952-04-21_39_16",
+"sim_newsweek-us_1952-04-28_39_17",
+"sim_newsweek-us_1952-05-05_39_18",
+"sim_newsweek-us_1952-05-12_39_19",
+"sim_newsweek-us_1952-05-19_39_20",
+"sim_newsweek-us_1952-05-26_39_21",
+"sim_newsweek-us_1952-06-02_39_22",
+"sim_newsweek-us_1952-06-09_39_23",
+"sim_newsweek-us_1952-06-16_39_24",
+"sim_newsweek-us_1952-06-23_39_25",
+"sim_newsweek-us_1952-06-30_39_26",
+"sim_newsweek-us_1952-07-07_40_1",
+"sim_newsweek-us_1952-07-14_40_2",
+"sim_newsweek-us_1952-07-21_40_3",
+"sim_newsweek-us_1952-07-28_40_4",
+"sim_newsweek-us_1952-08-04_40_5",
+"sim_newsweek-us_1952-08-11_40_6",
+"sim_newsweek-us_1952-08-18_40_7",
+"sim_newsweek-us_1952-08-25_40_8",
+"sim_newsweek-us_1952-09-01_40_9",
+"sim_newsweek-us_1952-09-08_40_10",
+"sim_newsweek-us_1952-09-15_40_11",
+"sim_newsweek-us_1952-09-22_40_12",
+"sim_newsweek-us_1952-09-29_40_13",
+"sim_newsweek-us_1952-10-06_40_14",
+"sim_newsweek-us_1952-10-13_40_15",
+"sim_newsweek-us_1952-10-20_40_16",
+"sim_newsweek-us_1952-10-27_40_17",
+"sim_newsweek-us_1952-11-03_40_18",
+"sim_newsweek-us_1952-11-10_40_19",
+"sim_newsweek-us_1952-11-17_40_21",
+"sim_newsweek-us_1952-11-24_40_22",
+"sim_newsweek-us_1952-12-01_40_23",
+"sim_newsweek-us_1952-12-08_40_24",
+"sim_newsweek-us_1952-12-15_40_25",
+"sim_newsweek-us_1952-12-22_40_26",
+"sim_newsweek-us_1952-12-29_40_27"
+)
+```
+
+# Past Samples
+
+```         
+
+1951, 53, 55, 57, 59 samples
+Show in New Window
+[1] "sim_newsweek-us_1953-01-05_41_1" "sim_newsweek-us_1953-01-12_41_2"
+[3] "sim_newsweek-us_1953-01-19_41_3" "sim_newsweek-us_1953-01-26_41_4"
+[5] "sim_newsweek-us_1953-02-02_41_5" "sim_newsweek-us_1953-02-09_41_6"
+Show in New Window
+"sim_newsweek-us_1953-01-26_41_4", 
+"sim_newsweek-us_1953-02-23_41_8", 
+"sim_newsweek-us_1953-03-23_41_12", 
+"sim_newsweek-us_1953-04-06_41_14", 
+"sim_newsweek-us_1953-05-25_41_21", 
+"sim_newsweek-us_1953-06-22_41_25", 
+"sim_newsweek-us_1953-07-13_42_2", 
+"sim_newsweek-us_1953-08-24_42_8", 
+"sim_newsweek-us_1953-09-28_42_13", 
+"sim_newsweek-us_1953-10-12_42_15", 
+"sim_newsweek-us_1953-11-30_42_22", 
+"sim_newsweek-us_1953-12-07_42_23", 
+"sim_newsweek-us_1955-01-03_45_1", 
+"sim_newsweek-us_1955-02-21_45_8", 
+"sim_newsweek-us_1955-03-28_45_13", 
+"sim_newsweek-us_1955-04-11_45_15", 
+"sim_newsweek-us_1955-05-30_45_22", 
+"sim_newsweek-us_1955-06-13_45_24", 
+"sim_newsweek-us_1955-07-18_46_3", 
+"sim_newsweek-us_1955-08-08_46_6", 
+"sim_newsweek-us_1955-09-19_46_12", 
+"sim_newsweek-us_1955-10-10_46_15", 
+"sim_newsweek-us_1955-11-28_46_22", 
+"sim_newsweek-us_1955-12-05_46_23", 
+"sim_newsweek-us_1957-01-28_49_4", 
+"sim_newsweek-us_1957-02-25_49_8", 
+"sim_newsweek-us_1957-03-18_49_11", 
+"sim_newsweek-us_1957-04-29_49_17", 
+"sim_newsweek-us_1957-05-06_49_18", 
+"sim_newsweek-us_1957-06-03_49_22", 
+"sim_newsweek-us_1957-07-08_50_2", 
+"sim_newsweek-us_1957-08-26_50_9", 
+"sim_newsweek-us_1957-09-16_50_12", 
+"sim_newsweek-us_1957-10-21_50_17", 
+"sim_newsweek-us_1957-11-18_50_21", 
+"sim_newsweek-us_1957-12-09_50_24", 
+"sim_newsweek-us_1959-01-26_53_4", 
+"sim_newsweek-us_1959-02-23_53_8", 
+"sim_newsweek-us_1959-03-02_53_9", 
+"sim_newsweek-us_1959-04-20_53_16", 
+"sim_newsweek-us_1959-05-04_53_18", 
+"sim_newsweek-us_1959-06-29_53_26", 
+"sim_newsweek-us_1959-07-06_54_1", 
+"sim_newsweek-us_1959-08-31_54_9", 
+"sim_newsweek-us_1959-09-28_54_13", 
+"sim_newsweek-us_1959-10-26_54_17", 
+"sim_newsweek-us_1959-11-30_54_22", 
+"sim_newsweek-us_1959-12-14_54_24", 
+"sim_newsweek-us_1953_41_index", 
+
+#1958 sample
+sample <- c(
+"sim_newsweek-us_1958-01-27_51_4", 
+"sim_newsweek-us_1958-02-17_51_7", 
+"sim_newsweek-us_1958-03-24_51_12", 
+"sim_newsweek-us_1958-04-07_51_14", 
+"sim_newsweek-us_1958-05-12_51_19", 
+"sim_newsweek-us_1958-06-16_51_24", 
+"sim_newsweek-us_1958-07-21_52_3", 
+"sim_newsweek-us_1958-08-25_52_8", 
+"sim_newsweek-us_1958-09-22_52_12", 
+"sim_newsweek-us_1958-10-13_52_15", 
+"sim_newsweek-us_1958-11-17_52_20", 
+"sim_newsweek-us_1958-12-08_52_23"
+)
+
+#1954 sample
+sample <- c(
+"sim_newsweek-us_1954-01-25_43_4", 
+"sim_newsweek-us_1954-02-01_43_5", 
+"sim_newsweek-us_1954-03-29_43_13", 
+"sim_newsweek-us_1954-04-19_43_16", 
+"sim_newsweek-us_1954-05-17_43_20", 
+"sim_newsweek-us_1954-06-14_43_24", 
+"sim_newsweek-us_1954-07-05_44_1", 
+"sim_newsweek-us_1954-08-09_44_6", 
+"sim_newsweek-us_1954-09-13_44_11", 
+"sim_newsweek-us_1954-10-25_44_17", 
+"sim_newsweek-us_1954-11-08_44_19", 
+"sim_newsweek-us_1954-12-27_44_26"
+)
+
+#1952 sample
+"sim_newsweek-us_1952-01-21_39_3", 
+"sim_newsweek-us_1952-02-18_39_7" ,
+"sim_newsweek-us_1952-03-03_39_9", 
+"sim_newsweek-us_1952-04-14_39_15",
+"sim_newsweek-us_1952-05-19_39_20",
+"sim_newsweek-us_1952-06-23_39_25",
+"sim_newsweek-us_1952-07-21_40_3", 
+"sim_newsweek-us_1952-08-18_40_7", 
+"sim_newsweek-us_1952-09-22_40_12",
+"sim_newsweek-us_1952-10-27_40_17",
+"sim_newsweek-us_1952-11-24_40_22",
+"sim_newsweek-us_1952-12-29_40_27"
+
+
+
+#1951 sample
+"sim_newsweek-us_1951-01-01_37_1", 
+"sim_newsweek-us_1951-02-26_37_9", 
+"sim_newsweek-us_1951-03-26_37_13", 
+"sim_newsweek-us_1951-04-09_37_15", 
+"sim_newsweek-us_1951-05-14_37_20", 
+"sim_newsweek-us_1951-06-11_37_24", 
+"sim_newsweek-us_1951-07-16_38_3", 
+"sim_newsweek-us_1951-08-13_38_7", 
+"sim_newsweek-us_1951-09-24_38_13", 
+"sim_newsweek-us_1951-10-22_38_17", 
+"sim_newsweek-us_1951-11-26_38_22", 
+"sim_newsweek-us_1951-12-24_38_26", 
+
+#1950 sample
+"sim_newsweek-us_1950-01-02_35_1", 
+"sim_newsweek-us_1950-02-06_35_6", 
+"sim_newsweek-us_1950-03-06_35_10", 
+"sim_newsweek-us_1950-04-17_35_16", 
+"sim_newsweek-us_1950-05-01_35_18", 
+"sim_newsweek-us_1950-06-19_35_25", 
+"sim_newsweek-us_1950-07-31_36_5", 
+"sim_newsweek-us_1950-08-21_36_8", 
+"sim_newsweek-us_1950-09-25_36_13", 
+"sim_newsweek-us_1950-10-23_36_17", 
+"sim_newsweek-us_1950-11-27_36_22", 
+"sim_newsweek-us_1950-12-11_36_24", 
+
+#1949 sample
+"sim_newsweek-us_1949-01-24_33_4", 
+"sim_newsweek-us_1949-02-14_33_7", 
+"sim_newsweek-us_1949-03-14_33_11", 
+"sim_newsweek-us_1949-04-18_33_16", 
+"sim_newsweek-us_1949-05-09_33_19", 
+"sim_newsweek-us_1949-06-27_33_26", 
+"sim_newsweek-us_1949-07-18_34_3", 
+"sim_newsweek-us_1949-08-01_34_5", 
+"sim_newsweek-us_1949-09-19_34_12", 
+"sim_newsweek-us_1949-10-24_34_17", 
+"sim_newsweek-us_1949-11-21_34_21", 
+"sim_newsweek-us_1949-12-12_34_24", 
+
+
+#1948 sample
+"sim_newsweek-us_1948-01-26_31_4" 
+"sim_newsweek-us_1948-02-09_31_6" 
+"sim_newsweek-us_1948-03-01_31_9" 
+"sim_newsweek-us_1948-04-19_31_16"
+"sim_newsweek-us_1948-05-10_31_19"
+"sim_newsweek-us_1948-06-07_31_23"
+"sim_newsweek-us_1948-07-26_32_4" 
+"sim_newsweek-us_1948-08-09_32_6" 
+"sim_newsweek-us_1948-09-06_32_10"
+"sim_newsweek-us_1948-10-18_32_16"
+"sim_newsweek-us_1948-11-15_32_20"
+"sim_newsweek-us_1948-12-06_32_23"
+
+#1947 sample
+"sim_newsweek-us_1947-01-20_29_3", 
+"sim_newsweek-us_1947-02-03_29_5", 
+"sim_newsweek-us_1947-03-31_29_13", 
+"sim_newsweek-us_1947-04-14_29_15", 
+"sim_newsweek-us_1947-05-19_29_20", 
+"sim_newsweek-us_1947-06-09_29_23", 
+"sim_newsweek-us_1947-07-14_30_2", 
+"sim_newsweek-us_1947-08-25_30_8", 
+"sim_newsweek-us_1947-09-22_30_12", 
+"sim_newsweek-us_1947-10-27_30_17", 
+"sim_newsweek-us_1947-11-17_30_20", 
+"sim_newsweek-us_1947-12-15_30_24", 
+
+
+#1946 sample
+"sim_newsweek-us_1946-01-21_27_3", 
+"sim_newsweek-us_1946-02-04_27_5", 
+"sim_newsweek-us_1946-03-11_27_10", 
+"sim_newsweek-us_1946-04-29_27_17", 
+"sim_newsweek-us_1946-05-13_27_19", 
+"sim_newsweek-us_1946-06-24_27_25", 
+"sim_newsweek-us_1946-07-08_28_2", 
+"sim_newsweek-us_1946-08-19_28_8", 
+"sim_newsweek-us_1946-09-16_28_12", 
+"sim_newsweek-us_1946-10-14_28_16", 
+"sim_newsweek-us_1946-11-11_28_20", 
+"sim_newsweek-us_1946-12-09_28_24"
+
+#1942 sample
+  
+  
+"sim_newsweek-us_1942-01-19_19_3", 
+"sim_newsweek-us_1942-02-02_19_5", 
+"sim_newsweek-us_1942-03-23_19_12", 
+"sim_newsweek-us_1942-04-20_19_16", 
+"sim_newsweek-us_1942-05-11_19_19", 
+"sim_newsweek-us_1942-06-01_19_22", 
+"sim_newsweek-us_1942-07-06_20_1", 
+"sim_newsweek-us_1942-08-24_20_8", 
+"sim_newsweek-us_1942-09-28_20_13", 
+"sim_newsweek-us_1942-10-19_20_16", 
+"sim_newsweek-us_1942-11-16_20_20", 
+"sim_newsweek-us_1942-12-07_20_23"
+
+#1941-1938 sample
+"sim_newsweek-us_1938-01-17_11_3", 
+"sim_newsweek-us_1938-02-07_11_6", 
+"sim_newsweek-us_1938-03-28_11_13", 
+"sim_newsweek-us_1938-04-25_11_17", 
+"sim_newsweek-us_1938-05-30_11_22", 
+"sim_newsweek-us_1938-06-27_11_26", 
+"sim_newsweek-us_1938-07-11_12_2", 
+"sim_newsweek-us_1938-08-22_12_8", 
+"sim_newsweek-us_1938-09-12_12_11", 
+"sim_newsweek-us_1938-10-31_12_18", 
+"sim_newsweek-us_1938-11-07_12_19", 
+"sim_newsweek-us_1938-12-19_12_25", 
+"sim_newsweek-us_1939-01-16_13_3", 
+"sim_newsweek-us_1939-02-06_13_6", 
+"sim_newsweek-us_1939-03-27_13_13", 
+"sim_newsweek-us_1939-04-10_13_15", 
+"sim_newsweek-us_1939-05-08_13_19", 
+"sim_newsweek-us_1939-06-26_13_26", 
+"sim_newsweek-us_1939-07-03_14_1", 
+"sim_newsweek-us_1939-08-14_14_7", 
+"sim_newsweek-us_1939-09-11_14_11", 
+"sim_newsweek-us_1939-10-30_14_18", 
+"sim_newsweek-us_1939-11-06_14_19", 
+"sim_newsweek-us_1939-12-25_14_26", 
+"sim_newsweek-us_1940-01-01_15_1", 
+"sim_newsweek-us_1940-02-26_15_9", 
+"sim_newsweek-us_1940-03-04_15_10", 
+"sim_newsweek-us_1940-04-01_15_14", 
+"sim_newsweek-us_1940-05-06_15_19", 
+"sim_newsweek-us_1940-06-10_15_24", 
+"sim_newsweek-us_1940-07-29_16_5", 
+"sim_newsweek-us_1940-08-26_16_9", 
+"sim_newsweek-us_1940-09-02_16_10", 
+"sim_newsweek-us_1940-10-14_16_16", 
+"sim_newsweek-us_1940-11-11_16_20", 
+"sim_newsweek-us_1940-12-09_16_24", 
+"sim_newsweek-us_1941-01-06_17_1", 
+"sim_newsweek-us_1941-02-17_17_7", 
+"sim_newsweek-us_1941-03-03_17_9", 
+"sim_newsweek-us_1941-04-28_17_17", 
+"sim_newsweek-us_1941-05-26_17_21", 
+"sim_newsweek-us_1941-06-23_17_25", 
+"sim_newsweek-us_1941-07-14_18_2", 
+"sim_newsweek-us_1941-08-11_18_6", 
+"sim_newsweek-us_1941-09-15_18_11", 
+"sim_newsweek-us_1941-10-13_18_15", 
+"sim_newsweek-us_1941-11-24_18_21", 
+"sim_newsweek-us_1941-12-29_18_26",
+
+
+
+ 1937 sample
+ sample = [
+    "sim_newsweek-us_1937-01-09_9_2",
+    "sim_newsweek-us_1937-02-27_9_9",
+    "sim_newsweek-us_1937-03-13_9_11",
+    "sim_newsweek-us_1937-04-10_9_15",
+    "sim_newsweek-us_1937-05-22_9_21",
+    "sim_newsweek-us_1937-06-05_9_23",
+    "sim_newsweek-us_1937-07-31_10_5",
+    "sim_newsweek-us_1937-08-14_10_7",
+    "sim_newsweek-us_1937-09-06_10_10",
+    "sim_newsweek-us_1937-10-25_10_17",
+    "sim_newsweek-us_1937-11-15_10_20",
+    "sim_newsweek-us_1937-12-06_10_23"
+]
+```
+
+# NOTES - OLD CODE
+
+```{r}
+url2 <- "https://archive.org/download/sim_newsweek-us_1945-"
+test  <- url2 %>%
+  read_html() %>%
+  html_table() 
+
+
+# Specify the base URL of the webpage you want to scrape
+base_url <- "https://archive.org/details/pub_newsweek-us?and%5B%5D=year%3A%221938%22&and%5B%5D=year%3A%5B1937+TO+1969%5D"
+
+
+
+# Read the HTML code from the website
+webpage <- read_html(base_url)
+
+# Use CSS selectors to scrape the links to the files
+file_urls <- webpage %>%
+  html_nodes("a") %>%
+  html_attr("href")
+
+# Filter the URLs to include only those that start with 'sim_newsweek-us_'
+newsweek_urls <- file_urls[str_detect(file_urls, "^sim_newsweek-us_")]
+
+# Append the base URL to each of the Newsweek URLs
+newsweek_urls <- paste0(base_url, newsweek_urls)
+
+# Print the Newsweek URLs
+print(newsweek_urls)
+
+#Part 2 - works
+
+# Specify the base URL
+base_url <- "https://archive.org/download/sim_newsweek-us_"
+
+# Specify the dates of the issues you're interested in
+dates <- c("1948-06-28_31_26", "1948-07-05_31_27")  # Add more dates as needed
+
+# Generate the URLs
+urls <- paste0(base_url, dates, "/sim_newsweek-us_", dates, ".pdf")
+
+# Print the URLs
+print(urls)
+
+```
+
+#from this tutorialL <https://github.com/hrbrmstr/wayback>
+
+```{r}
+devtools::install_github("hrbrmstr/wayback")
+```
+
+```{r}
+library(wayback)
+library(tidyverse)
+
+# current verison
+packageVersion("wayback")
+
+archive_available("https://archive.org/download/pub_newsweek-us/pub_newsweek-us_files.xml")
+
+get_mementos("https://archive.org/download/pub_newsweek-us/pub_newsweek-us_files.xml")
+
+
+newsweek_timemap <- get_timemap("https://archive.org/download/pub_newsweek-us/pub_newsweek-us_files.xml")
+
+cdx_basic_query("https://archive.org/download/pub_newsweek-us/pub_newsweek-us_files.xml", limit = 10) %>% 
+  glimpse()
+
+mem <- read_memento("https://www.r-project.org/news.html")
+res <- stringi::stri_split_lines(mem)[[1]]
+cat(paste0(res[187:200], collaspe="\n"))
+
+glimpse(
+  ia_scrape("lemon curry")
+)
+
+
+(newsweek<- ia_scrape("identifier:pub_newsweek-us", count=100L))
+
+## <ia_scrape object>
+## Cursor: W3siaWRlbnRpZmllciI6IjAzLTEwLTE4X1NwYWNlLXRvLUdyb3VuZHMuemlwIn1d
+
+(item <- ia_retrieve(newsweek$identifier[1]))
+
+write.csv(item, "/Users/robwells/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/newsweek_data.csv")
+
+download.file(item$link[1], file.path("~/Library/CloudStorage/Dropbox/Classes_Teaching_Archive/Data Journalism Classes/Data-Analysis-Class-Jour-405v-5003", item$file[1]))
+
+```
+
+```{r}
+
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(lubridate)
+
+get_newsweek_issues <- function(year) {
+  url <- "https://archive.org/advancedsearch.php"
+  
+  query <- list(
+    q = paste0('collection:pub_newsweek-us AND date:[', year, ' TO ', year, ']'),
+   fl = paste(c("identifier", "date", "title"), collapse = ","),
+    sort = c("date asc"),
+    output = "json",
+    rows = 1000  # Adjust this if you need more results per year
+  )
+  
+  response <- GET(url, query = query)
+  
+  if (status_code(response) != 200) {
+    warning(paste("Failed to retrieve data for year", year))
+    return(NULL)
+  }
+  
+  content <- content(response, "text")
+  data <- fromJSON(content)
+  
+  if (length(data$response$docs) == 0) {
+    warning(paste("No results found for year", year))
+    return(NULL)
+  }
+  
+  results <- as_tibble(data$response$docs)
+  results$year <- year
+  
+  Sys.sleep(1)  # Add delay to avoid rate limiting
+  
+  return(results)
+}
+
+# Get results for each year from 1962 to 1969
+start_year <- 1962
+end_year <- 1969
+
+all_results <- map_dfr(start_year:end_year, get_newsweek_issues)
+
+# Process results
+processed_results <- all_results %>%
+  mutate(date = as_date(date)) %>%
+  filter(!is.na(date)) %>%
+  arrange(date)
+
+# Display the first few results
+head(processed_results)
+
+# Save results to a CSV file
+write_csv(processed_results, "newsweek_issues.csv")
+```
+
+```{r}
+library(httr)
+library(rvest)
+library(tidyverse)
+library(lubridate)
+
+get_newsweek_issues <- function(year) {
+  url <- paste0("https://archive.org/search.php?query=collection%3A%28pub_newsweek-us%29%20AND%20date%3A", year, "&sort=-date")
+  
+  page <- read_html(url)
+  
+  titles <- page %>% html_nodes(".item-title") %>% html_text()
+  dates <- page %>% html_nodes(".item-date") %>% html_text()
+  identifiers <- page %>% html_nodes(".item-ia") %>% html_attr("data-id")
+  
+  if (length(titles) == 0) {
+    warning(paste("No results found for year", year))
+    return(NULL)
+  }
+  
+  results <- tibble(
+    title = titles,
+    date = dates,
+    identifier = identifiers,
+    year = year,
+    url = paste0("https://archive.org/details/", identifiers)
+  ) %>%
+    mutate(date = as_date(date)) %>%
+    filter(!str_detect(identifier, "_index")) %>%
+    arrange(date)
+  
+  Sys.sleep(2)  # Add delay to avoid rate limiting
+  
+  return(results)
+}
+
+# Get results for each year from 1962 to current year
+start_year <- 1962
+end_year <- 1969
+
+all_results <- map_dfr(start_year:end_year, get_newsweek_issues)
+
+# Display the first few results
+print(head(all_results))
+
+# Save results to a CSV file
+write_csv(all_results, "newsweek_issues.csv")
+```
+
+#after much difficulty... index 1962-1969
+
+```{r}
+
+library(tidyverse)
+library(lubridate)
+
+generate_newsweek_issues <- function(start_year, end_year) {
+  all_issues <- tibble(
+    date = as.Date(character()),
+    identifier = character(),
+    title = character(),
+    year = integer(),
+    url = character()
+  )
+  
+  for (year in start_year:end_year) {
+    for (month in 1:12) {
+      for (day in 1:31) {
+        date <- ymd(sprintf("%04d-%02d-%02d", year, month, day))
+        
+        if (is.na(date) || month(date) != month) next  # Skip invalid dates
+        
+        volume <- 59 + (year - 1962)  # Assuming volume increments each year
+        issue <- 1 + as.integer(date - ymd(sprintf("%04d-01-01", year))) %/% 7  # Assuming weekly issues
+        
+        identifier <- sprintf("sim_newsweek-us_%04d-%02d-%02d_%d_%d", year, month, day, volume, issue)
+        url <- paste0("https://archive.org/details/", identifier)
+        
+        all_issues <- all_issues %>% 
+          add_row(
+            date = date,
+            identifier = identifier,
+            title = sprintf("Newsweek %04d-%02d-%02d", year, month, day),
+            year = year,
+            url = url
+          )
+      }
+    }
+  }
+  
+  return(all_issues)
+}
+
+# Generate results for each year from 1962 to current year
+start_year <- 1962
+end_year <- 1969
+
+all_results <- generate_newsweek_issues(start_year, end_year)
+
+# Display the first few results
+print(head(all_results))
+
+# Save results to a CSV file
+write_csv(all_results, "newsweek_issues.csv")
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(httr)
+
+generate_newsweek_issues <- function(start_year, end_year) {
+  all_issues <- tibble(
+    date = as.Date(character()),
+    identifier = character(),
+    title = character(),
+    year = integer(),
+    url = character()
+  )
+  
+  for (year in start_year:end_year) {
+    for (month in 1:12) {
+      for (day in 1:31) {
+        date <- ymd(sprintf("%04d-%02d-%02d", year, month, day))
+        
+        if (is.na(date) || month(date) != month) next # Skip invalid dates
+        
+        volume <- 59 + (year - 1962) # Assuming volume increments each year
+        issue <- 1 + as.integer(date - ymd(sprintf("%04d-01-01", year))) %/% 7 # Assuming weekly issues
+        
+        identifier <- sprintf("sim_newsweek-us_%04d-%02d-%02d_%d_%d", year, month, day, volume, issue)
+        url <- paste0("https://archive.org/details/", identifier)
+        
+        response <- HEAD(url)
+        
+        if (status_code(response) == 200) {
+          all_issues <- all_issues %>%
+            add_row(
+              date = date,
+              identifier = identifier,
+              title = sprintf("Newsweek %04d-%02d-%02d", year, month, day),
+              year = year,
+              url = url
+            )
+        }
+      }
+    }
+  }
+  
+  return(all_issues)
+}
+
+# Generate results for each year from 1962 to the current year
+start_year <- 1962
+end_year <- 1963
+
+all_results <- generate_newsweek_issues(start_year, end_year)
+
+# Display the first few results
+print(head(all_results))
+
+# Save results to a CSV file
+write_csv(all_results, "newsweek_issues.csv")
+
+```
+
+# Oct 27 attempt
+
+```{r}
+library(httr)
+
+# URL of the page to download
+url <- "https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up"
+
+# Save the page as an HTML file locally
+response <- GET(url)
+
+if (status_code(response) == 200) {
+  writeBin(content(response, "raw"), "newsweek_1959_10_26_page_132.html")
+  cat("Downloaded successfully!\n")
+} else {
+  cat("Failed to download. Status:", status_code(response), "\n")
+}
+```
+
+```{r}
+library(chromote)
+library(base64enc)  # For base64 decoding
+
+# Initialize the Chromote browser
+b <- Chromote$new()
+
+# List of URLs to download as PDFs
+urls <- c(
+  "https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up",
+  "https://archive.org/details/sim_newsweek-us_1959-11-02_54_18/page/108/mode/2up"
+)
+
+# Loop through each URL and save it as a PDF
+for (i in seq_along(urls)) {
+  url <- urls[i]
+  filename <- paste0("newsweek_page_", i, ".pdf")
+
+  # Open a new session for each URL
+  session <- b$new_session()
+
+  # Navigate to the URL
+  session$Page$navigate(url)
+  session$Page$loadEventFired()  # Wait until the page fully loads
+
+  # Save the page as a PDF
+  pdf_data <- session$Page$printToPDF()  # Get the PDF binary data
+  writeBin(base64decode(pdf_data$data), filename)  # Save binary data to a PDF file
+
+  cat(paste0("Downloaded: ", filename, "\n"))
+
+  # Close the session
+  session$close()
+}
+
+# Close the Chromote browser
+b$close()
+
+
+```
+
+#This one yields something but not the article
+
+```{r}
+library(chromote)
+library(base64enc)  # Ensure this is loaded for base64 decoding
+
+# Initialize the Chromote browser
+b <- Chromote$new()
+
+# List of URLs to download as PDFs
+urls <- c(
+  "https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up",
+  "https://archive.org/details/sim_newsweek-us_1959-11-02_54_18/page/108/mode/2up"
+)
+
+# Loop through each URL and save it as a PDF
+for (i in seq_along(urls)) {
+  url <- urls[i]
+  filename <- paste0("newsweek_page_", i, ".pdf")
+
+  # Open a new session for each URL
+  session <- b$new_session()
+
+  # Navigate to the URL and wait for the page to load
+  session$Page$navigate(url)
+  session$Page$loadEventFired()  # Wait until the page is fully loaded
+
+  # Save the page as a PDF
+  pdf_data <- session$Page$printToPDF()  # Get the PDF binary data
+  writeBin(base64decode(pdf_data$data), filename)  # Save the binary data to a PDF file
+
+  cat(paste0("Downloaded: ", filename, "\n"))
+
+  # Close the session
+  session$close()
+}
+
+# Close the Chromote browser
+b$close()
+
+```
+
+#Formats the index
+
+```{r}
+index <- c("
+Taxation as Discipline Ja 2: 68;
+Coordinating the GOP Ja 9: 72;
+It was No Monolith J 23: 104;
+Unfair Tax-Rates: F 6: 108;
+Wilson, Bullitt, Freud F 20: 104;
+Creative Federalism Mr 6. 100;
+Free for Whom? Mr 20: 112;
+Wallace Threat Ap 3: 100;
+Campaign Agonies Ap 17: 120;
+Mr O'Briens Leviathan My 1: 96;
+A New Electric Age My 15: 108;
+The Battleship Returns My 29: 104;
+The US, UN and UK Je 12: 104;
+Ass in Lions Skin Je 26: 80;
+Titan Unbound, I Jl 24: 80;
+Tit Unbound, II Ag 7: 84;
+What Kind of City? Ag 21: 72;
+Rockfeller-Reagan S 18: 112;
+Subsidy or Windfall O 2: 100;
+Those Alleged Postal Subsidies O 16: 112;
+Portrait of the GOP O 30: 108;
+The GOP Mainstream N 13: 126;
+A Look Beyond the War N 27: 108;
+Romney the Incredible D 11: 116;
+A Personal Note, Last column for Newsweek D 25: 76;
+")
+
+
+
+
+  # Split the index string into individual lines
+index_lines <- str_split(index, ";\\s*")[[1]]
+
+# Initialize an empty data frame with consistent data types
+df <- data.frame(year = character(), title = character(), date = character(), volume = numeric(), stringsAsFactors = FALSE)
+
+# Define a function to parse a line
+parse_line <- function(line) {
+  # Extract the title
+  title <- str_trim(str_extract(line, "^[^\\.]+"))
+  
+  # Extract the date and volume
+  date_volume <- str_extract(line, "[A-Za-z]+\\s[0-9]+:\\s*[0-9]+")
+  date <- str_trim(str_extract(date_volume, "^[A-Za-z]+\\s[0-9]+"))
+  volume <- as.numeric(str_extract(date_volume, "[0-9]+$"))
+  
+  year <- "1967"
+  
+  return(data.frame(year = year, title = title, date = date, volume = volume, stringsAsFactors = FALSE))
+}
+
+# Parse each line and append to the data frame
+for (line in index_lines) {
+  # Only process non-empty lines
+  if (nchar(line) > 0 && !is.na(line)) {
+    parsed_line <- parse_line(line)
+    
+    # Append the parsed line to the data frame if it contains valid data
+    if (!is.na(parsed_line$title) && !is.na(parsed_line$date) && !is.na(parsed_line$volume)) {
+      df <- bind_rows(df, parsed_line)
+    }
+  }
+}
+
+write.csv(df, "df_index.csv")
+
+```
