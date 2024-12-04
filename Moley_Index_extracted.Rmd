@@ -5,6 +5,11 @@ date: "2024-12-04"
 output: html_document
 ---
 
+```{r}
+library(tidyverse)
+```
+
+
 This rationalizes the index for the extracted articles
 
 ```{r}
@@ -174,11 +179,83 @@ combined_AI_extracted <- combined_AI_extracted %>%
     new_path = file.path(folder_path, new_name) # Full path for new names
   )
 
-write.csv(combined_AI_extracted, "./AI_extracted_all/combined_AI_extracted.csv")
+# write.csv(combined_AI_extracted, "./AI_extracted_all/combined_AI_extracted.csv")
+
+# combined_AI_extracted <- read.csv("./AI_extracted_all/combined_AI_extracted.csv")
+```
+
+
+# Build Index from main articles
+
+```{r}
+
+older_articles <- list.files("~/Code/CompText_Jour/code/Moley_for_students/moley_newsweek", pattern="*.txt") %>% 
+  as.data.frame() |> 
+  rename(filename = 1) |> 
+  mutate(date = str_extract(filename, "\\d{4}-\\d{2}-\\d{2}")) |> 
+  inner_join(newsweek, c=("date"))
+  
+ 
 
 ```
 
 
+# Rename files in older-articles
+```{r}
+# Path to your folder
+folder_path <- "./older_articles"
+
+# Get a tibble of files in the folder
+files <- tibble(
+  original_path = dir(folder_path, full.names = TRUE),
+  original_name = dir(folder_path)
+)
+
+files <- files |> 
+  inner_join(older_articles, c("original_name" = "filename"))
+
+# Add the new file names based on the `article` index
+renamed_files <- files %>%
+  mutate(
+    # article = paste0("article_", row_number()), # Generate article index
+    new_name = paste0(identifier, ".txt"),         # Add desired extension
+    new_path = file.path(folder_path, new_name) # Full path for new names
+  )
+
+# Rename the files using purrr::walk2
+walk2(
+  renamed_files$original_path,
+  renamed_files$new_path,
+  ~ file.rename(.x, .y) # .x = old file path, .y = new file path
+)
+
+# Check results
+print(renamed_files)
+```
+
+# Clean index to join with combined_AI_extracted
+```{r}
+older_articles <- renamed_files |> 
+  mutate(URL = paste0("https://archive.org/details/", identifier, "/")) |> 
+  mutate(new_path = str_replace(new_path, "older_articles", "AI_extracted_all")) |> 
+  mutate(date = ymd(date)) |> 
+  # mutate(date = if_else(year(date) > 1999, date - years(100), date)) |> 
+  # mutate(date = as.Date(date, "%Y/%m/%d")) |> 
+  mutate(column2 = "NA") |> 
+  mutate(page = "NA") |> 
+  rename(list = identifier, Year = year, ) |> 
+  subset(select = -c(original_path, original_name))
+
+combined_AI_extracted <- combined_AI_extracted |> 
+  mutate(date = ymd(date)) |> 
+  mutate(volume = NA) |> 
+  mutate(issue = NA) |> 
+  subset(select = -c(X))
+
+moley_extracted_index <- rbind(combined_AI_extracted, older_articles)
+
+write.csv(moley_extracted_index, ("./AI_extracted_all/moley_extracted_index.csv"))
+```
 
 
 
