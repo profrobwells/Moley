@@ -1,0 +1,191 @@
+---
+title: "Moley Index"
+author: "Rob Wells"
+date: "2024-12-04"
+output: html_document
+---
+
+This rationalizes the index for the extracted articles
+
+```{r}
+
+#Import spreadsheet of Newsweek back issues
+
+newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_37_61")
+```
+
+### create year column
+
+```{r}
+newsweek <- newsweek %>%
+  mutate(
+    date = str_extract(identifier, "\\d{4}-\\d{2}-\\d{2}"),
+    volume = str_extract(identifier, "_\\d+_") %>% str_remove_all("_") %>% as.integer(),
+    issue = str_extract(identifier, "_\\d+$") %>% str_remove_all("_") %>% as.integer(),
+    year = as.numeric(str_extract(identifier, "19\\d{2}"))
+  )
+
+```
+
+#222 articles from 1950s
+```{r}
+index_1950s_cleaned <- read.csv("cleaned_moley_1950s_index.csv")
+```
+
+
+# Index of 23 extracted articles
+```{r}
+AI_extracted <- read.csv("~/Code/Moley/extracted_AI_moley_index_nov_20.csv")
+#these articles will match on sequence
+```
+
+# Build index and rename files for AI_extracted
+```{r}
+AI_extracted_files <- list.files("./AI_extracted", pattern="*.txt") %>% 
+  as.data.frame() |> 
+  rename(filename = 1) |> 
+  #create an index with the file name
+ mutate(file_number = str_extract(filename, "\\d+")) |> 
+  mutate(file_number = as.numeric(file_number)) |> 
+  mutate(index = row_number())
+
+```
+
+# Rename files in AI_extracted
+```{r}
+# Path to your folder
+folder_path <- "./AI_extracted"
+
+# Get a tibble of files in the folder
+files <- tibble(
+  original_path = dir(folder_path, full.names = TRUE),
+  original_name = dir(folder_path)
+)
+
+files <- files |> 
+  inner_join(AI_extracted, c("original_name" = "filename"))
+
+# Add the new file names based on the `article` index
+renamed_files <- files %>%
+  mutate(
+    # article = paste0("article_", row_number()), # Generate article index
+    new_name = paste0(list, ".txt"),         # Add desired extension
+    new_path = file.path(folder_path, new_name) # Full path for new names
+  )
+
+# Rename the files using purrr::walk2
+walk2(
+  renamed_files$original_path,
+  renamed_files$new_path,
+  ~ file.rename(.x, .y) # .x = old file path, .y = new file path
+)
+
+# Check results
+print(renamed_files)
+
+```
+
+
+# Index of 19 extracted articles
+```{r}
+AI2_extracted <- read.csv("retry_scans_nov_25.csv")
+#these articles will match on index
+```
+
+
+```{r}
+# Build index and rename files for AI_extracted
+AI2_extracted_files <- list.files("./AI2_extracted", pattern="*.txt") %>% 
+  as.data.frame() |> 
+  rename(filename = 1) |> 
+  #create an index with the file name
+ mutate(file_number = str_extract(filename, "\\d+")) |> 
+  mutate(file_number = as.numeric(file_number)) |> 
+  mutate(index = row_number())
+```
+
+# join indexes with file list
+```{r}
+AI2_extracted_filtered <- AI2_extracted |> 
+  inner_join(AI2_extracted_files, by=c("X"="file_number"))
+
+```
+
+
+# Rename files in AI2_extracted
+```{r}
+# Path to your folder
+folder_path <- "./AI2_extracted"
+
+# Get a tibble of files in the folder
+files <- tibble(
+  original_path = dir(folder_path, full.names = TRUE),
+  original_name = dir(folder_path)
+)
+
+files <- files |> 
+  inner_join(AI2_extracted_filtered, c("original_name" = "filename"))
+
+# Add the new file names based on the `article` index
+renamed_files <- files %>%
+  mutate(
+    # article = paste0("article_", row_number()), # Generate article index
+    new_name = paste0(list, ".txt"),         # Add desired extension
+    new_path = file.path(folder_path, new_name) # Full path for new names
+  )
+
+# Rename the files using purrr::walk2
+walk2(
+  renamed_files$original_path,
+  renamed_files$new_path,
+  ~ file.rename(.x, .y) # .x = old file path, .y = new file path
+)
+
+# Check results
+print(renamed_files)
+```
+
+# create master list of AI extracted articles
+
+```{r}
+x <- AI_extracted |> 
+  select(column2, list, date2, Year, real_page, URL) |> 
+  rename(page = real_page, date=date2) |> 
+  mutate(date = ymd(date)) |> 
+  mutate(date = if_else(year(date) > 1999, date - years(100), date)) |> 
+  mutate(date = as.Date(date, "%Y/%m/%d"))
+
+y <- AI2_extracted_filtered |> 
+  select(column2, list, date_new, Year, page, URL) |> 
+  rename(date = date_new) |> 
+  mutate(date = mdy(date)) |> 
+  mutate(date = if_else(year(date) > 1999, date - years(100), date)) |> 
+  mutate(date = as.Date(date, "%Y/%m/%d"))
+
+
+combined_AI_extracted <- rbind(x,y)
+
+
+folder_path <- "./AI_extracted_all"
+
+combined_AI_extracted <- combined_AI_extracted %>%
+  mutate(
+    new_name = paste0(list, ".txt"),         # Add desired extension
+    new_path = file.path(folder_path, new_name) # Full path for new names
+  )
+
+write.csv(combined_AI_extracted, "./AI_extracted_all/combined_AI_extracted.csv")
+
+```
+
+
+
+
+
+
+### Crap
+#the 95 extracted moley articles - dirty with date problems
+```{r}
+
+index_95 <- read.csv("/Users/robwells/Code/Moley/cropped_perspective_articles/the_95_moley_articles_extracted_nov_20.csv")
+```
