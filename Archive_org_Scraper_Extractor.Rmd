@@ -44,9 +44,9 @@ file <- newsweek %>%
     mutate(year = as.numeric(str_extract(identifier, "19\\d{2}"))) %>%  # Extract year as numeric
   #filter(year >= 1938 & year <= 1941) %>%   
   # filter(year == 1947 | year == 1949 | year == 1950 | year == 1951) 
-  filter(year == 1953 | year == 1955 | year == 1957 | year == 1959) %>%  
+  filter(year == 1953 | year == 1955 | year == 1957 | year == 1959)# %>%  
    filter(str_detect(identifier, "index")) |> 
-    select(-year)      
+  select(-year)      
 
 # newsweek1962 <- all_results %>% 
 #   filter(str_detect(identifier, "1962")) 
@@ -63,6 +63,20 @@ results <- x_list
 #This skips to line 160, extractor
 ```
 
+# Dec 4 list
+```{r}
+file <- newsweek %>%
+    mutate(year = as.numeric(str_extract(identifier, "19\\d{2}")))
+
+file_clean <- gsub("c\\(\"|\"\\)|\\n", "", file)
+x_clean <- file_clean
+# Split the string into a vector based on ", "
+x_list <- unlist(strsplit(x_clean, ", "))
+x_list <- gsub("\\\"", "", x_list)
+
+head(x_list)
+results <- x_list
+```
 
 
 #Cleaning sequence
@@ -115,7 +129,8 @@ sample <- stratified_sample_generator(results)
 print(sample)
 
 sample_df <- sample %>% 
-  as.data.frame()
+  as.data.frame() |> 
+  rename(identifier = 1)
 
 # write.csv(sample_df, "~/Code/Moley/moley_newsweek/newsweek_sample_1953_55_57_59.csv")
 # 
@@ -140,7 +155,8 @@ sample_df <- sample %>%
 
 ```{r}
 # Clean the text
-cleaned_text <- gsub("^\\[\\d+\\]\\s*\"|\"$", "", sample)
+cleaned_text <- gsub("^\\[\\d+\\]\\s*\"|\"$", "", to_1939)
+#cleaned_text <- gsub("^\\[\\d+\\]\\s*\"|\"$", "", sample)
 cleaned_text <- gsub("\n\\s+", "\n", cleaned_text)
 items <- unlist(strsplit(cleaned_text, "\\r?\\n"))
 
@@ -211,13 +227,14 @@ download_item <- function(identifier, destdir, retries = 3) {
 # )
 
 # Set up the download directory
-download_directory <- file.path(path.expand("~"), 'Code', 'Moley', 'Newsweek_1953_55_57_59')
+download_directory <- file.path(path.expand("~"), 'Code', 'Moley', 'Newsweek_1938_39')
 if (!dir.exists(download_directory)) {
   dir.create(download_directory, recursive = TRUE)
 }
 
 # Perform the download for the sample items
-walk(sample, ~download_item(.x, download_directory))
+walk(to_1939, ~download_item(.x, download_directory))
+# walk(sample, ~download_item(.x, download_directory))
 #walk(results, ~download_item(.x, download_directory))
 ```
 

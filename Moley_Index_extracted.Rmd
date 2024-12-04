@@ -257,6 +257,71 @@ moley_extracted_index <- rbind(combined_AI_extracted, older_articles)
 write.csv(moley_extracted_index, ("./AI_extracted_all/moley_extracted_index.csv"))
 ```
 
+```{r}
+moley_extracted_index <- read.csv("./AI_extracted_all/moley_extracted_index.csv")
+```
+
+
+
+ names(moley_extracted_index)
+ [1] "X"        "column2"  "list"     "date"     "Year"     "page"     "URL"      "new_name" "new_path"
+[10] "volume"   "issue"  
+
+
+# fix perspective_part_2 for scanning - retry nov 25
+```{r}
+retry <- read.csv("~/Code/Moley/perspective_part_2/retry_scans_nov_25.csv") |> 
+  janitor::clean_names() |> 
+   mutate(date = mdy(date_new)) |> 
+  mutate(date = if_else(year(date) > 1999, date - years(100), date)) |> 
+  mutate(date = as.Date(date, "%Y/%m/%d")) |> 
+  filter(scanned=="Y") |> 
+    subset(select = -c(date_x, date_y, crap, month, day, month_num, date_new, page1, index, bad_scan, scanned)) |> 
+  rename(X = x, Year = year, URL = url)
+
+write.csv(retry, "new_scans.csv")
+```
+
+
+# Sample vs the extracted
+```{r}
+to_extract <- moley_extracted_index |> 
+  anti_join(sample_df, by=c("list"="identifier"))
+
+to_extract <-sample_df |> 
+  anti_join( moley_extracted_index, by=c("identifier"="list"))
+
+write.csv(to_extract, "articles_to_extract.csv")
+
+to_extract <- to_extract |> 
+    mutate(
+    date = str_extract(identifier, "\\d{4}-\\d{2}-\\d{2}"),
+    volume = str_extract(identifier, "_\\d+_") %>% str_remove_all("_") %>% as.integer(),
+    issue = str_extract(identifier, "_\\d+$") %>% str_remove_all("_") %>% as.integer(),
+    year = as.numeric(str_extract(identifier, "19\\d{2}"))
+  )
+write.csv(to_extract, "articles_to_extract.csv")  
+
+to_1939 <- to_extract |> 
+  filter(year < 1939) |> 
+  select(identifier) |> 
+  as.character()
+
+x_clean <- to_1939
+
+
+# Split the string into a vector based on ", "
+to_1939 <- unlist(strsplit(to_1939, ", "))
+
+to_1939 <- gsub("\\\"", "", to_1939)
+
+head(x_list)
+
+
+results <- x_list
+  
+
+```
 
 
 
