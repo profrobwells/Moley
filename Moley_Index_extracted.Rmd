@@ -19,7 +19,7 @@ This rationalizes the index for the extracted articles
 newsweek <- rio::import("newsweek_sample_size.xlsx", sheet="newsweek_index_37_61")
 ```
 
-### create year column
+create year column
 
 ```{r}
 newsweek <- newsweek %>%
@@ -32,19 +32,19 @@ newsweek <- newsweek %>%
 
 ```
 
-#222 articles from 1950s
+222 articles from 1950s
 ```{r}
 index_1950s_cleaned <- read.csv("cleaned_moley_1950s_index.csv")
 ```
 
 
-# Index of 23 extracted articles
+Index of 23 extracted articles
 ```{r}
 AI_extracted <- read.csv("~/Code/Moley/extracted_AI_moley_index_nov_20.csv")
 #these articles will match on sequence
 ```
 
-# Build index and rename files for AI_extracted
+Build index and rename files for AI_extracted
 ```{r}
 AI_extracted_files <- list.files("./AI_extracted", pattern="*.txt") %>% 
   as.data.frame() |> 
@@ -56,7 +56,7 @@ AI_extracted_files <- list.files("./AI_extracted", pattern="*.txt") %>%
 
 ```
 
-# Rename files in AI_extracted
+Rename files in AI_extracted
 ```{r}
 # Path to your folder
 folder_path <- "./AI_extracted"
@@ -91,7 +91,7 @@ print(renamed_files)
 ```
 
 
-# Index of 19 extracted articles
+Index of 19 extracted articles
 ```{r}
 AI2_extracted <- read.csv("retry_scans_nov_25.csv")
 #these articles will match on index
@@ -109,7 +109,7 @@ AI2_extracted_files <- list.files("./AI2_extracted", pattern="*.txt") %>%
   mutate(index = row_number())
 ```
 
-# join indexes with file list
+join indexes with file list
 ```{r}
 AI2_extracted_filtered <- AI2_extracted |> 
   inner_join(AI2_extracted_files, by=c("X"="file_number"))
@@ -117,7 +117,7 @@ AI2_extracted_filtered <- AI2_extracted |>
 ```
 
 
-# Rename files in AI2_extracted
+Rename files in AI2_extracted
 ```{r}
 # Path to your folder
 folder_path <- "./AI2_extracted"
@@ -180,8 +180,17 @@ combined_AI_extracted <- combined_AI_extracted %>%
   )
 
 # write.csv(combined_AI_extracted, "./AI_extracted_all/combined_AI_extracted.csv")
+```
 
-# combined_AI_extracted <- read.csv("./AI_extracted_all/combined_AI_extracted.csv")
+one time Fix volume and issue
+```{r}
+
+combined_AI_extracted  <- combined_AI_extracted |> 
+  mutate(
+  volume = str_extract(new_name, "_\\d+_") %>% str_remove_all("_") %>% as.integer(),
+   issue = str_extract(new_name, "_\\d+\\.txt$") %>% str_remove_all("_|\\.txt")) 
+
+#write.csv(combined_AI_extracted, "./AI_extracted_all/moley_extracted_index.csv")
 ```
 
 
@@ -233,7 +242,7 @@ walk2(
 print(renamed_files)
 ```
 
-# Clean index to join with combined_AI_extracted
+### Clean index to join with combined_AI_extracted
 ```{r}
 older_articles <- renamed_files |> 
   mutate(URL = paste0("https://archive.org/details/", identifier, "/")) |> 
@@ -268,7 +277,7 @@ moley_extracted_index <- read.csv("./AI_extracted_all/moley_extracted_index.csv"
 [10] "volume"   "issue"  
 
 
-# fix perspective_part_2 for scanning - retry nov 25
+fix perspective_part_2 for scanning - retry nov 25
 ```{r}
 retry <- read.csv("~/Code/Moley/perspective_part_2/retry_scans_nov_25.csv") |> 
   janitor::clean_names() |> 
@@ -283,7 +292,7 @@ write.csv(retry, "new_scans.csv")
 ```
 
 
-# Sample vs the extracted
+### Sample vs the extracted
 ```{r}
 to_extract <- moley_extracted_index |> 
   anti_join(sample_df, by=c("list"="identifier"))
@@ -323,11 +332,47 @@ results <- x_list
 
 ```
 
+# Import combined_AI extracted
+
+```{r}
+combined_AI_extracted <- read.csv("./AI_extracted_all/moley_extracted_index.csv") |> 
+  mutate(date = ymd(date)) 
+```
+
+# Dec 5 Build Index from 57 newly extracted articles
+
+```{r}
+folder_path <- "./AI_extracted_all"
+
+new_scans <- list.files("./new_scans/extracted", pattern="*.txt") %>% 
+  as.data.frame() |> 
+  rename(filename = 1) |> 
+  mutate(
+    date = str_extract(filename, "\\d{4}-\\d{2}-\\d{2}"),
+    volume = str_extract(filename, "_\\d+_") %>% str_remove_all("_") %>% as.integer(),
+   issue = str_extract(filename, "_\\d+\\.txt$") %>% str_remove_all("_|\\.txt") %>% as.integer()
+  ) |> 
+  mutate(date = ymd(date)) |> 
+  mutate(Year = year(date)) |> 
+  mutate(
+    X = NA,
+    column2 = NA,
+    page = NA) |> 
+  mutate(
+    list = str_remove_all(filename, ".txt"), 
+    URL = paste0("https://archive.org/details/", list, "/"),
+    new_path = file.path(folder_path, filename) # Full path for new names
+  ) |> 
+  rename(new_name = filename)
+  
+```
 
 
-### Crap
-#the 95 extracted moley articles - dirty with date problems
+### write to moley-extracted-index.all
 ```{r}
 
-index_95 <- read.csv("/Users/robwells/Code/Moley/cropped_perspective_articles/the_95_moley_articles_extracted_nov_20.csv")
+combined_AI_extracted <- rbind(combined_AI_extracted, new_scans)
+
+write.csv(combined_AI_extracted, "./AI_extracted_all/moley_extracted_index.csv")
 ```
+
