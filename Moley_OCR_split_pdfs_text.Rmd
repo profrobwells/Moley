@@ -126,7 +126,7 @@ cleaned_text <- sapply(pdf_info, function(page) filter_columns(page))
 library(pdftools)
 
 # Set the path to the folder containing the PDF files
-folder_path <- "moley_newsweek"
+folder_path <- "new_scans"
 
 # Get a list of all PDF files in the folder
 pdf_files <- list.files(folder_path, pattern = "\\.pdf$", full.names = TRUE)

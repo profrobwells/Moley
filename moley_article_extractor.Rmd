@@ -12,7 +12,7 @@ library(stringr)
 library(fs)
 
 # Specify the folder containing the PDF files
-pdf_folder <- "/Users/robwells/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Newsweek_60"
+pdf_folder <- "new_scans"
 
 # Get a list of all PDF files in the folder
 pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
