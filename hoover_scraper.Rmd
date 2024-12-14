@@ -1,0 +1,409 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+# Scrape Wiki page for racist terms
+
+## Thanks to Sean Mussenden for his Advanced rvest tutorial, which this is shamelessly and ruthlessly stolen and remixed
+
+https://github.com/smussenden/datajournalismbook
+
+
+```{r}
+# install.packages("tidyverse")
+# install.packages("rvest")
+# install.packages("janitor")
+
+library(tidyverse)
+library(rvest)
+library(janitor)
+library(readxl)
+```
+
+
+Example URL of pages I want to scrape
+https://oac.cdlib.org/findaid/ark:/13030/tf6779n7xj/entire_text/
+
+/html/body/div/div/div[2]/div[1]/div/div[31]
+
+
+```{r}
+#/html/body/table/tbody/tr/td/table/tbody/tr[2]/td[2]/table[2]/tbody/tr/td/table[12]
+
+
+test_url <- "https://www.hoover.org/library-archives/research-services"
+test_page <- read_html(test_url)
+
+
+# Define url of the page we want to get
+url2 <- "https://oac.cdlib.org/findaid/ark:/13030/tf6779n7xj/entire_text/"
+
+#Use the read_html() function from the rvest package to read the HTML content of the page:
+page_content <- read_html(url2)
+
+
+
+
+
+
+
+```
+
+```{r}
+# Load required packages
+library(rvest)
+library(httr)
+library(xml2)
+library(stringr)
+library(dplyr)
+
+# Define the URL
+url2 <- "https://oac.cdlib.org/findaid/ark:/13030/tf6779n7xj/entire_text/"
+xpath_query <- "/html/body/div/div/div[2]/div[1]/div/div[31]"
+
+# Function to safely scrape webpage with error handling
+safe_scrape <- function(url, xpath) {
+  tryCatch({
+    response <- GET(
+      url,
+      timeout(10),
+      add_headers(
+        `User-Agent` = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        `Accept` = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      )
+    )
+    
+    if (status_code(response) == 200) {
+      page_content <- read_html(rawToChar(response$content))
+      target_content <- page_content %>%
+        html_nodes(xpath = xpath) %>%
+        html_text(trim = TRUE)
+      
+      return(target_content)
+    } else {
+      stop(paste("HTTP error:", status_code(response)))
+    }
+  }, error = function(e) {
+    message("Error occurred: ", e$message)
+    return(NULL)
+  })
+}
+
+# Function to extract box and folder numbers from content
+extract_location <- function(content) {
+  box_match <- str_extract(content, "box\\s+\\d+")
+  folder_match <- str_extract(content, "folder\\s+\\d+")
+  
+  box_num <- if (!is.null(box_match)) {
+    str_extract(box_match, "\\d+")
+  } else {
+    NA
+  }
+  
+  folder_num <- if (!is.null(folder_match)) {
+    str_extract(folder_match, "\\d+")
+  } else {
+    NA
+  }
+  
+  return(list(box = box_num, folder = folder_num))
+}
+
+# Try to scrape the specific content
+content <- safe_scrape(url2, xpath_query)
+
+if (!is.null(content) && length(content) > 0) {
+  # Split content into lines and remove empty lines
+  lines <- unlist(strsplit(content, "\n"))
+  lines <- lines[trimws(lines) != ""]
+  
+  # Initialize vectors
+  boxes <- character()
+  folders <- character()
+  contents <- character()
+  
+  # Keep track of current box and folder
+  current_box <- NA
+  current_folder <- NA
+  
+  # Process each line
+  for (line in lines) {
+    # Check for box or folder information
+    location_info <- extract_location(line)
+    
+    # Update current box/folder if found
+    if (!is.na(location_info$box)) current_box <- location_info$box
+    if (!is.na(location_info$folder)) current_folder <- location_info$folder
+    
+    # Skip lines that only contain box/folder information
+    if (!grepl("^box\\s+\\d+$|^folder\\s+\\d+$", trimws(line))) {
+      boxes <- c(boxes, current_box)
+      folders <- c(folders, current_folder)
+      contents <- c(contents, trimws(line))
+    }
+  }
+  
+  # Create data frame
+  df <- data.frame(
+    Box = boxes,
+    Folder = folders,
+    Contents = contents,
+    stringsAsFactors = FALSE
+  )
+  
+  # Write to CSV
+  write.csv(df, "archive_contents.csv", row.names = FALSE)
+  cat("Content has been saved to 'archive_contents.csv'\n")
+  
+  # Display first few rows
+  print(head(df))
+  
+} else if (length(content) == 0) {
+  cat("No content found at the specified XPath. The structure might have changed or the XPath might be incorrect.")
+} else {
+  cat("Failed to scrape the page. Please check the URL or try again later.")
+}
+```
+
+#Filtered and cleaned
+
+```{r}
+# Reshape the dataframe
+result <- df %>%
+  group_by(Box, Folder) %>%
+  summarize(
+    Box1 = first(Contents),
+    Content1 = nth(Contents, 2),
+    Year = nth(Contents, 3),.groups = 'drop'
+  )
+
+# View the result
+# print(result)
+# 
+# write.csv(result, "full_moley_index.csv")
+```
+
+```{r}
+
+months_pattern <- paste0("^(January|February|March|April|May|June|July|August|September|October|November|December)")
+
+
+result <- result |> 
+  janitor::clean_names() |> 
+  separate(content1, c("last", "first"), sep = ",") |> 
+  rename(location = box1) |> 
+  mutate(year1 = ifelse(str_detect(year, "^19"), year, NA)) |> 
+  mutate(date = ifelse(str_detect(year, months_pattern), year, NA)) |> 
+  mutate(date = as.Date(parse_date_time(date, orders = c("mdy", "mdY", "Bdy")))) |> 
+  mutate(year2 = year(date)) |> 
+  mutate(year = coalesce(as.numeric(year1), as.numeric(year2))) |> 
+  select(-year1, -year2)
+
+  
+```
+
+
+
+# MERGE with existing notes
+
+```{r}
+#import full index: 6564 items
+letters <- rio::import("/Users/robwells/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Hoover Searches/Hoover Moley Search Requests Aug 8 2024.xlsx") |> 
+  janitor::clean_names() |> 
+  mutate(box = as.character(box))
+
+#130 rows with content
+letters1 <- letters |> 
+  filter(august_priority_1_5 !="NA" | notes != "NA" | select != "NA")
+
+```
+
+
+```{r}
+letters |> 
+  count(year) |> 
+  arrange(desc(n))
+
+
+
+```
+
+
+
+# Speeches
+```{r}
+ speech <- letters |> 
+  filter(str_detect(last,regex("address|speech", ignore_case = TRUE)))
+```
+
+
+```{r}
+
+speech |> 
+  count(year) |> 
+  filter(year != "NA") |> 
+   ggplot() +
+  geom_col(aes(x=year, y=n, fill=n)) +
+   theme(axis.text.x = element_text(angle=90))  +
+  theme(legend.position = "none") +
+    labs(title = "Raymond Moley Speeches",
+       subtitle = "750 speeches 1914-1968",
+       caption = "137 speeches lacked date entry. Graphic by Rob Wells, 12-13-2024",
+       y="Count",
+       x="Year")
+  
+ 
+```
+
+```{r}
+speech |> 
+  count(year) |> 
+  arrange(desc(n))
+```
+
+
+
+# NOTES BELOW 
+
+
+```{r}
+hoover <- df |> 
+  filter(!str_detect(Contents, regex("box", ignore_case = TRUE))) |> 
+# Identify rows where Contents contain a year
+  mutate(
+    Year = ifelse(grepl("^[0-9]{4}(-[0-9]{4})?$", Contents), Contents, NA)
+  )
+
+# Shift the Year values up by one row
+hoover <- hoover %>%
+  mutate(Year = lag(Year)) %>%
+  filter(!is.na(Year))
+
+# Remove rows where Contents are years
+hoover <- hoover%>%
+  filter(!grepl("^[0-9]{4}(-[0-9]{4})?$", Contents))
+
+
+```
+#this almost worked
+```{r}
+# Load required packages
+library(rvest)
+library(httr)
+library(xml2)
+library(stringr)
+library(dplyr)
+
+# Define the URL
+url2 <- "https://oac.cdlib.org/findaid/ark:/13030/tf6779n7xj/entire_text/"
+xpath_query <- "/html/body/div/div/div[2]/div[1]/div/div[31]"
+
+# Function to safely scrape webpage with error handling
+safe_scrape <- function(url, xpath) {
+  tryCatch({
+    # Make the request with proper headers and timeout
+    response <- GET(
+      url,
+      timeout(10),
+      add_headers(
+        `User-Agent` = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        `Accept` = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      )
+    )
+    
+    # Check if request was successful
+    if (status_code(response) == 200) {
+      # Convert response to text and then parse HTML
+      page_content <- read_html(rawToChar(response$content))
+      
+      # Extract content using XPath
+      target_content <- page_content %>%
+        html_nodes(xpath = xpath) %>%
+        html_text(trim = TRUE)
+      
+      return(target_content)
+    } else {
+      stop(paste("HTTP error:", status_code(response)))
+    }
+  }, error = function(e) {
+    message("Error occurred: ", e$message)
+    return(NULL)
+  })
+}
+
+# Function to parse location string into box and folder
+parse_location <- function(text) {
+  # Extract box number
+  box_match <- str_match(text, "box\\s+(\\d+)")
+  box_num <- if (!is.na(box_match[1])) box_match[2] else NA
+  
+  # Extract folder number
+  folder_match <- str_match(text, "folder\\s+(\\d+)")
+  folder_num <- if (!is.na(folder_match[1])) folder_match[2] else NA
+  
+  return(list(box = box_num, folder = folder_num))
+}
+
+# Try to scrape the specific content
+content <- safe_scrape(url2, xpath_query)
+
+if (!is.null(content) && length(content) > 0) {
+  # Split content into lines
+  lines <- unlist(strsplit(content, "\n"))
+  
+  # Initialize empty vectors
+  boxes <- character()
+  folders <- character()
+  contents <- character()
+  
+  # Process each line
+  for (line in lines) {
+    if (trimws(line) != "") {  # Skip empty lines
+      # Split line into location and content
+      parts <- strsplit(line, "\\s{2,}")[[1]]
+      
+      if (length(parts) >= 2) {
+        # Parse location
+        location_info <- parse_location(parts[1])
+        
+        # Store data
+        boxes <- c(boxes, location_info$box)
+        folders <- c(folders, location_info$folder)
+        contents <- c(contents, paste(parts[-1], collapse = " "))
+      }
+    }
+  }
+  
+  # Create data frame
+  df <- data.frame(
+    Box = boxes,
+    Folder = folders,
+    Contents = contents,
+    stringsAsFactors = FALSE
+  )
+  
+  # Write to CSV
+  write.csv(df, "archive_contents.csv", row.names = FALSE)
+  cat("Content has been saved to 'archive_contents.csv'\n")
+  
+} else if (length(content) == 0) {
+  cat("No content found at the specified XPath. The structure might have changed or the XPath might be incorrect.")
+} else {
+  cat("Failed to scrape the page. Please check the URL or try again later.")
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

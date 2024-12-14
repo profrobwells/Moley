@@ -10,6 +10,19 @@ library(pdftools)
 #install.packages("pdftools")
 ```
 
+#quickie OCR
+
+```{r}
+text <- pdf_text("/Users/robwells/Downloads/Groucho.pdf")
+#pdf_text reads the text from a PDF file.
+writeLines(text, "test_text.txt")
+
+
+```
+
+
+
+
 # Convert PDF to text
 
 ```{r}
@@ -292,6 +305,9 @@ system("brew install imagemagick")
 #Executes pdftotext, a command-line tool used to convert PDF files to plain text.
 system("pdftotext /Users/robwells/Code/CompText_Jour/exercises/split_file/kemi.PDF ../exercises/split_file/kemi3.txt")
 ```
+
+
+
 
 
 # NOTES
