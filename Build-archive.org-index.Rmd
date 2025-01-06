@@ -1,0 +1,91 @@
+---
+title: "Build-archive.org-index"
+author: "Rob Wells"
+date: "2025-01-06"
+output: html_document
+---
+
+(The following comes from "Archive_org_Scraper_Extactor.rmd")
+
+First Step: Find the Raymond Moley entry in the specific Newsweek index file.
+Download or screenshot the entry. See video: https://drive.google.com/file/d/1_1sWxqo3Q4Biiw7nFAqDPfKYtkd5Z97i/view?usp=sharing
+
+
+Second: Upload the entry into Claude.ai or chatgpt and ask to extract the text into a csv file. See video: https://drive.google.com/file/d/1_1sWxqo3Q4Biiw7nFAqDPfKYtkd5Z97i/view?usp=sharing
+
+Third: Use this script to process the csv. file into an index
+
+The result: each entry will have a URL that looks like this:
+https://archive.org/details/sim_newsweek-us_1959-07-06_54_1/page/16/mode/2up
+
+
+#Formats the index
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(rvest)
+library(janitor)
+library(stringr)
+```
+https://archive.org/details/sim_newsweek-us_1959-07-06_54_1/page/16/mode/2up
+```{r}
+index <- read.csv("test_1951_moley_articles.csv")
+
+# Define the month abbreviation mapping
+month_lookup <- c("Ja" = "01", "F" = "02", "Mr" = "03", "Ap" = "04",
+                  "My" = "05", "Je" = "06", "Jl" = "07", "Ag" = "08",
+                  "S" = "09", "O" = "10", "N" = "11", "D" = "12")
+
+# Create the `date2` column
+index <- index %>%
+  mutate(month_num = month_lookup[month],
+         year= "1951",
+         date2 = sprintf("%s-%s-%02d", year, month_num, as.integer(day)), 
+         date = lubridate::ymd(date2),
+         page = str_squish(page),
+         real_page = as.numeric(page),
+         real_page = (real_page + 1))
+```
+
+
+
+,
+         URL = paste0("https://archive.org/details/sim_newsweek-us", "/","date","/","page","/n",real_page,"/","mode/2up")) 
+
+
+
+# Compile Perspective Entries into an index
+```{r}
+library(googlesheets4)
+googlesheets4::gs4_deauth()
+main_index <- read_sheet("https://docs.google.com/spreadsheets/d/1GCvfNHgEN_TP1KA6YdpBf-Bp0YdwGOeG8x9uSzjHvGI/edit?usp=sharing")
+
+#replace question marks for column splitting
+main_index <- main_index |> 
+  mutate(new_date = str_replace_all(Issue, "sim_newsweek-us_", ""), 
+         new_date1 = str_extract(new_date, "\\d{4}-\\d{2}-\\d{2}")) |> 
+  mutate(new_date2 = ifelse(is.na(new_date1), new_date, new_date1)) |> 
+  mutate(new_date = lubridate::ymd(new_date2))  |> 
+  select(-new_date2, -new_date1)
+
+```
+
+
+# Join index and sample
+```{r}
+index1 <- index |> 
+  inner_join(main_index, by=c("date"="new_date")) |> 
+  mutate(Issue = str_replace(Issue, ",$", "")) |> 
+ mutate(URL = paste0("https://archive.org/details/", str_trim(Issue), "/page/", page, "/mode/2up"))
+
+
+```
+
+Check to see the URL field looks like this:
+
+https://archive.org/details/sim_newsweek-us_1959-07-06_54_1/page/16/mode/2up
+
+https://archive.org/details/sim_newsweek-us_1959-07-06_54_1/page/88/mode/2up
+
+https://archive.org/details/sim_newsweek-us_1959-10-26_54_17/page/132/mode/2up
+

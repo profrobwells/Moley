@@ -4,6 +4,458 @@ output:
   html_document: default
   pdf_document: default
 ---
+
+
+
+#gemini failed
+```{r}
+library(httr)
+library(stringr)
+
+# Function to create archive.org URLs
+create_archive_urls <- function(identifier_string) {
+  identifiers <- strsplit(identifier_string, ",")[[1]]
+  identifiers <- trimws(identifiers)
+  
+  urls <- sapply(identifiers, function(id) {
+    paste0("https://archive.org/stream/", id, "/", id, "_djvu.txt")
+  })
+  
+  return(urls)
+}
+
+# Function to extract and save perspective section
+extract_and_save_perspective <- function(url, output_dir = "articles") {
+  # Create output directory if it doesn't exist
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir)
+  }
+  
+  # Extract identifier from URL to use as filename
+  identifier <- str_extract(url, "sim_newsweek-us_[\\d-]+_\\d+_\\d+")
+  output_file <- file.path(output_dir, paste0(identifier, ".txt"))
+  
+  read_url <- str_replace(url, "stream", "download")
+  headers <- c(
+    "User-Agent" = "R-Script/1.0",
+    "Accept" = "text/plain"
+  )
+  
+  response <- tryCatch({
+    GET(read_url, add_headers(.headers=headers))
+  }, error = function(e) {
+    warning(paste("Download failed for:", identifier, " -", e$message))
+    return(NULL)
+  })
+  
+  if (is.null(response)) {
+    return(FALSE)
+  }
+  
+  if (status_code(response) == 200) {
+    content <- rawToChar(response$content)
+    
+    # Attempt to identify approximate page range
+    page_breaks <- str_locate_all(content, "Page \\d+?")[[1]] 
+    if (length(page_breaks) < 5) {
+      warning("Could not reliably identify page breaks in:", identifier)
+      # Extract the last 20% of the document as a fallback
+      start_pos <- max(1, floor(nchar(content) * 0.8)) 
+    } else {
+      start_pos <- page_breaks[max(1, length(page_breaks) - 4)] 
+    }
+    end_pos <- nchar(content) 
+    
+    # Extract potential article
+    potential_article <- substr(content, start_pos, end_pos)
+    
+    # Refine pattern with negative lookbehind
+    pattern <- "(?<!Index|Contents|Table of)Perspective\\s*(?:by Raymond Moley)?"
+    loc <- str_locate(potential_article, pattern)
+    
+    if (!is.na(loc[1])) {
+      # Adjust start_pos based on "Perspective" location
+      start_pos <- max(start_pos, loc[1] - 50) 
+      end_pos <- min(nchar(content), loc[1] + 4000) 
+      article <- substr(content, start_pos, end_pos)
+      
+      # Clean up the text
+      cleaned <- str_replace_all(article, "\\n\\s*\\n\\s*\\n+", "\n\n")
+      cleaned <- str_replace_all(cleaned, "(?<!\\n)\\n(?!\\n)", " ")
+      cleaned <- str_replace_all(cleaned, "\\s+", " ")
+      cleaned <- trimws(cleaned)
+      
+      # Write to file
+      write(cleaned, file = output_file)
+      cat("Saved article to:", output_file, "\n")
+      return(TRUE)
+    } else {
+      cat("No Perspective section found in:", identifier, "\n")
+      return(FALSE)
+    }
+  } else {
+    cat("Failed to download:", identifier, "\n")
+    return(FALSE)
+  }
+}
+
+# Main processing function
+process_identifiers <- function(identifier_string, output_dir = "articles") {
+  urls <- create_archive_urls(identifier_string)
+  
+  # Process each URL
+  results <- sapply(urls, function(url) {
+    cat("Processing:", url, "\n")
+    extract_and_save_perspective(url, output_dir)
+  })
+  
+  # Summary
+  cat("\nProcessing complete!\n")
+  cat("Successfully processed:", sum(results), "articles\n")
+  cat("Failed to process:", sum(!results), "articles\n")
+}
+
+# Example usage
+identifier <- "sim_newsweek-us_1945-01-22_25_4,
+sim_newsweek-us_1945-02-19_25_8,
+sim_newsweek-us_1945-03-05_25_10,
+sim_newsweek-us_1945-04-09_25_15,
+sim_newsweek-us_1945-05-28_25_22,
+sim_newsweek-us_1945-06-25_25_26,
+sim_newsweek-us_1945-07-30_26_5,
+sim_newsweek-us_1945-08-13_26_7,
+sim_newsweek-us_1945-09-10_26_11,
+sim_newsweek-us_1945-10-15_26_16,
+sim_newsweek-us_1945-11-26_26_22,
+sim_newsweek-us_1945-12-03_26_23"
+
+process_identifiers(identifier)
+```
+
+
+#captures some perspective but also grabs index
+```{r}
+library(httr)
+library(stringr)
+
+# Function to create archive.org URLs
+create_archive_urls <- function(identifier_string) {
+  identifiers <- strsplit(identifier_string, ",")[[1]]
+  identifiers <- trimws(identifiers)
+  
+  urls <- sapply(identifiers, function(id) {
+    paste0("https://archive.org/stream/", id, "/", id, "_djvu.txt")
+  })
+  
+  return(urls)
+}
+
+# Function to extract and save perspective section
+extract_and_save_perspective <- function(url, output_dir = "articles") {
+  # Create output directory if it doesn't exist
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir)
+  }
+  
+  # Extract identifier from URL to use as filename
+  identifier <- str_extract(url, "sim_newsweek-us_[\\d-]+_\\d+_\\d+")
+  output_file <- file.path(output_dir, paste0(identifier, ".txt"))
+  
+  read_url <- str_replace(url, "stream", "download")
+  headers <- c(
+    "User-Agent" = "R-Script/1.0",
+    "Accept" = "text/plain"
+  )
+  
+  response <- GET(read_url, add_headers(.headers=headers))
+  
+  if(status_code(response) == 200) {
+    content <- rawToChar(response$content)
+    pattern <- "(?i)Persp\\s*ective"
+    loc <- str_locate(content, pattern)
+    
+    if(!is.na(loc[1])) {
+      start_pos <- max(1, loc[1] - 100)
+      end_pos <- min(nchar(content), loc[1] + 4800)
+      article <- substr(content, start_pos, end_pos)
+      
+      # Clean up the text
+      cleaned <- str_replace_all(article, "\\n\\s*\\n\\s*\\n+", "\n\n")
+      cleaned <- str_replace_all(cleaned, "(?<!\\n)\\n(?!\\n)", " ")
+      cleaned <- str_replace_all(cleaned, "\\s+", " ")
+      cleaned <- trimws(cleaned)
+      
+      # Write to file
+      write(cleaned, file = output_file)
+      cat("Saved article to:", output_file, "\n")
+      return(TRUE)
+    } else {
+      cat("No Perspective section found in:", identifier, "\n")
+      return(FALSE)
+    }
+  } else {
+    cat("Failed to download:", identifier, "\n")
+    return(FALSE)
+  }
+}
+
+# Main processing function
+process_identifiers <- function(identifier_string, output_dir = "articles") {
+  urls <- create_archive_urls(identifier_string)
+  
+  # Process each URL
+  results <- sapply(urls, function(url) {
+    cat("Processing:", url, "\n")
+    extract_and_save_perspective(url, output_dir)
+  })
+  
+  # Summary
+  cat("\nProcessing complete!\n")
+  cat("Successfully processed:", sum(results), "articles\n")
+  cat("Failed to process:", sum(!results), "articles\n")
+}
+
+# Example usage
+identifier <- "sim_newsweek-us_1945-01-22_25_4,
+sim_newsweek-us_1945-02-19_25_8,
+sim_newsweek-us_1945-03-05_25_10,
+sim_newsweek-us_1945-04-09_25_15,
+sim_newsweek-us_1945-05-28_25_22,
+sim_newsweek-us_1945-06-25_25_26,
+sim_newsweek-us_1945-07-30_26_5,
+sim_newsweek-us_1945-08-13_26_7,
+sim_newsweek-us_1945-09-10_26_11,
+sim_newsweek-us_1945-10-15_26_16,
+sim_newsweek-us_1945-11-26_26_22,
+sim_newsweek-us_1945-12-03_26_23"
+
+process_identifiers(identifier)
+```
+
+```{r}
+write.csv(urls, "test_1945_urls.csv")
+```
+
+
+
+```{r}
+create_archive_urls <- function(identifier_string) {
+  # Split on commas and clean up whitespace
+  identifiers <- strsplit(identifier_string, ",")[[1]]
+  identifiers <- trimws(identifiers)
+  
+  # Create URLs for each identifier
+  urls <- sapply(identifiers, function(id) {
+    paste0("https://archive.org/stream/", id, "/", id, "_djvu.txt")
+  })
+  
+  return(urls)
+}
+
+# Example usage with your identifiers
+identifier <- "sim_newsweek-us_1945-01-22_25_4,
+sim_newsweek-us_1945-02-19_25_8,
+sim_newsweek-us_1945-03-05_25_10,
+sim_newsweek-us_1945-04-09_25_15,
+sim_newsweek-us_1945-05-28_25_22,
+sim_newsweek-us_1945-06-25_25_26,
+sim_newsweek-us_1945-07-30_26_5,
+sim_newsweek-us_1945-08-13_26_7,
+sim_newsweek-us_1945-09-10_26_11,
+sim_newsweek-us_1945-10-15_26_16,
+sim_newsweek-us_1945-11-26_26_22,
+sim_newsweek-us_1945-12-03_26_23"
+
+urls <- create_archive_urls(identifier)
+
+# Print each URL on a new line
+the_1945_urls <- cat(urls, sep="\n")
+
+
+```
+
+
+
+#searching the scanned text on archive.org
+```{r}
+library(httr)
+library(stringr)
+
+extract_perspective_section <- function(url) {
+  read_url <- str_replace(url, "stream", "download")
+  headers <- c(
+    "User-Agent" = "R-Script/1.0",
+    "Accept" = "text/plain"
+  )
+  
+  response <- GET(read_url, add_headers(.headers=headers))
+  
+  if(status_code(response) == 200) {
+    content <- rawToChar(response$content)
+    
+    # Find the Perspective section
+    pattern <- "(?i)Persp\\s*ective"
+    loc <- str_locate(content, pattern)
+    
+    if(!is.na(loc[1])) {
+      # Get the full article (starting a bit before to catch the header, and grabbing 1500 words after)
+      start_pos <- max(1, loc[1] - 100)  # Start before the match to catch the header
+      end_pos <- min(nchar(content), loc[1] + 4800)  # Grab plenty of text to ensure we get 1500 words
+      
+      article <- substr(content, start_pos, end_pos)
+      
+      # Clean up the text
+      # Remove excessive newlines while preserving paragraph breaks
+      cleaned <- str_replace_all(article, "\\n\\s*\\n\\s*\\n+", "\n\n")
+      # Replace single newlines with spaces
+      cleaned <- str_replace_all(cleaned, "(?<!\\n)\\n(?!\\n)", " ")
+      # Clean up multiple spaces
+      cleaned <- str_replace_all(cleaned, "\\s+", " ")
+      cleaned <- trimws(cleaned)
+      
+      return(cleaned)
+    }
+  }
+  
+  return("Article not found")
+}
+
+# Test with the URL
+url <- "https://archive.org/stream/sim_newsweek-us_1945-09-10_26_11/sim_newsweek-us_1945-09-10_26_11_djvu.txt"
+result <- extract_perspective_section(url)
+cat(result, "\n")
+```
+
+
+
+# fails because pdf text isn't working properly
+```{r}
+library(pdftools)
+library(stringr)
+library(fs)
+
+# Specify the folder containing the PDF files
+pdf_folder <- "new_scans/source_pdfs"
+output_folder <- "new_scans/cropped"
+
+# Create output directory if it doesn't exist
+#dir_create(output_folder)
+
+# Get a list of all PDF files in the folder
+pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
+
+# Function to extract perspective page
+extract_perspective <- function(pdf_path) {
+  tryCatch({
+    # Try to safely read the PDF
+    text <- tryCatch({
+      pdf_text(pdf_path)
+    }, error = function(e) {
+      # If pdf_text fails, try with different encoding
+      message("Attempting alternate PDF reading method for: ", basename(pdf_path))
+      pdf_data <- pdf_subset(pdf_path, pages = NULL)  # This creates a temporary copy
+      pdf_text(pdf_data)
+    })
+    
+    # Only look at the final 10 pages of the PDF
+    total_pages <- length(text)
+    if(total_pages > 10) {
+      text <- text[(total_pages-10):total_pages]
+      offset <- total_pages - 11  # To adjust page numbers later
+    } else {
+      offset <- 0
+    }
+    
+    # Find pages with "Moley" in the subset
+    page_nums <- which(str_detect(text, regex("Moley", ignore_case = FALSE)) |
+                      str_detect(text, regex("by Raymond Moley", ignore_case = FALSE)))
+    
+    # Get the last instance and adjust page number back to original PDF
+    if (length(page_nums) > 0) {
+      last_page <- max(page_nums) + offset
+      
+      # Try to extract the page with error handling
+      tryCatch({
+        output_file <- file.path(output_folder, paste0("Extracted_perspective_", basename(pdf_path)))
+        pdf_subset(pdf_path, pages = last_page, output = output_file)
+        return(paste("Last Moley page extracted successfully from", basename(pdf_path), "! Page number:", last_page))
+      }, error = function(e) {
+        return(paste("Failed to extract page from", basename(pdf_path), "- Error:", e$message))
+      })
+    } else {
+      return(paste("Moley not found in final pages of", basename(pdf_path)))
+    }
+  }, error = function(e) {
+    return(paste("Error processing", basename(pdf_path), ":", e$message))
+  })
+}
+
+# Process each PDF file with additional error information
+results <- sapply(pdf_files, function(pdf_file) {
+  message("Processing: ", basename(pdf_file))
+  extract_perspective(pdf_file)
+})
+
+# Print results
+for (result in results) {
+  cat(result, "\n")
+}
+```
+
+
+```{r}
+library(pdftools)
+library(stringr)
+library(fs)
+
+# Specify the folder containing the PDF files
+pdf_folder <- "new_scans/source_pdfs"
+output_folder <- "new_scans/cropped"
+
+# Create output directory if it doesn't exist
+#dir_create(output_folder)
+
+# Get a list of all PDF files in the folder
+pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
+
+# Function to extract perspective page
+extract_perspective <- function(pdf_path) {
+  tryCatch({
+    # Extract all text
+    text <- pdf_text(pdf_path)
+    
+    # Find pages with required terms but exclude those with Weekly Publications text
+    page_num <- which(
+      str_detect(text, regex("Perspective", ignore_case = FALSE)) &
+      str_detect(text, regex("Patent Office", ignore_case = FALSE)) &
+      str_detect(text, regex("by Raymond Moley", ignore_case = FALSE)) &
+      !str_detect(text, regex("published weekly by WEEKLY PUBLICATIONS, INC.", ignore_case = TRUE))
+    )
+    
+    # Extract the specific page
+    if (length(page_num) > 0) {
+      output_file <- file.path(output_folder, paste0("Extracted_perspective_", basename(pdf_path)))
+      pdf_subset(pdf_path, pages = page_num, output = output_file)
+      return(paste("Perspective page extracted successfully from", basename(pdf_path), "! Page number:", page_num))
+    } else {
+      return(paste("Perspective not found in", basename(pdf_path)))
+    }
+  }, error = function(e) {
+    return(paste("Error processing", basename(pdf_path), ":", e$message))
+  })
+}
+
+# Process each PDF file
+results <- sapply(pdf_files, extract_perspective)
+
+# Print results
+for (result in results) {
+  cat(result, "\n")
+}
+```
+
+
+
 # Extracts the Moley column from a folder of pdfs
 
 ```{r}
@@ -12,8 +464,11 @@ library(stringr)
 library(fs)
 
 # Specify the folder containing the PDF files
-pdf_folder <- "new_scans"
+pdf_folder <- "new_scans/source_pdfs"
+output_folder <- "new_scans/cropped"
 
+# Create output directory if it doesn't exist
+dir_create(output_folder)
 # Get a list of all PDF files in the folder
 pdf_files <- dir_ls(pdf_folder, glob = "*.pdf")
 
@@ -30,7 +485,7 @@ extract_perspective <- function(pdf_path) {
     
     # Extract the specific page
     if (length(page_num) > 0) {
-      output_file <- paste0("Moley_column_", basename(pdf_path))
+      output_file <- paste0("Extracted_perspective_", basename(pdf_path))
       pdf_subset(pdf_path, pages = page_num, output = output_file)
       return(paste("Perspective page extracted successfully from", basename(pdf_path), "! Page number:", page_num))
     } else {
