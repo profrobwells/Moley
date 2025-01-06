@@ -13,7 +13,7 @@ Download or screenshot the entry. See video: https://drive.google.com/file/d/1_1
 
 Second: Upload the entry into Claude.ai or chatgpt and ask to extract the text into a csv file. See video: https://drive.google.com/file/d/1_1sWxqo3Q4Biiw7nFAqDPfKYtkd5Z97i/view?usp=sharing
 
-Third: Use this script to process the csv. file into an index
+Third: Use this script to process the csv. file into an index and it creates a unique URL by page that **often** allows us to access the Newsweek issue
 
 The result: each entry will have a URL that looks like this:
 https://archive.org/details/sim_newsweek-us_1959-07-06_54_1/page/16/mode/2up

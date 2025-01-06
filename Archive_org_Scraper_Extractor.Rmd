@@ -382,7 +382,7 @@ PNG Format: Saving as a .png file maintains the quality of the screenshot.
 # Import sample article index
 ```{r}
 
-sample <- read_csv("moley_newsweek/newsweek_sample_1953_55_57_59.csv") |> 
+sample <- read_csv("newsweek_sample_1953_55_57_59.csv") |> 
   rename(list = 2, index = 1)
 
 #filtering
