@@ -1,0 +1,108 @@
+---
+title: "Moley LAT Index"
+output: html_notebook
+---
+This notebook processes the moley lat index
+
+```{r}
+library(tidyverse)
+```
+### Import data
+```{r}
+
+lat_index <- rio::import("./data/moley_lat.csv") |> 
+  mutate(date = as.Date(entryDate, "%b %d, %Y")) |> 
+  mutate(year2 = year(date))
+
+```
+
+
+### fact check all years match
+```{r}
+lat_index %>%
+  mutate(years_match = year1 == year2) %>%
+  summarise(all_match = all(years_match))
+
+lat_index %>%
+  filter(year1 != year2) %>%
+  select(year1, year2)
+```
+
+### count of years
+```{r}
+counts <- lat_index |> 
+  count(year1) 
+
+sum(counts$n)
+#2522 entries
+```
+
+### Moley full index
+```{r}
+full_index <- rio::import("./data/moley_lat_full_index.csv") |> 
+  mutate(date = as.Date(PubDate, "%m/%d/%Y")) |> 
+  mutate(year2 = year(date))
+```
+
+
+```{r}
+
+counts_full <- full_index |> 
+  count(year2) 
+```
+
+```{r}
+anti <- counts |> 
+  anti_join(counts_full)
+
+
+```
+
+#list actual downloaded files
+```{r}
+files_downloaded <- list.files("/Users/robwells/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Moley_LAT_column", pattern="*.pdf") %>% 
+  as.data.frame() |> 
+  rename(filename = 1) |> 
+  mutate(filename1 = str_replace_all(filename, ".pdf", ""))
+```
+
+### modify lat_index to match properly. -- adding "_1" as suffix
+```{r}
+lat_index <- lat_index |> 
+  mutate(filename1 = paste0(StoreId, "_1"))
+
+```
+
+```{r}
+updated_lat_moley_index <- lat_index |> 
+  inner_join(files_downloaded, by=c("filename1")) |> 
+  select(date, entryDate, year1, Title, Abstract, StoreId, filename1,filename)  
+
+write.csv(updated_lat_moley_index, "updated_lat_moley_index.csv")
+```
+
+## fact check
+```{r}
+anti <- files_downloaded |> 
+  anti_join(lat_index, by=c("filename1"))
+
+```
+
+```{r}
+
+updated_lat_moley_index |> 
+  count(date) |> 
+  filter(n==2)
+```
+```{r}
+dupes <- updated_lat_moley_index |> 
+  count(date, Title) |> 
+  filter(n==2)
+
+dupes <- dupes |> 
+  inner_join(updated_lat_moley_index, by=c("date"))
+
+write.csv(dupes, "dupes.csv")
+```
+
+
