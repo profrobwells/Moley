@@ -1,0 +1,47 @@
+---
+title: "PDF to PNG"
+author: "Rob Wells"
+date: "2025-02-08"
+output: html_document
+---
+```{r}
+# Install required packages if not already installed
+install.packages(c("pdftools", "magick"))
+
+# Load the libraries
+library(pdftools)
+library(magick)
+
+# Function to convert PDF to PNG
+convert_pdf_to_png <- function(input_dir, output_dir, dpi = 300) {
+  # Create output directory if it doesn't exist
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir)
+  }
+  
+  # Get list of PDF files in input directory
+  pdf_files <- list.files(input_dir, pattern = "\\.pdf$", full.names = TRUE)
+  
+  # Process each PDF file
+  for (pdf_file in pdf_files) {
+    # Get base filename without extension
+    base_name <- tools::file_path_sans_ext(basename(pdf_file))
+    
+    # Convert PDF to PNG
+    pdf_convert(pdf_file,
+               format = "png",
+               dpi = dpi,
+               filenames = file.path(output_dir, paste0(base_name, "_%d.png")))
+    
+    cat("Converted:", pdf_file, "\n")
+  }
+}
+
+# Usage example:
+# Replace these paths with your actual directories
+input_directory <- "path/to/pdf/folder"
+output_directory <- "path/to/output/folder"
+
+# Convert all PDFs in the input directory
+convert_pdf_to_png(input_directory, output_directory)
+```

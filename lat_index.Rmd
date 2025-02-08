@@ -88,12 +88,157 @@ anti <- files_downloaded |>
 
 ```
 
+# OCR LAT stories
+#Load Libraries
+```{r}
+library(pdftools)
+library(tesseract)
+library(magick)
+
+```
+
+#Loop Through PDFs in a Directory
+
+```{r}
+# Define paths
+pdf_folder <- "./lat_sample"
+extracted_folder <- "./lat_scanned"
+
+# Create extracted folder if it doesn't exist
+if (!dir.exists(extracted_folder)) {
+  dir.create(extracted_folder)
+}
+
+# Loop through all files in the PDF folder
+pdf_files <- list.files(pdf_folder, pattern = "\\.png$", full.names = TRUE)
+for (pdf_file in pdf_files) {
+  output_file <- file.path(extracted_folder, paste0(tools::file_path_sans_ext(basename(pdf_file)), ".txt"))
+  pdf_text <- pdf_text(pdf_file)
+  writeLines(pdf_text, output_file)
+  cat("Text extracted from", pdf_file, "and saved to", output_file, "\n")
+}
+
+```
+
+```{r}
+library(pdftools)
+library(tesseract)
+library(magick)
+# Define paths
+pdf_folder <- "./lat_sample"
+extracted_folder <- "./lat_scanned"
+
+# Create extracted folder if it doesn't exist
+if (!dir.exists(extracted_folder)) {
+  dir.create(extracted_folder)
+}
+
+# Loop through all files in the PDF folder
+pdf_files <- list.files(pdf_folder, pattern = "\\.png$", full.names = TRUE)
+for (file_path in pdf_files) {
+  # Construct the output path
+  output_filename <- paste0(tools::file_path_sans_ext(basename(file_path)), ".txt")
+  output_path <- file.path(extracted_folder, output_filename)
+  
+  # Check the file extension and process accordingly
+  grepl("\\.png$", file_path) 
+    # Extract text from PNG using tesseract
+    text <- ocr(file_path)
+    writeLines(text, output_path)
+  
+  
+  cat("Text extracted from", basename(file_path), "and saved to", output_filename, "\n")
+}
+
+```
+
+Pre-processing the images before OCR:
+
+```{r}
+library(magick)
+
+# Function to pre-process images
+preprocess_image <- function(file_path) {
+  image <- image_read(file_path) %>%
+    image_resize("3000x") %>%  # Increase resolution
+    image_contrast(sharpen = 100) %>%  # Enhance contrast
+    image_convert(colorspace = "gray") %>%  # Convert to grayscale
+    image_deskew() %>%  # Correct skewing
+    image_trim()  # Remove excess white space
+  return(image)
+}
+
+# Modified loop
+for (file_path in pdf_files) {
+  output_filename <- paste0(tools::file_path_sans_ext(basename(file_path)), ".txt")
+  output_path <- file.path(extracted_folder, output_filename)
+  
+  # Preprocess image
+  processed_img <- preprocess_image(file_path)
+  
+  # Extract text with additional tesseract configuration
+  text <- tesseract::ocr(processed_img, 
+                        engine = tesseract(options = list(
+                          tessedit_char_whitelist = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,;:'\"()-!? ",
+                          preserve_interword_spaces = 1
+                        )))
+  
+  # Basic text cleaning
+  text <- gsub("\\s+", " ", text)  # Remove extra whitespace
+  text <- gsub("-\\s+", "", text)  # Remove hyphenation at line breaks
+  text <- gsub("([a-z])\\s+([A-Z])", "\\1\\2", text)  # Join split words
+  
+  writeLines(text, output_path)
+  cat("Text extracted from", basename(file_path), "and saved to", output_filename, "\n")
+}
+```
+
+Post-processing with string cleaning:
+```{r}
+library(stringr)
+
+clean_ocr_text <- function(text) {
+  text <- str_trim(text)  # Remove leading/trailing whitespace
+  text <- gsub("\\s{2,}", " ", text)  # Remove multiple spaces
+  text <- gsub("(?<=\\w)-\\s+(?=\\w)", "", text, perl = TRUE)  # Remove hyphenation
+  text <- gsub("([a-z])\\s+([A-Z])", "\\1 \\2", text)  # Fix word spacing
+  text <- gsub("\\b(\\w)\\s+(\\w{1,2})\\b", "\\1\\2", text)  # Join split short words
+  text <- gsub("([^.!?])\\s*\\n\\s*([a-z])", "\\1 \\2", text)  # Fix sentence breaks
+  text <- gsub("\\b(\\w)\\s+('s|'t|'d|'ll|'ve|'re)\\b", "\\1\\2", text)  # Fix contractions
+  return(text)
+}
+
+# Apply to your existing loop:
+text <- clean_ocr_text(text)
+```
+
+Consider using a different OCR engine configuration:
 ```{r}
 
-updated_lat_moley_index |> 
-  count(date) |> 
-  filter(n==2)
+# Try different tesseract configurations
+eng <- tesseract(options = list(
+  tessedit_pageseg_mode = 1,  # Automatic page segmentation with OSD
+  tessedit_ocr_engine_mode = 3,  # Legacy + LSTM engines
+  textord_heavy_nr = 1,  # Heavy noise removal
+  language = "eng"
+))
+
+text <- tesseract::ocr(processed_img, engine = eng)
 ```
+
+
+```{r}
+# For column-based text
+eng <- tesseract(options = list(
+  tessedit_pageseg_mode = 1,  # Try different modes (1-13)
+  textord_tablefind_recognize_tables = 0,
+  textord_detect_columns = 1
+))
+```
+
+
+# Notes below
+
 ```{r}
 dupes <- updated_lat_moley_index |> 
   count(date, Title) |> 
@@ -102,7 +247,26 @@ dupes <- updated_lat_moley_index |>
 dupes <- dupes |> 
   inner_join(updated_lat_moley_index, by=c("date"))
 
-write.csv(dupes, "dupes.csv")
+
+```
+
+```{r}
+#This tutorial shows how to copy files from one directory to another
+# https://stackoverflow.com/questions/68995687/r-move-files-to-folder-based-on-list-or-column
+
+inputdir  <- "./lat_sample" 
+targetdir <- "./renamed_lat" 
+df <- updated_lat_moley_index$Title
+filestocopy <- list.files(inputdir, full.names = TRUE)
+
+filestocopy <- unique(grep(paste(df,collapse="|"), filestocopy, value=TRUE))
+
+sapply(filestocopy, function(x) file.copy(from=x, to=targetdir, copy.mode = TRUE))
+```
+
+
+```{r}
+
 ```
 
 
