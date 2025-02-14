@@ -1,0 +1,151 @@
+---
+title: "Compile Moley Text"
+author: "Wells"
+date: "2025-02-14"
+output: html_document
+---
+```{r}
+#install.packages("pdftools")
+library(tidyverse)
+library(pdftools)
+library(janitor)
+```
+
+# Compile Text into a Dataframe
+
+## Raw text compiler 
+```{r include=FALSE}
+#This creates an index with the file path to the stories. And then it compiles the stories into a dataframe
+#####################
+# Begin SM Code #####
+#####################
+
+###
+# List out text files that match pattern .txt, create DF
+###
+
+files <- list.files("./perspective_extracted", pattern="*.txt") %>% 
+  as.data.frame() |> 
+  rename(filename = 1) |> 
+  mutate(index2 = str_replace_all(filename, "_page0.txt",""))
+
+#Join the file list to the index
+
+#load final data if you haven't already
+final_data <- rio::import("matching with extract-Perspective_full_index_1967_1937.xls") |> 
+  clean_names() |> 
+  mutate(index2 = str_replace_all(index, ".pdf",""))
+
+final_index <- final_data |> 
+  inner_join(files, c("index2")) |> 
+  mutate(filepath = paste0("./perspective_extracted/", filename))
+head(final_index)
+```
+
+## Text compiler
+```{r}
+###
+# Define function to loop through each text file 
+###
+
+create_article_text <- function(row_value) {
+  
+  #row_value is the single argument that is passed to the function
+  # Take each row of the dataframe
+  temp <- final_index %>%
+    slice(row_value)
+  
+  # Store the filename for  use in constructing articles dataframe
+  temp_filename <- temp$filename
+  
+  # Create a dataframe by reading in lines of a given textfile
+  # Add a filename column 
+  articles_df_temp <- read_lines(temp$filepath) %>%
+    as_tibble() %>%
+    mutate(filename = temp_filename)
+  
+  # Bind results to master articles_df
+  # <<- returns to global environment
+  articles_df <<- articles_df %>%
+    bind_rows(articles_df_temp)
+}
+
+###
+# Create elements needed to run function
+###
+
+# Create empty tibble to store results
+articles_df <- tibble()
+#running once to test
+#create_article_text(2) 
+# Create an array of numbers to loop through, from 1 to the number of rows in our index dataframe 
+row_values <- 1:nrow(final_index)
+
+###
+# Execute function using lapply
+# This loops through each row of the dataframe and append results to master file
+###
+
+lapply(row_values, create_article_text)
+
+###
+# Clean up articles_df and join to index dataframe
+###
+
+articles_df <- articles_df %>%
+  select(filename, sentence=value) %>%
+  inner_join(final_index)
+
+write.csv(articles_df, "moley_perspective_text.csv")
+
+```
+
+# Clean text
+
+```{r}
+cleaned_articles_df <- articles_df %>%
+  group_by(filename) %>%
+  mutate(row_num = row_number()) %>%
+  filter(!(row_num == 1 & str_detect(sentence, "^Here's"))) %>%
+  select(-row_num) %>%
+  ungroup()
+#write.csv(cleaned_articles_df, "moley_cleaned_perspective_text.csv")
+```
+
+
+```{r}
+cleaned_articles_df %>%
+  group_by(filename) %>%
+  slice(1) %>%
+  select(filename, sentence) %>%
+  head(10)
+```
+
+
+
+```{r}
+
+"Here's a text version of the provided image, attempting to preserve the column structure:"
+"Here's a text extraction of the provided image, attempting to avoid overlapping text from different columns:"
+"Here's the extracted text from the provided image.  I've tried to preserve the original formatting as much as possible, but some minor adjustments might be necessary."
+"Here's a text version of the provided article, respecting column breaks as much as possible.  I've tried to minimize overlaps, but due to the image quality and column layout some minor inconsistencies might remain.  For perfect accuracy, a higher-resolution scan would be helpful."
+"Here's a text version of the provided image, attempting to maintain the column structure.  Note that perfect separation isn't always possible due to the image quality and layout. Some minor inaccuracies might remain."
+
+
+
+```
+
+
+# Failed Scans
+```{r}
+
+failed <- rio::import("https://docs.google.com/spreadsheets/d/1J4cBKY_xTz5D7u7_S_0mL1Qm2nFxZ2d7e6Ip-IjJu6s/edit?gid=1417593840#gid=1417593840", which="Copy of failed scans")
+
+
+failed2 <- failed |> 
+  inner_join(final_data, by=c("Errors"="index"))
+
+
+write.csv(failed2, "perspective_failed_index.csv")
+```
+
