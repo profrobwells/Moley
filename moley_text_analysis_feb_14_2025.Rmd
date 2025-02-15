@@ -30,7 +30,7 @@ https://www.britannica.com/event/New-Deal
 
 Some of these libraries are used only in this webpage, but this is all libraries used in the analysis done so far. 
 
-```{r echo = T, results = 'hide', error=F, warning=F, message=F}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 
 
 library(textdata)
@@ -62,7 +62,7 @@ library(flextable)
 library(janitor)
 ```
 
-## Statistics about the data 
+
 ```{r echo = F}
 #1562 articles in index
 article_index <-  rio::import("matching with extract-Perspective_full_index_1967_1937.xls") |> 
@@ -74,6 +74,9 @@ article_index <-  rio::import("matching with extract-Perspective_full_index_1967
 articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/moley_cleaned_perspective_text.csv") |> 
     mutate(year = as.numeric(year),
          date = as.Date(pubdate, format="%b %d, %Y"))
+```
+## Statistics about the index 
+```{r}
 
 nrows <- nrow(article_index)
 ncols <- ncol(article_index)
@@ -95,7 +98,7 @@ max_years <- year_counts %>%
   filter(year_counts$n == max_count)
                   
 
-glue::glue("There are {nrows} articles");
+glue::glue("There are {nrows} articles in the index of Moley Newsweek columns.");
 
 glue::glue("The earliest year of publication is {as.integer(min_year)}, and the latest is {max_year}.")
 
@@ -106,7 +109,7 @@ glue::glue("The average year of publication is {as.integer(mean_year)}, with the
 
 ```
 
-## Columns and Rows
+## Statistics about the extracted text
 ```{r echo = F}
 nrows1 <- nrow(articles_text)
 ncols1 <- ncol(articles_text)
@@ -115,9 +118,9 @@ articles <- articles_text |>
   distinct(filename) |> 
   count()
 
-glue::glue("The number of rows in the article text dataframe is {nrows1}")
-glue::glue("The number of article text columns is {ncols1}")
+
 glue::glue("The article text has {articles} articles. That's less than the {nrows} entries in the article index. The difference was due to about {nrows-articles} failed AI scans.")
+glue::glue("The article text dataframe is huge, with {nrows1} rows and {ncols1} columns.")
 
 ```
 
@@ -126,7 +129,7 @@ glue::glue("The article text has {articles} articles. That's less than the {nrow
 
 ```{r}
 
-#Here is a chart, Figure x, that countss columns by year
+#Here is a chart, Figure x, that counts columns by year
 count_year <- articles_text %>% 
   distinct(filename, .keep_all = TRUE) |> 
 count(year) %>% 
@@ -173,7 +176,7 @@ bigrams <- bigrams %>%
 
 ```
 
-# Cleaning bigrams
+## Datatable with bigrams
 ```{r}
 bigrams_separated <- bigrams %>%
   separate(word, c("word1", "word2"), sep = " ")
@@ -196,6 +199,12 @@ datatable(bigram_counts,
 ```
 
 
+
+There are 192 word pairs containing "Nixon."
+There are 300 word pairs containing "Dewey."
+There are 139 word pairs containing "Goldwater."
+
+
 ```{r}
   
 top_20_bigrams <- bigram_counts |> 
@@ -214,6 +223,40 @@ ggplot(top_20_bigrams, aes(n, reorder(bigram, n), fill=n)) +
        caption = "Source: Newsweek. Graphic by Rob Wells and Bridget Lang, 2-14-2024")
 ```
 
+
+Counting Word instances
+```{r}
+
+
+articles_text %>%
+  # First ensure sentence is character and lowercase
+  mutate(sentence = as.character(sentence),
+         sentence = tolower(sentence)) %>%
+  # Group by filename to avoid double-counting articles
+  group_by(filename) %>%
+  summarise(
+    nixon = sum(str_count(sentence, "nixon"), na.rm = TRUE),
+    goldwater = sum(str_count(sentence, "goldwater"), na.rm = TRUE),
+    dewey = sum(str_count(sentence, "dewey"), na.rm = TRUE),
+    eisenhower = sum(str_count(sentence, "eisenhower"), na.rm = TRUE)
+  ) %>%
+  # Now get totals across all articles
+  summarise(
+    nixon = sum(nixon),
+    goldwater = sum(goldwater),
+    dewey = sum(dewey),
+    eisenhower = sum(eisenhower)
+  ) %>%
+  pivot_longer(
+    everything(),
+    names_to = "politician",
+    values_to = "count"
+  ) %>%
+  mutate(
+    percentage = count / 1487) * 100  # Using actual number of articles
+  ) %>%
+  arrange(desc(count))
+```
 
 
 
@@ -242,10 +285,36 @@ political_terms <- read.csv("./data/Political_Terms.csv")
 kable(head(political_terms, 20), caption="Sample of Political Terms")
 
 ```
-#rsw comment: this was a cool and basic way to begin the analysis. Nice job and a creative, simple solution.
-```{r echo = F}
-one_word_per_row <- read.csv("./data/one_word_per_row.csv")
+#Unigrams
+```{r}
 
+unigrams <- articles_text %>% mutate(sentence= str_squish(sentence)) |> 
+  mutate(text = tolower(sentence)) |>  
+  mutate(text = gsub("\\d+", "", text)) |>
+  mutate(text = str_replace_all(text, "raymond", "")) %>% 
+  mutate(text = str_replace_all(text, "newsweek", "")) %>% 
+  mutate(text = str_replace_all(text, "image", "")) %>%
+  mutate(text = str_replace_all(text, "perspective", "")) %>%
+  mutate(text = str_replace_all(text, "registered u.s. patent office", "")) %>%
+  mutate(text = str_replace_all(text, "- ", "")) %>%
+  mutate(text = str_replace_all(text, " -", "")) %>%
+  mutate(text = str_replace_all(text, " - ", "")) %>%
+  unnest_tokens(word, text, token="ngrams", n=1 ) %>%
+  filter(!word %in% stop_words$word) %>%
+  filter(!word == "minor inaccuracies") %>%
+  filter(!word == "text extraction") %>%
+  filter(!word == "text version") %>%
+    filter(!is.na(word))
+
+
+
+one_word_per_row <- unigrams |> 
+  select(word, date, year, filename)
+
+```
+
+#Chart Political vs Economic Coverage
+```{r}
 count_word_per_year <- function(data, target_word) {
   data %>%
     filter(word == target_word) %>%       
@@ -302,18 +371,16 @@ article_type_by_year <- economic_articles_by_year %>%
 
 ggplot(article_type_by_year, aes(year, n, fill=type)) +
   geom_bar(stat="identity", position="dodge") + 
-  labs(title = "Political vs. Economic Articles Written by Raymond Moley, 1942 - 1960",
+  labs(title = "Political vs. Economic Articles Written by Raymond Moley, 1937-1967",
         x = "Year",
-        y = "Count")
+        y = "Count",
+       caption= "n=1,487 Newsweek columns. Graphic by Bridget Lang, 2/16/2025")
 
 ```
 
 ## Sentiment Analysis of Coverage of Presidential Candidates 
-#rsw comment: nice way to begin the analysis.  
+
 ```{r echo = F}
-
-articles_text <- rename(articles_text, sentence = value)
-
 nixon_articles <- articles_text %>%
   filter(str_detect(sentence, "Nixon")) %>%
   select(filename, year) %>%
@@ -359,33 +426,29 @@ dewey_text_tokenized <- dewey_text %>%
 dewey_sentiments_all <- dewey_text_tokenized %>%
   inner_join(nrc_sentiments, relationship = "many-to-many") %>%
   count(sentiment, sort = TRUE) %>% 
-  mutate(pct_total =round(n/sum(n), digits=2))
+  mutate(pct_total = round(n/sum(n), digits=4)) %>%
+  mutate(president = "Dewey") %>%
+  # Reorder sentiment based on pct_total
+  mutate(sentiment = reorder(sentiment, -pct_total))
 
-dewey_sentiments_all <- dewey_sentiments_all %>%
-  mutate(percent = percent(pct_total)) %>%
-  mutate(president = "Dewey")
-
-
-dewey_sentiments_all <- dewey_sentiments_all %>%
-  mutate(sentiment = fct_reorder(sentiment, desc(percent)))
-
-ggplot(dewey_sentiments_all, aes(sentiment, percent, fill=president)) +
+ggplot(dewey_sentiments_all, aes(sentiment, pct_total, fill=pct_total)) +
   geom_bar(stat="identity", position="dodge") +
-  labs(title = "Presence of Sentiment in Articles by Raymond Moley Mentioning Thomas Dewey",
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.01)) +  # Format y-axis as percentages
+  labs(title = "Sentiment of Thomas Dewey Articles",
         x = "Sentiment",
-        y = "Percentage of Total Text") + 
-  theme(axis.text.x = element_text(angle = 45, vjust=0.5)) 
-
-
+        y = "Percentage of Total Text", 
+        caption = "Newsweek articles, Graphic by Rob Wells and Bridget Lang") +
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5),legend.position = "none") 
 ```
 
 ### Nixon
 
-```{r echo = F, results = 'hide', error=F, warning=F, message=F}
+```{r}
 
 nixon_text <- articles_text %>%
   select(filename, year, sentence) %>%
   filter(filename %in% nixon_articles$filename)
+
 
 nixon_text_tokenized <- nixon_text %>% 
   select(sentence) %>% 
@@ -397,64 +460,47 @@ nixon_text_tokenized <- nixon_text %>%
 nixon_sentiments_all <- nixon_text_tokenized %>%
   inner_join(nrc_sentiments, relationship = "many-to-many") %>%
   count(sentiment, sort = TRUE) %>% 
-  mutate(pct_total =round(n/sum(n), digits=2))
+  mutate(pct_total = round(n/sum(n), digits=4)) %>%
+  mutate(president = "Nixon") %>%
+  # Reorder sentiment based on pct_total
+  mutate(sentiment = reorder(sentiment, -pct_total))
 
-nixon_sentiments_all <- nixon_sentiments_all %>%
-  mutate(percent = percent(pct_total)) %>%
-  mutate(president = "Nixon")
-
-nixon_sentiments_all <- nixon_sentiments_all %>%
-  mutate(sentiment = fct_reorder(sentiment, desc(percent)))
-
-ggplot(nixon_sentiments_all, aes(sentiment, percent, fill=president)) +
+ggplot(nixon_sentiments_all, aes(sentiment, pct_total, fill=pct_total)) +
   geom_bar(stat="identity", position="dodge") +
-  labs(title = "Presence of Sentiment in Articles by Raymond Moley Mentioning Richard Nixon",
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.01)) +  # Format y-axis as percentages
+  labs(title = "Sentiment of Nixon Articles",
         x = "Sentiment",
-        y = "Percentage of Total Text") + 
-  theme(axis.text.x = element_text(angle = 45, vjust=0.5)) 
-
-
+        y = "Percentage of Total Text", 
+        caption = "Newsweek articles, Graphic by Rob Wells and Bridget Lang") +
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5),legend.position = "none") 
 ```
 
-### Comaprison
-#rsw comment - This is very cool, extremely helpful for what I am doing. A few tweaks: the y axis needs to be properly formatted in percents. You write these bomber headlines that go off the margins, so tighten that up
-```{r echo = F, results = 'hide', error=F, warning=F, message=F}
+# Nixon v Dewey Sentiment
+
+```{r}
 
 nixon_dewey_sentiments <- dewey_sentiments_all %>%
   bind_rows(nixon_sentiments_all)
 
-ggplot(nixon_dewey_sentiments, aes(sentiment, percent, fill=president)) +
+
+ggplot(nixon_dewey_sentiments, aes(sentiment, pct_total, fill=president)) +
   geom_bar(stat="identity", position="dodge") +
-  labs(title = "Presence of Sentiment in Articles by Raymond Moley Mentioning Richard Nixon vs. Thomas Dewey",
-        x = "Sentiment",
-        y = "Percentage of Total Text") + 
+  scale_y_continuous(labels = scales::percent, limits=c(0, .30)) +
+  geom_text(aes(label=scales::percent(pct_total, accuracy=0.01), group=president), 
+            position = position_dodge(width=0.9),  # Match the dodge width of bars
+            angle = 90,                            # Rotate text 90 degrees
+            hjust = -0.2,                         # Adjust horizontal position
+            size=3) +
+  labs(title = "Sentiment Nixon vs. Dewey in Moley Columns",
+       x = "Sentiment",
+       y = "Percentage of Total Text",
+       caption = "Graphic by Bridget Lang and Rob Wells, 2/16/2025") + 
   theme(axis.text.x = element_text(angle = 45, vjust=0.5)) + 
   scale_fill_manual(values = c("forestgreen", "purple"))
 
 
-
 ```
 
-# Wells fix  
-```{r echo = F, results = 'hide', error=F, warning=F, message=F}
-
-nixon_dewey_sentiments <- dewey_sentiments_all %>%
-  bind_rows(nixon_sentiments_all)
-
-ggplot(nixon_dewey_sentiments, aes(sentiment, percent, fill=president)) +
-  geom_bar(stat="identity", position="dodge") +
-  scale_y_continuous(labels = scales::percent)+
-  labs(title = "Moley Sentiment Nixon vs. Dewey",
-       subtitle = "Analysis of Newsweek columns, 1942-1960",
-       caption = "Graphic by Bridget Lang, 12-10-2024",
-        x = "Sentiment",
-        y = "Percentage of Total Text") + 
-  theme(axis.text.x = element_text(angle = 45, vjust=0.5)) + 
-  scale_fill_manual(values = c("forestgreen", "purple"))
-
-
-
-```
 
 ## Overall Sentiment Analysis 
 
