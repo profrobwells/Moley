@@ -16,20 +16,7 @@ The earliest year of publication is 1937, and the latest is 1967.
 The average year of publication is 1952, with the majority of articles written in 1938.
 The article text has 1487 articles. That's less than the 1562 entries in the article index. The difference was due to about 75 failed AI scans.
 
-## Background on Raymond Moley
-
-Born in 1886, Raymond Moley was an American journalist, presidential advisor, and political economist. He is well known as a founder of the "Brain Trust", which was Roosovelt's group of advisors during his campaign in 1932. This group helped pen the New Deal, which was a group of controversial policy measures passed by Roosovelt to help aid in recovery from the great depression. Moley was a outspoken supporter of the New Deal early in his work with FDR, but as the presidency continued, his opinions began to shift and he ended up becoming one of its largest critics. He used his platform as a political columnist to advise and provide insight on what he believed to be the successes and issues within the political climate of his time. 
-
-https://case.edu/ech/articles/m/moley-raymond
-https://www.britannica.com/biography/Raymond-Charles-Moley
-https://www.presidency.ucsb.edu/documents/remarks-presenting-the-presidential-medal-freedom-eight-journalists
-https://www.britannica.com/event/New-Deal
-
-
-## Libraries Used
-
-Some of these libraries are used only in this webpage, but this is all libraries used in the analysis done so far. 
-
+# Load Libraries
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 
 
@@ -62,7 +49,7 @@ library(flextable)
 library(janitor)
 ```
 
-
+## Load Data
 ```{r echo = F}
 #1562 articles in index
 article_index <-  rio::import("matching with extract-Perspective_full_index_1967_1937.xls") |> 
@@ -260,123 +247,6 @@ articles_text %>%
 
 
 
-## Economic vs Political Articles Over Time
-
-
-I generated the lists to determine economic and political articles using ChatGPT, giving it the following prompts. 
-
-### For economic words:
-
-"Give me a list of words in the english language that have an economic connotation."
-"Add the words economy, economic, money, and union"
-```{r echo = F}
-
-economic_terms <- read.csv("./data/Economic_Terms.csv")
-kable(head(economic_terms, 20), caption="Sample of Economic Terms")
-
-```
-### For political words:
-
-"Give me a list of words in the English language that have a political connotation specific to the years 1932-1960 but also general political terms. Specific to american politics."
-  
-```{r echo = F}
-
-political_terms <- read.csv("./data/Political_Terms.csv")
-kable(head(political_terms, 20), caption="Sample of Political Terms")
-
-```
-#Unigrams
-```{r}
-
-unigrams <- articles_text %>% mutate(sentence= str_squish(sentence)) |> 
-  mutate(text = tolower(sentence)) |>  
-  mutate(text = gsub("\\d+", "", text)) |>
-  mutate(text = str_replace_all(text, "raymond", "")) %>% 
-  mutate(text = str_replace_all(text, "newsweek", "")) %>% 
-  mutate(text = str_replace_all(text, "image", "")) %>%
-  mutate(text = str_replace_all(text, "perspective", "")) %>%
-  mutate(text = str_replace_all(text, "registered u.s. patent office", "")) %>%
-  mutate(text = str_replace_all(text, "- ", "")) %>%
-  mutate(text = str_replace_all(text, " -", "")) %>%
-  mutate(text = str_replace_all(text, " - ", "")) %>%
-  unnest_tokens(word, text, token="ngrams", n=1 ) %>%
-  filter(!word %in% stop_words$word) %>%
-  filter(!word == "minor inaccuracies") %>%
-  filter(!word == "text extraction") %>%
-  filter(!word == "text version") %>%
-    filter(!is.na(word))
-
-
-
-one_word_per_row <- unigrams |> 
-  select(word, date, year, filename)
-
-```
-
-#Chart Political vs Economic Coverage
-```{r}
-count_word_per_year <- function(data, target_word) {
-  data %>%
-    filter(word == target_word) %>%       
-    group_by(year) %>%                   
-    summarise(count = n(), .groups = "drop") 
-}
-
-political_articles <- one_word_per_row %>%
-  select(filename, year, word) %>%
-  filter(word %in% political_terms$Word )
-
-political_articles <- political_articles %>%
-  select(filename, year)
-
-political_articles <- distinct(political_articles)
-
-economic_articles <- one_word_per_row %>%
-  select(filename, year, word) %>%
-  filter(word %in% economic_terms$Word )
-
-economic_articles <- economic_articles %>%
-   select(filename, year)
-
-economic_articles <- distinct(economic_articles)
-
-both_econ_political <- political_articles %>%
-  select(filename, year) %>%
-  filter(filename %in% economic_articles$filename)
-
-only_political <- political_articles %>%
-  select(filename, year) %>%
-  filter(!filename %in% economic_articles$filename)
-
-only_economic <- economic_articles %>%
-  select(filename, year) %>%
-  filter(!filename %in% political_articles$filename)
-
-political_articles_by_year <- political_articles %>%
-  count(year) %>%
-  group_by(year)
-
-political_articles_by_year <- political_articles_by_year %>%
-  mutate(type = "political")
-
-economic_articles_by_year <- economic_articles %>%
-  count(year) %>%
-  group_by(year)
-
-economic_articles_by_year <- economic_articles_by_year %>%
-  mutate(type = "economic")
-
-article_type_by_year <- economic_articles_by_year %>%
-  bind_rows(political_articles_by_year)
-
-ggplot(article_type_by_year, aes(year, n, fill=type)) +
-  geom_bar(stat="identity", position="dodge") + 
-  labs(title = "Political vs. Economic Articles Written by Raymond Moley, 1937-1967",
-        x = "Year",
-        y = "Count",
-       caption= "n=1,487 Newsweek columns. Graphic by Bridget Lang, 2/16/2025")
-
-```
 
 ## Sentiment Analysis of Coverage of Presidential Candidates 
 
@@ -501,6 +371,161 @@ ggplot(nixon_dewey_sentiments, aes(sentiment, pct_total, fill=president)) +
 
 ```
 
+# Words in headlines
+Count the words in the Perspective column headlines
+```{r}
+
+headlines_tokens <- article_index |> 
+  mutate(text= str_squish(title), 
+      text = tolower(text),
+      text = str_remove_all(text, "[[:punct:]]")) |> 
+  unnest_tokens(word, text, token="ngrams", n=1 ) %>%
+  filter(!word %in% stop_words$word) %>%
+  filter(!is.na(word)) |> 
+  filter(!word == "perspective") %>%
+  select(word, date, year, index)
+
+
+headline_counts <- headlines_tokens %>%
+  count(word, sort = TRUE) %>% 
+  filter(!is.na(word))
+
+datatable(headline_counts,
+          caption = "Top Words in Moley Headlines",
+          options = list(pageLength = 15))
+
+
+```
+
+Dewey and its variants appeared in headlines 18 times, which would have made it a top 10 term.
+
+Nixon and its variants appeared 16 times in headlines, which would have made it a top 15 term.
+
+Goldwater appeared 7 times. Eisenhower, 3; Wilkie, 0; Roosevelt, 9; Kennedy, 6; Truman, 7
+Republican was the 8th most frequent term with 18 mentions; Democrats, 5, around 80th place.
+
+
+## Economic vs Political Articles Over Time
+
+
+I generated the lists to determine economic and political articles using ChatGPT, giving it the following prompts. 
+
+### For economic words:
+
+"Give me a list of words in the english language that have an economic connotation."
+"Add the words economy, economic, money, and union"
+```{r echo = F}
+
+economic_terms <- read.csv("./data/Economic_Terms.csv")
+kable(head(economic_terms, 20), caption="Sample of Economic Terms")
+
+```
+### For political words:
+
+"Give me a list of words in the English language that have a political connotation specific to the years 1932-1960 but also general political terms. Specific to american politics."
+  
+```{r echo = F}
+
+political_terms <- read.csv("./data/Political_Terms.csv")
+kable(head(political_terms, 20), caption="Sample of Political Terms")
+
+```
+#Unigrams
+```{r}
+
+unigrams <- articles_text %>% mutate(sentence= str_squish(sentence)) |> 
+  mutate(text = tolower(sentence)) |>  
+  mutate(text = gsub("\\d+", "", text)) |>
+  mutate(text = str_replace_all(text, "raymond", "")) %>% 
+  mutate(text = str_replace_all(text, "newsweek", "")) %>% 
+  mutate(text = str_replace_all(text, "image", "")) %>%
+  mutate(text = str_replace_all(text, "perspective", "")) %>%
+  mutate(text = str_replace_all(text, "registered u.s. patent office", "")) %>%
+  mutate(text = str_replace_all(text, "- ", "")) %>%
+  mutate(text = str_replace_all(text, " -", "")) %>%
+  mutate(text = str_replace_all(text, " - ", "")) %>%
+  unnest_tokens(word, text, token="ngrams", n=1 ) %>%
+  filter(!word %in% stop_words$word) %>%
+  filter(!word == "minor inaccuracies") %>%
+  filter(!word == "text extraction") %>%
+  filter(!word == "text version") %>%
+    filter(!is.na(word))
+
+
+
+one_word_per_row <- unigrams |> 
+  select(word, date, year, filename)
+
+```
+
+#Chart Political vs Economic Coverage
+```{r}
+count_word_per_year <- function(data, target_word) {
+  data %>%
+    filter(word == target_word) %>%       
+    group_by(year) %>%                   
+    summarise(count = n(), .groups = "drop") 
+}
+
+political_articles <- one_word_per_row %>%
+  select(filename, year, word) %>%
+  filter(word %in% political_terms$Word )
+
+political_articles <- political_articles %>%
+  select(filename, year)
+
+political_articles <- distinct(political_articles)
+
+economic_articles <- one_word_per_row %>%
+  select(filename, year, word) %>%
+  filter(word %in% economic_terms$Word )
+
+economic_articles <- economic_articles %>%
+   select(filename, year)
+
+economic_articles <- distinct(economic_articles)
+
+both_econ_political <- political_articles %>%
+  select(filename, year) %>%
+  filter(filename %in% economic_articles$filename)
+
+only_political <- political_articles %>%
+  select(filename, year) %>%
+  filter(!filename %in% economic_articles$filename)
+
+only_economic <- economic_articles %>%
+  select(filename, year) %>%
+  filter(!filename %in% political_articles$filename)
+
+political_articles_by_year <- political_articles %>%
+  count(year) %>%
+  group_by(year)
+
+political_articles_by_year <- political_articles_by_year %>%
+  mutate(type = "political")
+
+economic_articles_by_year <- economic_articles %>%
+  count(year) %>%
+  group_by(year)
+
+economic_articles_by_year <- economic_articles_by_year %>%
+  mutate(type = "economic")
+
+article_type_by_year <- economic_articles_by_year %>%
+  bind_rows(political_articles_by_year)
+
+ggplot(article_type_by_year, aes(year, n, fill=type)) +
+  geom_bar(stat="identity", position="dodge") + 
+  labs(title = "Political vs. Economic Articles Written by Raymond Moley, 1937-1967",
+        x = "Year",
+        y = "Count",
+       caption= "n=1,487 Newsweek columns. Graphic by Bridget Lang, 2/16/2025")
+
+```
+
+#----------------------------------------
+# Notes Below
+#----------------------------------------
 
 ## Overall Sentiment Analysis 
 
@@ -647,7 +672,18 @@ ggplot(vizDataFrame, aes(x=decade, y=value, fill=category)) +
 
 **election** - Relating to or commenting on an ongoing, past, or future election, its candidates, its status, and/or expected or hoped-for outcome.
 
-## Essay
+## Background on Raymond Moley
+
+Born in 1886, Raymond Moley was an American journalist, presidential advisor, and political economist. He is well known as a founder of the "Brain Trust", which was Roosovelt's group of advisors during his campaign in 1932. This group helped pen the New Deal, which was a group of controversial policy measures passed by Roosovelt to help aid in recovery from the great depression. Moley was a outspoken supporter of the New Deal early in his work with FDR, but as the presidency continued, his opinions began to shift and he ended up becoming one of its largest critics. He used his platform as a political columnist to advise and provide insight on what he believed to be the successes and issues within the political climate of his time. 
+
+https://case.edu/ech/articles/m/moley-raymond
+https://www.britannica.com/biography/Raymond-Charles-Moley
+https://www.presidency.ucsb.edu/documents/remarks-presenting-the-presidential-medal-freedom-eight-journalists
+https://www.britannica.com/event/New-Deal
+
+
+
+## Bridget's Essay
 The data itself is currently a collection of 105 articles, written by Raymond Moley for Newsweek between the years 1942 and 1960. For each article there is a known filename, length, and date of publication, along with the contents of each article. There were a few iterations of importing data before a final process and dataset was established. The issue mainly lied in the way that the articles needed to be scanned, as the format was columns, which are difficult for a usual PDF scanning software to decipher. Dr. Wells used a variety of methods, including artififical intelligence, to gather these articles and put them into a final set of 105 articles with an accompanying index. All but one of the articles written in 1948 were corrupted, showing up as lines of "[?]" rather than text. The cause of this issue is unknown, but it is interesting that it was all articles from 1948. I excluded the one functional article from 1948 in order to prevent the data being skewed in any analysis done based on year or decade. 
 
 I created a table of the top 20 bigrams, the two most common of which being "republican party" and "federal government". This is not a surprise given that Moley was an advisor for every republican presidential candidate from 1934-1960. The second most common after these two bigram was "democratic party", followed by "vice president", then "federal aid". I think that "federal aid" is the first bigram of significant interest, given that the first four are no surprise given the context of the writing. "Federal aid" implies discussion of policy or use of government funds, which was likely a common theme for Moley's writings. 
