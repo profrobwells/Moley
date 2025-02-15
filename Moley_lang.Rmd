@@ -1,0 +1,128 @@
+---
+title: "Richard Moley Article Scraping"
+author: "Bridget Lang"
+date: "2024-11-16"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(pdftools)
+#install.packages("pdftools")
+```
+
+#Make a dataframe of all the names of the pdf files 
+
+```{r}
+article_index <- list.files("./test", pattern="*.pdf") %>% 
+  as.data.frame() |>
+  rename(filename = 1) |> 
+  mutate(index = str_extract(filename, "\\d+")) |> 
+  mutate(index = as.numeric(index))
+  
+article_index <- article_index %>%
+  mutate(filename = str_replace(filename, ".pdf", ""))
+
+article_index
+```
+
+#Extract the date from a test file into a .txt file, using methods by Rob Wells
+```{r}
+# Function to segment columns and remove the first column
+get_date <- function(page_data) {
+  # Get the width of the page
+  page_width <- max(page_data$x + page_data$width)
+  page_height <- max(page_data$y + page_data$height) 
+  
+  date_bottom = (0.09) * page_height
+  #distance from left of page to start of date 
+  date_left = (0.7) * page_width
+  
+  date <- page_data[page_data$x >= date_left & page_data$y <=  date_bottom,]
+  print(date$text)
+ # return(date)
+ # article_index2 <- article_index2 %>%
+#  filter(index = idx)
+  #mutate(date = date$text)
+
+}
+call_get_date <- function(filename) {
+  file_path = glue::glue("./test/{filename}.pdf")
+  pdf_info <- pdf_data(file_path)
+  sapply(pdf_info, function(page) get_date(page))
+}
+
+# Apply the function to each page in the PDF
+sapply(article_index$filename, call_get_date)
+
+
+
+```
+
+#Extract the text from a test file into a .txt file, using methods by Rob Wells
+```{r}
+# Function to segment columns and remove the first column
+filter_columns <- function(page_data, filename) {
+  # Get the width of the page
+  page_width <- max(page_data$x + page_data$width)
+  
+  # Define column boundaries
+  column_1_cutoff <- 0.4 * page_width  # Left column
+  column_2_cutoff <- 0.7 * page_width  # Middle column
+
+  # Split the text into three columns based on x-coordinates
+  column_2 <- page_data[page_data$x > column_1_cutoff & page_data$x <= column_2_cutoff, ]
+  column_3 <- page_data[page_data$x > column_2_cutoff, ]
+  
+  # Combine the text from each column separately, line by line, to preserve order
+  col2_text <- paste(column_2$text, collapse = " ")
+  col3_text <- paste(column_3$text, collapse = " ")
+  
+  # Combine the text from columns 2 and 3
+  full_text <- paste(col2_text, col3_text, sep = " ")
+  
+  writeLines(full_text, glue::glue("./test/{filename}.txt"))
+}
+
+# Apply the function to each page in each PDF in each file in ./test
+call_filter_columns <- function(filename) {
+  file_path = glue::glue("./test/{filename}.pdf")
+  pdf_info <- pdf_data(file_path)
+  sapply(pdf_info, function(page) filter_columns(page, filename))
+}
+
+sapply(article_index$filename, call_filter_columns)
+```
+# Compiling text
+```{r}
+
+create_article_text <- function(filename) {
+  
+    articles_df_temp <- read_lines(glue::glue("./test/{filename}.txt")) %>%
+    as_tibble() %>%
+    mutate(filename = filename)
+  
+  # Bind results to master articles_df
+  # <<- returns to global environment
+  articles_df <<- articles_df %>%
+    bind_rows(articles_df_temp)
+}
+
+###
+# Create elements needed to run function
+###
+
+# Create empty tibble to store results
+articles_df <- tibble()
+#running once to test
+#create_article_text(2) 
+# Create an array of numbers to loop through, from 1 to the number of rows in our index dataframe 
+row_values <- 1:nrow(article_index)
+
+###
+# Execute function using lapply
+# This loops through each row of the dataframe and append results to master file
+###
+
+sapply(article_index$filename, create_article_text)
+```
+
