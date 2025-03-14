@@ -248,13 +248,125 @@ articles_text %>%
 
 
 
-## Sentiment Analysis of Coverage of Presidential Candidates 
+## Presidential Candidate Coverage
+###Nixon
+```{r}
+nixon_articles2 <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  group_by(filename, year, date) %>%
+  summarize(mentions = sum(str_detect(sentence, "Nixon"), na.rm = TRUE)) %>%
+  filter(mentions >= 2) |> 
+  mutate(politician = "Nixon")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+nixon_mentions <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  filter(str_detect(sentence, "Nixon"))
+
+print(paste("Total number of sentences mentioning Nixon:", nrow(nixon_mentions)))
+```
+###Goldwater
+```{r}
+goldwater_articles2 <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  group_by(filename, year, date) %>%
+  summarize(mentions = sum(str_detect(sentence, "Goldwater"), na.rm = TRUE)) %>%
+  filter(mentions >= 2) |> 
+    mutate(politician = "Goldwater")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+goldwater_mentions <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  filter(str_detect(sentence, "Goldwater"))
+
+print(paste("Total number of sentences mentioning Goldwater:", nrow(goldwater_mentions)))
+```
+###Roosevelt
+```{r}
+roosevelt_articles2 <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  group_by(filename, year, date) %>%
+  summarize(mentions = sum(str_detect(sentence, "Roosevelt"), na.rm = TRUE)) %>%
+  filter(mentions >= 2) |> 
+    mutate(politician = "Roosevelt")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+roosevelt_mentions <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  filter(str_detect(sentence, "Roosevelt"))
+
+print(paste("Total number of sentences mentioning Roosevelt:", nrow(roosevelt_mentions)))
+```
+###Eisenhower
+```{r}
+eisenhower_articles2 <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  group_by(filename, year, date) %>%
+  summarize(mentions = sum(str_detect(sentence, "Eisenhower"), na.rm = TRUE)) %>%
+  filter(mentions >= 2) |> 
+    mutate(politician = "Eisenhower")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+eisenhower_mentions <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  filter(str_detect(sentence, "Eisenhower"))
+
+print(paste("Total number of sentences mentioning eisenhower:", nrow(eisenhower_mentions)))
+```
+###Dewey
+```{r}
+dewey_articles2 <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+   group_by(filename, year, date) %>%
+  summarize(mentions = sum(str_detect(sentence, "Dewey"), na.rm = TRUE)) %>%
+  filter(mentions >= 2) |> 
+    mutate(politician = "Dewey")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+dewey_mentions <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  filter(str_detect(sentence, "Dewey"))
+
+print(paste("Total number of sentences mentioning dewey:", nrow(dewey_mentions)))
+```
+
+```{r}
+politicians <- rbind(nixon_articles2, goldwater_articles2, roosevelt_articles2, dewey_articles2, eisenhower_articles2)
+
+#write.csv(politicians, "politicians_mentions_feb21.csv")
+```
+###Candidates visualized
+```{r}
+politicians |> 
+  group_by(year, politician) |> 
+  summarize(total = sum(mentions)) |> 
+ggplot(aes(y=total, x= year, fill=politician)) +
+  geom_bar(stat="identity", position="dodge") +
+  scale_x_continuous(breaks = seq(1936, 1968, by = 2))+
+  labs(title = "Moley's Coverage of Major Candidates",
+       subtitle = "Two or more mentions of politician in Newsweek",
+        y = "Count of Politician Mentions", 
+        x = "",
+        caption = "n=1,487 Newsweek articles, Graphic by Rob Wells") +
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5)) 
+
+
+```
+
+
+
 
 ```{r echo = F}
 nixon_articles <- articles_text %>%
   filter(str_detect(sentence, "Nixon")) %>%
   select(filename, year) %>%
   distinct(filename, year)
+
 
 goldwater_articles <- articles_text %>%
   filter(str_detect(sentence, "Goldwater")) %>%
@@ -405,6 +517,130 @@ Goldwater appeared 7 times. Eisenhower, 3; Wilkie, 0; Roosevelt, 9; Kennedy, 6; 
 Republican was the 8th most frequent term with 18 mentions; Democrats, 5, around 80th place.
 
 
+# Articles - Politicians
+
+```{r}
+
+
+
+
+```
+
+
+
+#----------------------------------------
+# Notes Below
+#----------------------------------------
+
+## Overall Sentiment Analysis 
+
+### All Articles
+#rsw comment - again, fix the y axis to scale as percentages. 
+```{r echo = F, results = 'hide', error=F, warning=F, message=F}
+
+all_text_tokenized <- articles_text %>% 
+  select(sentence) %>% 
+  mutate(sentence = str_replace_all(sentence, "- ", "")) %>% 
+  unnest_tokens(word, sentence) %>% 
+  filter(!word %in% stop_words$word) %>% 
+  filter(!grepl('[0-9]', word))
+
+sentiments_all <- all_text_tokenized %>%
+  inner_join(nrc_sentiments, relationship = "many-to-many") %>%
+  count(sentiment, sort = TRUE) %>% 
+  mutate(pct_total =round(n/sum(n), digits=2))
+
+sentiments_all <- sentiments_all %>%
+  mutate(percent = percent(pct_total)) %>%
+  mutate(sentiment = fct_reorder(sentiment, desc(percent)))
+
+ggplot(sentiments_all, aes(sentiment, percent, fill=percent)) +
+  geom_bar(stat="identity", position="dodge") +
+  labs(title = "Presence of Sentiment in Articles by Raymond Moley, 1942-1964",
+        x = "Sentiment",
+        y = "Percentage of Total Text")
+
+```
+
+### By Decade
+
+#rsw comment; great idea. the bars need to be in chronological sequence, though. An easier way would be to mutate a new decade variable and visualize that instead.
+```{r echo = F, results = 'hide', error=F, warning=F, message=F}
+#fourties
+fourties_text <- articles_text %>% 
+  filter((round(year / 10) * 10) == 1940)
+
+fourties_text_tokenized <- fourties_text %>% 
+  select(sentence) %>% 
+  mutate(sentence = str_replace_all(sentence, "- ", "")) %>% 
+  unnest_tokens(word, sentence) %>% 
+  filter(!word %in% stop_words$word) %>% 
+  filter(!grepl('[0-9]', word))
+
+fourties_sentiments <- fourties_text_tokenized %>%
+  inner_join(nrc_sentiments, relationship = "many-to-many") %>%
+  count(sentiment, sort = TRUE) %>% 
+  mutate(pct_total =round(n/sum(n), digits=2))
+
+fourties_sentiments <- fourties_sentiments %>%
+  mutate(percent = percent(pct_total)) %>%
+  mutate(decade = "Fourties")
+
+#fifties
+fifties_text <- articles_text %>% 
+  filter((round(year / 10) * 10) == 1950)
+
+fifties_text_tokenized <- fifties_text %>% 
+  select(sentence) %>% 
+  mutate(sentence = str_replace_all(sentence, "- ", "")) %>% 
+  unnest_tokens(word, sentence) %>% 
+  filter(!word %in% stop_words$word) %>% 
+  filter(!grepl('[0-9]', word))
+
+fifties_sentiments <- fifties_text_tokenized %>%
+  inner_join(nrc_sentiments, relationship = "many-to-many") %>%
+  count(sentiment, sort = TRUE) %>% 
+  mutate(pct_total =round(n/sum(n), digits=2))
+
+fifties_sentiments <- fifties_sentiments %>%
+  mutate(percent = percent(pct_total)) %>%
+  mutate(decade = "Fifties")
+
+#sixties
+sixties_text <- articles_text %>% 
+  filter((round(year / 10) * 10) == 1960)
+
+sixties_text_tokenized <- sixties_text %>% 
+  select(sentence) %>% 
+  mutate(sentence = str_replace_all(sentence, "- ", "")) %>% 
+  unnest_tokens(word, sentence) %>% 
+  filter(!word %in% stop_words$word) %>% 
+  filter(!grepl('[0-9]', word))
+
+sixties_sentiments <- sixties_text_tokenized %>%
+  inner_join(nrc_sentiments, relationship = "many-to-many") %>%
+  count(sentiment, sort = TRUE) %>% 
+  mutate(pct_total =round(n/sum(n), digits=2))
+
+sixties_sentiments <- sixties_sentiments %>%
+  mutate(percent = percent(pct_total)) %>%
+  mutate(decade = "Sixties")
+
+decade_sentiment_all <- fourties_sentiments %>%
+  bind_rows(fifties_sentiments %>% bind_rows(sixties_sentiments))
+
+ggplot(decade_sentiment_all, aes(sentiment, percent, fill=decade)) +
+  geom_bar(stat="identity", position="dodge") +
+  labs(title = "Presence of Sentiment in Articles by Raymond Moley, Grouped by Decade",
+        x = "Sentiment",
+        y = "Percentage of Total Text") + 
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5)) + 
+  scale_fill_manual(values = c("orange", "purple", "navy"))
+
+```
+
+
+
 ## Economic vs Political Articles Over Time
 
 
@@ -523,116 +759,6 @@ ggplot(article_type_by_year, aes(year, n, fill=type)) +
 
 ```
 
-#----------------------------------------
-# Notes Below
-#----------------------------------------
-
-## Overall Sentiment Analysis 
-
-### All Articles
-#rsw comment - again, fix the y axis to scale as percentages. 
-```{r echo = F, results = 'hide', error=F, warning=F, message=F}
-
-all_text_tokenized <- articles_text %>% 
-  select(sentence) %>% 
-  mutate(sentence = str_replace_all(sentence, "- ", "")) %>% 
-  unnest_tokens(word, sentence) %>% 
-  filter(!word %in% stop_words$word) %>% 
-  filter(!grepl('[0-9]', word))
-
-sentiments_all <- all_text_tokenized %>%
-  inner_join(nrc_sentiments, relationship = "many-to-many") %>%
-  count(sentiment, sort = TRUE) %>% 
-  mutate(pct_total =round(n/sum(n), digits=2))
-
-sentiments_all <- sentiments_all %>%
-  mutate(percent = percent(pct_total)) %>%
-  mutate(sentiment = fct_reorder(sentiment, desc(percent)))
-
-ggplot(sentiments_all, aes(sentiment, percent, fill=percent)) +
-  geom_bar(stat="identity", position="dodge") +
-  labs(title = "Presence of Sentiment in Articles by Raymond Moley, 1942-1964",
-        x = "Sentiment",
-        y = "Percentage of Total Text")
-
-```
-
-### By Decade
-
-#rsw comment; great idea. the bars need to be in chronological sequence, though. An easier way would be to mutate a new decade variable and visualize that instead.
-```{r echo = F, results = 'hide', error=F, warning=F, message=F}
-#fourties
-fourties_text <- articles_text %>% 
-  filter((round(year / 10) * 10) == 1940)
-
-fourties_text_tokenized <- fourties_text %>% 
-  select(sentence) %>% 
-  mutate(sentence = str_replace_all(sentence, "- ", "")) %>% 
-  unnest_tokens(word, sentence) %>% 
-  filter(!word %in% stop_words$word) %>% 
-  filter(!grepl('[0-9]', word))
-
-fourties_sentiments <- fourties_text_tokenized %>%
-  inner_join(nrc_sentiments, relationship = "many-to-many") %>%
-  count(sentiment, sort = TRUE) %>% 
-  mutate(pct_total =round(n/sum(n), digits=2))
-
-fourties_sentiments <- fourties_sentiments %>%
-  mutate(percent = percent(pct_total)) %>%
-  mutate(decade = "Fourties")
-
-#fifties
-fifties_text <- articles_text %>% 
-  filter((round(year / 10) * 10) == 1950)
-
-fifties_text_tokenized <- fifties_text %>% 
-  select(sentence) %>% 
-  mutate(sentence = str_replace_all(sentence, "- ", "")) %>% 
-  unnest_tokens(word, sentence) %>% 
-  filter(!word %in% stop_words$word) %>% 
-  filter(!grepl('[0-9]', word))
-
-fifties_sentiments <- fifties_text_tokenized %>%
-  inner_join(nrc_sentiments, relationship = "many-to-many") %>%
-  count(sentiment, sort = TRUE) %>% 
-  mutate(pct_total =round(n/sum(n), digits=2))
-
-fifties_sentiments <- fifties_sentiments %>%
-  mutate(percent = percent(pct_total)) %>%
-  mutate(decade = "Fifties")
-
-#sixties
-sixties_text <- articles_text %>% 
-  filter((round(year / 10) * 10) == 1960)
-
-sixties_text_tokenized <- sixties_text %>% 
-  select(sentence) %>% 
-  mutate(sentence = str_replace_all(sentence, "- ", "")) %>% 
-  unnest_tokens(word, sentence) %>% 
-  filter(!word %in% stop_words$word) %>% 
-  filter(!grepl('[0-9]', word))
-
-sixties_sentiments <- sixties_text_tokenized %>%
-  inner_join(nrc_sentiments, relationship = "many-to-many") %>%
-  count(sentiment, sort = TRUE) %>% 
-  mutate(pct_total =round(n/sum(n), digits=2))
-
-sixties_sentiments <- sixties_sentiments %>%
-  mutate(percent = percent(pct_total)) %>%
-  mutate(decade = "Sixties")
-
-decade_sentiment_all <- fourties_sentiments %>%
-  bind_rows(fifties_sentiments %>% bind_rows(sixties_sentiments))
-
-ggplot(decade_sentiment_all, aes(sentiment, percent, fill=decade)) +
-  geom_bar(stat="identity", position="dodge") +
-  labs(title = "Presence of Sentiment in Articles by Raymond Moley, Grouped by Decade",
-        x = "Sentiment",
-        y = "Percentage of Total Text") + 
-  theme(axis.text.x = element_text(angle = 45, vjust=0.5)) + 
-  scale_fill_manual(values = c("orange", "purple", "navy"))
-
-```
 
 ## Topic Model 
 
