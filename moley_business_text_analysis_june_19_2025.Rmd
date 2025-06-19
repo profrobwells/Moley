@@ -1,15 +1,13 @@
 ---
-title: "Content Analysis of Raymond Moley’s Reporting from 1937 - 1968"
+title: "Analysis of Business Narratives Raymond Moley’s Reporting from 1937 - 1968"
 author: "Rob Wells and Bridget Lang"
-date: '2025-2-14'
+date: '2025-6-19'
 output: html_document
 ---
 
-This project aims to perform a basic narrative and topic analysis of the journalism of **Raymond Moley**, a prominent columnist who advocated a centrist conservative political vision from 1937 through 1967 in his books, weekly Newsweek column and syndicated newspaper column. 
+This notebook extends the analysis from "moley_text_analysius_feb_14_2025.rmd" by focusing on specific business and economic narratives over time..
 
-The goal of this project is to **measure patterns in wording, verbiage, themes, and sentiment** of Raymond Moley's poltitical reporting over time. This research will support a larger effort in analyzing the **influence of journalism and polticial activism on American elections, voting, and democracy at large**. 
-
-I am focusing on the time period of Moley's work from **1937-1968**, with **1400 articles**  analyzed. 
+The following examines Moley's Newsweek columns from **1937-1968**, with **1487 articles**  analyzed. 
 
 The index has 1562 articles
 The earliest year of publication is 1937, and the latest is 1967.
@@ -62,81 +60,6 @@ articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_
     mutate(year = as.numeric(year),
          date = as.Date(pubdate, format="%b %d, %Y"))
 ```
-## Statistics about the index 
-```{r}
-
-nrows <- nrow(article_index)
-ncols <- ncol(article_index)
-
-mean_year <- round(mean(article_index$year, na.rm = TRUE),0)
-
-min_year <- min(article_index$year)
-
-max_year <- max(article_index$year)
-
-
-year_counts <- 
-  article_index %>%
-  count(year)
-
-max_count <- max(year_counts$n)
-max_years <- year_counts %>%
-  select(year) %>%
-  filter(year_counts$n == max_count)
-                  
-
-glue::glue("There are {nrows} articles in the index of Moley Newsweek columns.");
-
-glue::glue("The earliest year of publication is {as.integer(min_year)}, and the latest is {max_year}.")
-
-glue::glue("The average year of publication is {as.integer(mean_year)}, with the majority of articles written in {max_years$year}.")
-
-
-
-
-```
-
-## Statistics about the extracted text
-```{r echo = F}
-nrows1 <- nrow(articles_text)
-ncols1 <- ncol(articles_text)
-
-articles <- articles_text |> 
-  distinct(filename) |> 
-  count()
-
-
-glue::glue("The article text has {articles} articles. That's less than the {nrows} entries in the article index. The difference was due to about {nrows-articles} failed AI scans.")
-glue::glue("The article text dataframe is huge, with {nrows1} rows and {ncols1} columns.")
-
-```
-
-
-# Figure x: Articles over time
-
-```{r}
-
-#Here is a chart, Figure x, that counts columns by year
-count_year <- articles_text %>% 
-  distinct(filename, .keep_all = TRUE) |> 
-count(year) %>% 
-#Sandwich it onto a simple ggplot
-  ggplot(aes(x = year, y = n, fill = n)) +
-  geom_col(position = "dodge") + 
-  theme(legend.position = "none") +
-  scale_x_continuous(breaks = seq(1935, 1970, by = 5))+
-  labs(title = "Moley Newsweek Columns By Year, 1937-1967", 
-       subtitle = "Extracted Text Only",
-       caption = "n=1,487  articles. Graphic by Rob Wells, 2/14/2025",
-       y="Count of Pages",
-       x="Year")
-
-count_year
-
-#ggsave(here::here("Figure_X_ columns_by_year_2_14_2025.png"),device = "png",width=9,height=6, dpi=800)
-
-```
-
 
 # Bigrams
 ```{r}
@@ -163,6 +86,168 @@ bigrams <- bigrams %>%
 
 ```
 
+### Checking Narratives
+
+#### Statism
+```{r}
+statism <- bigrams |> 
+ filter(str_detect(word, "statism"))
+
+statism |> 
+  group_by(year) |> 
+  count() |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1941, 1964, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "'Statism' in Raymond Moley Newsweek Articles, 1937-1967",
+       subtitle = "Analysis of 1,487 Newsweek columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Source: Newsweek. Graphic by Rob Wells, 6-19-2025")
+
+ggsave("output/statism_newsweek_6-19_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+#### Free Enterprise
+```{r}
+free <- c("private enterprise", "free enterprise",
+"business enterprise", "individual enterprise", "enterprise system", "business enterprises",
+"industrial enterprises")
+
+enterprise <- bigrams |> 
+ filter(str_detect(word, paste(free, collapse = "|")))
+
+
+
+# enterprise |> 
+#   count(word) |> 
+#   arrange(desc(n))
+
+
+enterprise |> 
+  group_by(year) |> 
+  count() |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1937, 1966, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "Free Enterprise in Raymond Moley Newsweek Articles, 1937-1967",
+       subtitle = "Analysis of 1,487 Newsweek columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Free enterprise and six variants of phrase. Source: Newsweek. Graphic by Rob Wells, 6-19-2025")
+
+ggsave("output/free_enterprise_newsweek_6-19_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+#### Communism
+```{r}
+free <- c("communis", "socialis", "marxis")
+
+marx <- bigrams |> 
+ filter(str_detect(word, paste(free, collapse = "|")))
+
+
+
+# enterprise |> 
+#   count(word) |> 
+#   arrange(desc(n))
+
+
+marx |> 
+  group_by(year) |> 
+  count() |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1937, 1967, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "Marxism in Raymond Moley Newsweek Articles, 1937-1967",
+       subtitle = "Analysis of 1,487 Newsweek columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Marxism, communism, socialism. Source: Newsweek. Graphic by Rob Wells, 6-19-2025")
+
+ggsave("output/marxism_newsweek_6-19_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+#### Bureaucracy
+```{r}
+free <- c("bureaucra", "socialis", "marxis")
+
+bureaucrat <- bigrams |> 
+ filter(str_detect(word, "bureaucr"))
+
+
+
+bureaucrat |>
+  count(word) |>
+  arrange(desc(n))
+
+bureaucrat |> 
+  group_by(year) |> 
+  count() |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1937, 1967, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "Bureaucracy in Raymond Moley Newsweek Articles, 1937-1967",
+       subtitle = "Analysis of 1,487 Newsweek columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Source: Newsweek. Graphic by Rob Wells, 6-19-2025")
+
+ggsave("output/bureaucracy_newsweek_6-19_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+#### Spending
+
+expenditures
+
+```{r}
+free <- c("expenditures", "spending p", "appropriations")
+
+spend <- bigrams |> 
+ filter(str_detect(word, paste(free, collapse = "|")))
+
+
+
+spend |>
+  count(word) |>
+  arrange(desc(n))
+
+spend |> 
+  group_by(year) |> 
+  count() |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1937, 1967, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "Government Spending Topics in Raymond Moley Newsweek Articles, 1937-1967",
+       subtitle = "Analysis of 1,487 Newsweek columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Source: Newsweek. Graphic by Rob Wells, 6-19-2025")
+
+ggsave("output/spending_newsweek_6-19_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+
 ## Datatable with bigrams
 ```{r}
 bigrams_separated <- bigrams %>%
@@ -185,6 +270,10 @@ datatable(bigram_counts,
 
 ```
 
+
+# --------------------------------------------------------------------
+# NOTES BELOW
+# --------------------------------------------------------------------
 
 
 There are 192 word pairs containing "Nixon."
@@ -225,7 +314,8 @@ articles_text %>%
     nixon = sum(str_count(sentence, "nixon"), na.rm = TRUE),
     goldwater = sum(str_count(sentence, "goldwater"), na.rm = TRUE),
     dewey = sum(str_count(sentence, "dewey"), na.rm = TRUE),
-    eisenhower = sum(str_count(sentence, "eisenhower"), na.rm = TRUE)
+    eisenhower = sum(str_count(sentence, "eisenhower"), na.rm = TRUE),
+    .groups = 'drop'
   ) %>%
   # Now get totals across all articles
   summarise(
@@ -240,8 +330,8 @@ articles_text %>%
     values_to = "count"
   ) %>%
   mutate(
-    percentage = count / 1487) * 100  # Using actual number of articles
-  ) %>%
+    percentage = round((count / 1487) * 100, digits =1)
+) %>%
   arrange(desc(count))
 ```
 

@@ -1,0 +1,375 @@
+---
+title: "Moley Topic Modeling"
+author: "Rob Wells"
+date: '2025-6-19'
+output: html_document
+---
+
+#--------------------------------------------- \# Mainstream Papers Topic Modeling #--------------------------------------------- 
+
+The following examines Moley's Newsweek columns from **1937-1968**, with **1487 articles**  analyzed. 
+
+The index has 1562 articles
+The earliest year of publication is 1937, and the latest is 1967.
+The average year of publication is 1952, with the majority of articles written in 1938.
+The article text has 1487 articles. That's less than the 1562 entries in the article index. The difference was due to about 75 failed AI scans.
+
+
+This notebook execute basic topic modeling with LADAL Method I've adapted this LADAL tutorial for the lynching research: <https://ladal.edu.au/topicmodels.html>
+
+Load up the packages if you haven't already....
+
+```{r}
+# install.packages("here")
+# install.packages("tidytext")
+# install.packages("quanteda")
+# install.packages("tm")
+# install.packages("topicmodels")
+# install.packages("reshape2")
+# install.packages("ggplot2")
+# install.packages("wordcloud")
+# install.packages("pals")
+# install.packages("SnowballC")
+# install.packages("lda")
+# install.packages("ldatuning")
+# install.packages("kableExtra")
+# install.packages("DT")
+# install.packages("flextable")
+# install.packages("remotes")
+# remotes::install_github("rlesur/klippy")
+#install.packages("rio")
+#install.packages("readtext")
+#install.packages("formattable")
+
+```
+
+```{r include=FALSE}
+# set options
+options(stringsAsFactors = F)         # no automatic data transformation
+options("scipen" = 100, "digits" = 4) # suppress math annotation
+# load packages
+here::here()
+library(tidyverse)
+library(tidytext)
+library(rio)
+library(readtext)
+#topic modeling
+library(quanteda)
+library(tm)
+library(topicmodels)
+library(lda)
+library(ldatuning)
+# from tutorial packages
+library(DT)
+library(knitr) 
+library(kableExtra) 
+library(reshape2)
+library(ggplot2)
+library(wordcloud)
+library(pals)
+library(SnowballC)
+library(flextable)
+
+```
+
+### Import Data
+
+## Load Data
+```{r echo = F}
+#1562 articles in index
+article_index <-  rio::import("matching with extract-Perspective_full_index_1967_1937.xls") |> 
+  clean_names() |> 
+  mutate(year = as.numeric(year),
+         date = as.Date(pubdate, format="%b %d, %Y"))
+
+#136596 rows of text
+articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/moley_cleaned_perspective_text.csv") |> 
+    mutate(year = as.numeric(year),
+         date = as.Date(pubdate, format="%b %d, %Y"))
+```
+
+# Topic Modeling Predmoninantly White-Owned Papers
+
+### Process into corpus object
+
+```{r}
+textdata <- articles_text %>% 
+  select(filename, sentence, year) %>% 
+  as.data.frame() %>% 
+  rename(doc_id = filename, text= sentence)
+
+# load stopwords
+english_stopwords <- readLines("https://slcladal.github.io/resources/stopwords_en.txt", encoding = "UTF-8")
+# load cleaning sequence
+clean <- c("newsweek", "raymond moley", "perspective")
+# create corpus object
+corpus <- Corpus(DataframeSource(textdata))
+# Preprocessing chain
+processedCorpus <- tm_map(corpus, content_transformer(tolower))
+processedCorpus <- tm_map(processedCorpus, removeWords, english_stopwords)
+processedCorpus <- tm_map(processedCorpus, removeWords, clean)
+processedCorpus <- tm_map(processedCorpus, removePunctuation, preserve_intra_word_dashes = TRUE)
+processedCorpus <- tm_map(processedCorpus, removeNumbers)
+processedCorpus <- tm_map(processedCorpus, stemDocument, language = "en")
+processedCorpus <- tm_map(processedCorpus, stripWhitespace)
+```
+
+```{r tm3a}
+#DTM: rows correspond to the documents in the corpus. Columns correspond to the terms in the documents. Cells correspond to the weights of the terms. (Girder)
+# compute document term matrix with terms >= minimumFrequency
+minimumFrequency <- 5
+DTM <- DocumentTermMatrix(processedCorpus, control = list(bounds = list(global = c(minimumFrequency, Inf))))
+# have a look at the number of documents and terms in the matrix
+dim(DTM)
+# due to vocabulary pruning, we have empty rows in our DTM
+# LDA does not like this. So we remove those docs from the
+# DTM and the metadata
+sel_idx <- slam::row_sums(DTM) > 0
+DTM <- DTM[sel_idx, ]
+textdata <- textdata[sel_idx, ]
+#5 term minimum[1] 136596   7782
+
+
+```
+
+## Topic proportions over time {.unnumbered}
+
+We examine topics in the data over time by aggregating mean topic proportions per decade. These aggregated topic proportions can then be visualized, e.g. as a bar plot.
+
+```{r}
+# append decade information for aggregation
+textdata$decade <- paste0(substr(textdata$year, 0, 3), "0")
+```
+
+Articles per decade
+
+```{r}
+#install.packages("formattable")
+articles_decades <- textdata %>% 
+  distinct(doc_id, .keep_all=TRUE) %>% 
+  count(decade) %>% 
+  mutate(pct_total= (n/sum(n))) %>% 
+  mutate(pct_total= formattable::percent(pct_total)) %>% 
+  # mutate(pct_total = round(pct_total, 1)) %>% 
+  arrange(desc(decade))
+
+library(kableExtra)
+articles_decades %>%
+  kbl(caption = "Moley Articles by Decade", font_size = 30) %>%
+  kable_classic(full_width = F, html_font = "Cambria") %>% 
+  column_spec(1, bold = T, border_right = T) %>%
+  column_spec(2, width = "5em") %>% 
+  column_spec(3, width = "5em", background = "yellow") 
+
+
+
+#Fact check 9589 articles
+#sum(articles_decades$n)
+```
+
+```{r tm12}
+# number of topics
+# K <- 20
+K <- 4
+# set random number generator seed
+set.seed(9161)
+#Latent Dirichlet Allocation, LDA
+topicModel2 <- LDA(DTM, K, method="Gibbs", control=list(iter = 500, verbose = 25, alpha = 0.2))
+tmResult <- posterior(topicModel2)
+theta <- tmResult$topics
+beta <- tmResult$terms
+topicNames <- apply(terms(topicModel2, 10), 2, paste, collapse = " ")  # reset topicnames
+```
+
+### Mean topic proportions per decade
+
+```{r}
+# Step 1: Check dimensions
+n_theta <- nrow(theta)
+n_textdata <- length(textdata$decade)
+
+cat("Number of rows in theta: ", n_theta, "\n")
+cat("Number of documents in textdata: ", n_textdata, "\n")
+
+# Check if textdata contains all the documents in theta
+common_ids <- intersect(rownames(theta), textdata$doc_id) # Assuming textdata has a 'doc_id' column
+
+# Filter textdata to include only the documents present in theta
+textdata_filtered <- textdata[textdata$doc_id %in% common_ids, ]
+
+# Check dimensions after filtering
+n_textdata_filtered <- nrow(textdata_filtered)
+cat("Number of documents in filtered textdata: ", n_textdata_filtered, "\n")
+
+# Ensure the lengths match now
+if (n_theta != n_textdata_filtered) {
+  stop("The number of rows in 'theta' still does not match the length of 'textdata_filtered$decade'.")
+}
+
+# Align rownames of theta with filtered textdata
+theta_aligned <- theta[rownames(theta) %in% textdata_filtered$doc_id, ]
+
+# Optional: Verify the order of documents
+if (!all(rownames(theta_aligned) == textdata_filtered$doc_id)) {
+  # If the order doesn't match, reorder one to match the other
+  textdata_filtered <- textdata_filtered[match(rownames(theta_aligned), textdata_filtered$doc_id), ]
+}
+
+# Ensure they are now aligned and can be combined
+if (!all(rownames(theta_aligned) == textdata_filtered$doc_id)) {
+  stop("The document IDs still do not match. Please check the data alignment.")
+}
+
+# Step 2: Combine data
+topic_data <- data.frame(theta_aligned, decade = textdata_filtered$decade)
+
+# Step 3: Aggregate data
+topic_proportion_per_decade <- aggregate(. ~ decade, data = topic_data, FUN = mean)
+
+
+# get mean topic proportions per decade
+# topic_proportion_per_decade <- aggregate(theta, by = list(decade = textdata$decade), mean)
+# set topic names to aggregated columns
+colnames(topic_proportion_per_decade)[2:(K+1)] <- topicNames
+# reshape data frame
+vizDataFrame <- melt(topic_proportion_per_decade, id.vars = "decade")
+
+```
+
+#Examine topic names
+
+```{r}
+#enframe(): Converts a named list into a dataframe.
+topics <- enframe(topicNames, name = "number", value = "text") %>% 
+  unnest(cols = c(text)) 
+  
+topics
+```
+Claude.ai summary with 4 topics
+
+Topic 1: "War & National Government Power"
+Topic 2: "Presidential Politics & Public Affairs"
+Topic 3: "Federal Economic Policy & Taxation"
+Topic 4: "Electoral Politics & Party Competition"
+
+
+Claude.ai summary with 10 topics
+Here are single-phrase summaries for each topic:
+Topic 1: "Foreign Policy & International Relations"
+Topic 2: "General Commentary & Business Affairs"
+Topic 3: "Political Parties & Elections"
+Topic 4: "Presidential Politics & Roosevelt Administration"
+Topic 5: "Political Philosophy & Social Principles"
+Topic 6: "Federal Taxation & Government Finance"
+Topic 7: "Labor Relations & Private Industry"
+Topic 8: "Historical Reflection & Public Figures"
+Topic 9: "Congressional Legislation & Legal Affairs"
+Topic 10: "Electoral Campaigns & Republican Politics"
+
+
+### Review the topics and determine a 1-2 word label after reading the source documents.
+
+```{r}
+
+#Topic 1	 "War & National Government Power"
+
+theta2 <- as.data.frame(theta)
+
+topic1 <- theta2 %>% 
+  rownames_to_column(var = "file") |> # putting the rownames into a new column called file
+  mutate(file = str_remove(file, "^X"),  # Remove leading 'X'
+         line = str_extract(file, "(?<=\\.txt)\\.\\d+")) |>   # Extract number after .txt
+  mutate(file = str_remove(file, "\\.\\d+$")) |> 
+  rename(topic1 = '1') |> # looking at first topic: ounti citi night mile jail day town morn march juli
+  top_n(20, topic1) |> 
+  arrange(desc(topic1)) |>  
+  select(file, line, topic1) 
+
+
+```
+
+```{r}
+
+#add categories
+
+vizDataFrame <- vizDataFrame %>% 
+  mutate(category = case_when(
+    str_detect(variable,  "war nation american govern state world power econom great countri") ~ "War_Natl_Govt_Power",
+    str_detect(variable, "year presid polit public peopl time man court men book") ~ "President_Politics_Pub_Affairs",
+    str_detect(variable, "govern feder power state year busi tax money product plan") ~ "Economy_Tax",
+    str_detect(variable, "parti republican state democrat presid senat elect vote polit year") ~ "Politics",
+    ))
+
+
+```
+
+# Fact Check and Validate Topics
+
+Topic 1: lynchings "counti citi night mile jail day town morn march juli" Topic 2: criticizing_lynchings "law crime peopl lynch great excit state good citizen countri" Topic 3: negro_lynching "lynch mob negro jail men hang night crowd prison attempt" Topic 4: female_victim "negro murder white lynch man kill year assault charg mrs" Topic 5: 5_legal_proceedings "sheriff state court juri governor order offic prison judg deputi" Topic 6: lynch_mob "bodi fire shot hang hous tree found street rope door"
+
+### for female_victim
+
+```{r}
+theta2 <- as.data.frame(theta)
+
+female <- theta2 %>% 
+  #renaming for a general topic
+  rename(female = '4') %>% 
+  top_n(20, female ) %>%
+  arrange(desc(female )) %>% 
+  select(female )
+
+# Apply rownames_to_column
+female  <- tibble::rownames_to_column(female , "story_id") 
+
+female $story_id <- gsub("X", "", female $story_id)
+
+head(female$story_id, 20)
+#Checks out
+
+
+```
+
+# test topic
+
+```{r}
+ggplot(vizDataFrame, aes(x=decade, y=value, fill=category)) + 
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label = round(value, 3)), 
+            position = position_stack(vjust = 0.5),
+            size = 3, 
+            color = "black") +
+  ylab("proportion") + 
+  scale_fill_manual(values = c("#9933FF",
+                              "#33FFFF", 
+                              "red",
+                              "yellow"), 
+                   name = "Topic") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "Common Narratives in Moley's Articles",
+       subtitle = "Four probable topics in Newsweek Perspective columns",
+       caption = "Aggregate mean topic proportions per decade. Graphic by Rob Wells, 6-19-2025")
+
+ggsave("output/topic_model1_6-19-2025.png",device = "png",width=9,height=6, dpi=800)
+
+```
+
+
+```{r}
+# plot topic proportions per decade as bar plot
+ggplot(vizDataFrame, aes(x=decade, y=value, fill=category)) + 
+  geom_bar(stat = "identity") + ylab("proportion") + 
+  scale_fill_manual(values = paste0(alphabet(20), "FF"), name = "decade") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+   scale_fill_manual(values=c("#9933FF",
+                              "#33FFFF",
+                              "red",
+                              "yellow",
+                              )) +
+  labs(title = "Common Narratives in Moley's Articles",
+       subtitle = "Four probable topics in Newsweek Perspective columns",
+       caption = "Aggregate mean topic proportions per decade. Graphic by Rob Wells, 6-19-2025")
+
+# ggsave(here::here("../lynching_press/output_images_tables/Article_Images/Figure_15_white_topics_oct_19_2024.png"),device = "png",width=9,height=6, dpi=800)
+```
+
