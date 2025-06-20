@@ -354,6 +354,27 @@ ggsave("output/topic_model1_6-19-2025.png",device = "png",width=9,height=6, dpi=
 
 ```
 
+analysis of codes in maxqda by claude.ai
+Looking at these codes, here are 4 broad topic categories that capture the main themes:
+Topic 1: "Economic Policy & Government Role"
+
+Economy, Economy\Business, Economy\fiscal conservatism, Economy\government efficiency, Economy\Privatization of government functions, Economy\Statism, Taxes, New Deal critique
+
+Topic 2: "Political Analysis & Party Politics"
+
+Political analysis, Political analysis\Conservative criticism, Political analysis\Conservative Politics, Political analysis\Dem criticism, Political analysis\Democratic Party politics, Political analysis\GOP Party politics, Political analysis\Election related advocacy, Political analysis\Promote GOP unity and cause, Democracy
+
+Topic 3: "Presidential & Political Figures"
+
+Political analysis\Nixon (60), Political analysis\John F Kennedy (50), Political analysis\Goldwater (45), Political analysis\Eisenhower, Political analysis\Johnson, Political analysis\Herbert Hoover, New Deal critique\FDR_criticism, New Deal critique\FDR_explicit_support, Political analysis\FDR analysis
+
+Topic 4: "Social Issues & Domestic Affairs"
+
+Education (123 - highest single count), Civil Rights, Labor, Foreign Policy, Communism, Crime - Criminal Justice, Religion, Supreme Court, Vietnam, Journalism-Media, Lobbying-Pressure Groups
+
+These groupings reflect Moley's focus on economic philosophy, partisan political commentary, analysis of major political figures, and coverage of key domestic and social issues of his era.
+
+
 
 ```{r}
 # plot topic proportions per decade as bar plot
