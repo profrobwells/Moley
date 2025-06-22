@@ -1,0 +1,664 @@
+---
+title: "Content Analysis of Raymond Moley’s Newspaper Column from 1937 - 1968"
+author: "Rob Wells and Bridget Lang"
+date: '2025-6-21'
+output: html_document
+---
+
+This notebook performs a basic narrative and topic analysis of the syndicated newspaper column **Raymond Moley** wrote from 1942-1969 as published in the Los Angeles Times syndicate. 
+
+The goal of this project is to **measure patterns in wording, verbiage, themes, and sentiment** of Raymond Moley's poltitical reporting over time. This research will support a larger effort in analyzing the **influence of journalism and polticial activism on American elections, voting, and democracy at large**. 
+
+I am focusing on the time period of Moley's work from **1937-1968**, with **1400 articles**  analyzed. 
+
+The full index has 2547 articles
+
+The average year of publication is xxx, with the majority of articles written in xxx.
+The article text has 2501 articles. The difference of 46 articles was due to failed AI scans.
+
+# Load Libraries
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+
+library(textdata)
+library(tidyverse)
+library(pdftools)
+library(dplyr)
+library(rio)
+library(tidytext)
+library(quanteda)
+library(knitr)
+library(formattable)
+library(forcats)
+library(readtext)
+#topic modeling
+library(tm)
+library(topicmodels)
+library(lda)
+library(ldatuning)
+# from tutorial packages
+library(DT)
+library(knitr) 
+library(kableExtra) 
+library(reshape2)
+library(ggplot2)
+library(wordcloud)
+library(pals)
+library(SnowballC)
+library(flextable)
+library(janitor)
+```
+
+## Load Data
+```{r echo = F}
+#2501 articles in index
+article_index <-  rio::import("./data/moley_lat_final_index_scanned_june_21.csv") |> 
+  clean_names() |> 
+  mutate(year = lubridate::year(date))
+  
+
+#284067 rows of text
+articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Moley_LAT_column/moley_lat_text_june_21.csv") |> 
+   clean_names() |> 
+    mutate(year = as.numeric(year))
+
+```
+## Statistics about the index 
+```{r}
+
+nrows <- nrow(article_index)
+ncols <- ncol(article_index)
+
+mean_year <- round(mean(article_index$year, na.rm = TRUE),0)
+
+min_year <- min(article_index$year)
+
+max_year <- max(article_index$year)
+
+
+year_counts <- 
+  article_index |>
+  count(year)
+
+max_count <- max(year_counts$n)
+max_years <- year_counts |>
+  select(year) |>
+  filter(year_counts$n == max_count)
+                  
+
+glue::glue("There are {nrows} articles in the index of Moley newspaper columns.");
+
+glue::glue("The earliest year of publication is {as.integer(min_year)}, and the latest is {max_year}.")
+
+glue::glue("The average year of publication is {as.integer(mean_year)}, with the majority of articles written in {max_years$year}.")
+
+
+
+
+```
+
+## Statistics about the extracted text
+```{r echo = F}
+nrows1 <- nrow(articles_text)
+ncols1 <- ncol(articles_text)
+
+articles <- articles_text |> 
+  distinct(filename) |> 
+  count()
+
+
+glue::glue("The article text has {articles} articles. That matches the {nrows} entries in the article index. The difference was due to about {nrows-articles} failed AI scans.")
+glue::glue("The article text dataframe is huge, with {nrows1} rows and {ncols1} columns.")
+
+```
+
+
+# Figure x: Articles over time
+
+```{r}
+
+#Here is a chart, Figure x, that counts columns by year
+count_year <- articles_text |> 
+  distinct(filename, .keep_all = TRUE) |> 
+count(year) |> 
+#Sandwich it onto a simple ggplot
+  ggplot(aes(x = year, y = n, fill = n)) +
+  geom_col(position = "dodge") + 
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = seq(1935, 1970, by = 5))+
+  labs(title = "Moley Newspaper Columns By Year, 1942-1969", 
+       subtitle = "Extracted Text Only",
+       caption = "n=2,501  articles. Graphic by Rob Wells, 6/21/2025",
+       y="Count of Pages",
+       x="Year")
+
+count_year
+
+#ggsave(here::here("Figure_X_ columns_by_year_2_14_2025.png"),device = "png",width=9,height=6, dpi=800)
+
+```
+
+
+# Bigrams
+```{r}
+bigrams <- articles_text |> mutate(sentence= str_squish(sentence)) |> 
+  mutate(text = tolower(sentence)) |>  
+  mutate(text = gsub("\\d+", "", text)) |>
+  mutate(text = str_replace_all(text, "raymond", "")) |>
+  mutate(text = str_replace_all(text, "newsweek", "")) |>
+  mutate(text = str_replace_all(text, "image", "")) |>
+  mutate(text = str_replace_all(text, "perspective", "")) |>
+  mutate(text = str_replace_all(text, "registered u.s. patent office", "")) |>
+  mutate(text = str_replace_all(text, "reproduced with permission of the copyright owner", "")) |>
+  mutate(text = str_replace_all(text, "further reproduction prohibited without permission", "")) |>
+  mutate(text = str_replace_all(text, "copyright", "")) |>
+  mutate(text = str_replace_all(text, "new york city", "")) |>
+  mutate(text = str_replace_all(text, "- ", "")) |>
+  mutate(text = str_replace_all(text, " -", "")) |>
+  mutate(text = str_replace_all(text, " - ", "")) |>
+  unnest_tokens(word, text, token="ngrams", n=2 ) |>
+  filter(!word %in% stop_words$word) |>
+  filter(!word == "minor inaccuracies") |>
+  filter(!word == "text extraction") |>
+  filter(!word == "text version") |>
+  filter(!word == "copyright owner") |>
+  filter(!word == "reproduction prohibited") |>
+  filter(!is.na(word))
+
+bigrams <- bigrams |>
+  select(word, date, year, filename)
+
+```
+
+## Datatable with bigrams
+```{r}
+bigrams_separated <- bigrams |>
+  separate(word, c("word1", "word2"), sep = " ")
+
+#bigrams with stop words filtered
+
+bigrams_filtered <- 
+  bigrams_separated |>
+  filter(!word1 %in% stop_words$word) |>
+  filter(!word2 %in% stop_words$word)
+
+bigram_counts <- bigrams_filtered |>
+  count(word1, word2, sort = TRUE) |> 
+  filter(!is.na(word1))
+
+datatable(bigram_counts,
+          caption = "Top Bigrams",
+          options = list(pageLength = 20))
+
+```
+
+
+
+There are 288 word pairs containing "Nixon."
+There are 256 word pairs containing "Dewey."
+There are 96 word pairs containing "Goldwater."
+There are 269 word pairs containing "Eisenhower."
+There are 425 word pairs containing "Roosevelt."
+There are 382 word pairs containing "Truman."
+There are 271 word pairs containing "Kennedy."
+
+```{r}
+  
+top_20_bigrams <- bigram_counts |> 
+   top_n(20) |> 
+  mutate(bigram = paste(word1, " ", word2)) |> 
+  select(bigram, n)
+
+ggplot(top_20_bigrams, aes(n, reorder(bigram, n), fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+  theme(legend.position="none") +
+  geom_text(aes(label=n), hjust=-0.2, size=3) +
+  labs(title = "Raymond Moley Newspaper Column Phrases, 1942-1969",
+       subtitle = "Analysis of 2,501 newspaper columns",
+       x = "Count",
+       y = "Bigrams",
+       caption = "Source: Newsweek. Graphic by Rob Wells, 6-21-2025")
+```
+
+
+Counting Word instances
+```{r}
+
+
+articles_text |>
+  # First ensure sentence is character and lowercase
+  mutate(sentence = as.character(sentence),
+         sentence = tolower(sentence)) |>
+  # Group by filename to avoid double-counting articles
+  group_by(filename) |>
+  summarise(
+    nixon = sum(str_count(sentence, "nixon"), na.rm = TRUE),
+    goldwater = sum(str_count(sentence, "goldwater"), na.rm = TRUE),
+    dewey = sum(str_count(sentence, "dewey"), na.rm = TRUE),
+    eisenhower = sum(str_count(sentence, "eisenhower"), na.rm = TRUE),
+    truman = sum(str_count(sentence, "truman"), na.rm = TRUE),
+    kennedy = sum(str_count(sentence, "kennedy"), na.rm = TRUE)
+  ) |>
+  # Now get totals across all articles
+  summarise(
+    nixon = sum(nixon),
+    goldwater = sum(goldwater),
+    dewey = sum(dewey),
+    eisenhower = sum(eisenhower),
+    truman = sum(truman),
+    kennedy = sum(kennedy)
+  ) |>
+  pivot_longer(
+    everything(),
+    names_to = "politician",
+    values_to = "count"
+  ) |>
+  mutate(percentage = (count / 2501) * 100) |>
+  arrange(desc(count))
+```
+
+In Newsweek:
+
+politician
+<chr>
+count
+<int>
+percentage
+<dbl>
+dewey	668	44.92266		
+eisenhower	456	30.66577		
+nixon	348	23.40282		
+goldwater	254	17.08137	
+
+
+
+## Presidential Candidate Coverage
+
+###Kennedy
+```{r}
+kennedy_articles2 <- articles_text |>
+  filter(!is.na(sentence)) |>
+  group_by(filename, year, date) |>
+  summarize(mentions = sum(str_detect(sentence, "Kennedy"), na.rm = TRUE)) |>
+  filter(mentions >= 2) |> 
+  mutate(politician = "Kennedy")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any kennedy mentions at all
+kennedy_mentions <- articles_text |>
+  filter(!is.na(sentence)) |>
+  filter(str_detect(sentence, "Kennedy"))
+
+print(paste("Total number of sentences mentioning Kennedy:", nrow(kennedy_mentions)))
+```
+
+
+###Truman
+```{r}
+truman_articles2 <- articles_text |>
+  filter(!is.na(sentence)) |>
+  group_by(filename, year, date) |>
+  summarize(mentions = sum(str_detect(sentence, "Truman"), na.rm = TRUE)) |>
+  filter(mentions >= 2) |> 
+  mutate(politician = "Truman")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Truman mentions at all
+truman_mentions <- articles_text |>
+  filter(!is.na(sentence)) |>
+  filter(str_detect(sentence, "Truman"))
+
+print(paste("Total number of sentences mentioning Truman:", nrow(truman_mentions)))
+```
+
+
+###Nixon
+```{r}
+nixon_articles2 <- articles_text |>
+  filter(!is.na(sentence)) |>
+  group_by(filename, year, date) |>
+  summarize(mentions = sum(str_detect(sentence, "Nixon"), na.rm = TRUE)) |>
+  filter(mentions >= 2) |> 
+  mutate(politician = "Nixon")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+nixon_mentions <- articles_text |>
+  filter(!is.na(sentence)) |>
+  filter(str_detect(sentence, "Nixon"))
+
+print(paste("Total number of sentences mentioning Nixon:", nrow(nixon_mentions)))
+```
+###Goldwater
+```{r}
+goldwater_articles2 <- articles_text |>
+  filter(!is.na(sentence)) |>
+  group_by(filename, year, date) |>
+  summarize(mentions = sum(str_detect(sentence, "Goldwater"), na.rm = TRUE)) |>
+  filter(mentions >= 2) |> 
+    mutate(politician = "Goldwater")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+goldwater_mentions <- articles_text |>
+  filter(!is.na(sentence)) |>
+  filter(str_detect(sentence, "Goldwater"))
+
+print(paste("Total number of sentences mentioning Goldwater:", nrow(goldwater_mentions)))
+```
+###Roosevelt
+```{r}
+roosevelt_articles2 <- articles_text |>
+  filter(!is.na(sentence)) |>
+  group_by(filename, year, date) |>
+  summarize(mentions = sum(str_detect(sentence, "Roosevelt"), na.rm = TRUE)) |>
+  filter(mentions >= 2) |> 
+    mutate(politician = "Roosevelt")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+roosevelt_mentions <- articles_text |>
+  filter(!is.na(sentence)) |>
+  filter(str_detect(sentence, "Roosevelt"))
+
+print(paste("Total number of sentences mentioning Roosevelt:", nrow(roosevelt_mentions)))
+```
+###Eisenhower
+```{r}
+eisenhower_articles2 <- articles_text |>
+  filter(!is.na(sentence)) |>
+  group_by(filename, year, date) |>
+  summarize(mentions = sum(str_detect(sentence, "Eisenhower"), na.rm = TRUE)) |>
+  filter(mentions >= 2) |> 
+    mutate(politician = "Eisenhower")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+eisenhower_mentions <- articles_text |>
+  filter(!is.na(sentence)) |>
+  filter(str_detect(sentence, "Eisenhower"))
+
+print(paste("Total number of sentences mentioning eisenhower:", nrow(eisenhower_mentions)))
+```
+###Dewey
+```{r}
+dewey_articles2 <- articles_text |>
+  filter(!is.na(sentence)) |>
+   group_by(filename, year, date) |>
+  summarize(mentions = sum(str_detect(sentence, "Dewey"), na.rm = TRUE)) |>
+  filter(mentions >= 2) |> 
+    mutate(politician = "Dewey")
+
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+dewey_mentions <- articles_text |>
+  filter(!is.na(sentence)) |>
+  filter(str_detect(sentence, "Dewey"))
+
+print(paste("Total number of sentences mentioning dewey:", nrow(dewey_mentions)))
+```
+
+```{r}
+politicians <- rbind(nixon_articles2, goldwater_articles2, roosevelt_articles2, dewey_articles2, eisenhower_articles2, truman_articles2, kennedy_articles2)
+
+#write.csv(politicians, "politicians_mentions_feb21.csv")
+```
+###Candidates visualized
+```{r}
+politician_colors <- c(
+  "Truman" = "#1f77b4",     # Blue
+  "Eisenhower" = "#ff7f0e", # Orange
+  "Dewey" = "#2ca02c",      # Green
+  "Nixon" = "#d62728",      # Red
+  "Goldwater" = "#9467bd",  # Purple
+  "Kennedy" = "black",    # black
+  "Roosevelt" = "#e377c2"   # Pink
+)
+
+politicians |> 
+  group_by(year, politician) |> 
+  summarize(total = sum(mentions)) |> 
+ggplot(aes(y=total, x= year, fill=politician)) +
+  geom_bar(stat="identity", position="dodge") +
+  scale_fill_manual(values = politician_colors) +  
+  scale_x_continuous(breaks = seq(1942, 1969, by = 2))+
+  labs(title = "Moley's Coverage of Major Candidates",
+       subtitle = "Two or more mentions of politician in Moley's newspaper column",
+        y = "Count of Politician Mentions", 
+        x = "",
+        caption = "n=2,501 newspaper articles, Graphic by Rob Wells") +
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5))
+
+
+```
+
+
+
+
+```{r echo = F}
+nixon_articles <- articles_text |>
+  filter(str_detect(sentence, "Nixon")) |>
+  select(filename, year) |>
+  distinct(filename, year)
+
+
+goldwater_articles <- articles_text |>
+  filter(str_detect(sentence, "Goldwater")) |>
+  select(filename, year) |>
+  distinct(filename, year)
+
+roosevelt_articles <- articles_text |>
+  filter(str_detect(sentence, "Roosevelt")) |>
+  select(filename, year) |>
+  distinct(filename, year)
+
+dewey_articles <- articles_text |>
+  filter(str_detect(sentence, "Dewey")) |>
+  select(filename, year) |>
+  distinct(filename, year)
+
+truman_articles <- articles_text |>
+  filter(str_detect(sentence, "Truman")) |>
+  select(filename, year) |>
+  distinct(filename, year)
+
+kennedy_articles <- articles_text |>
+  filter(str_detect(sentence, "Kennedy")) |>
+  select(filename, year) |>
+  distinct(filename, year)
+
+
+nrc_sentiments <- get_sentiments("nrc")
+afinn_sentiments <- get_sentiments("afinn")
+
+```
+
+### Dewey
+
+```{r echo = F, results = 'hide', error=F, warning=F, message=F}
+
+dewey_text <- articles_text |>
+  select(filename, year, sentence) |>
+  filter(filename %in% dewey_articles$filename)
+
+
+dewey_text_tokenized <- dewey_text |> 
+  select(sentence) |> 
+  mutate(sentence = str_replace_all(sentence, "- ", "")) |> 
+  unnest_tokens(word, sentence) |> 
+  filter(!word %in% stop_words$word) |> 
+  filter(!grepl('[0-9]', word))
+
+dewey_sentiments_all <- dewey_text_tokenized |>
+  inner_join(nrc_sentiments, relationship = "many-to-many") |>
+  count(sentiment, sort = TRUE) |> 
+  mutate(pct_total = round(n/sum(n), digits=4)) |>
+  mutate(president = "Dewey") |>
+  # Reorder sentiment based on pct_total
+  mutate(sentiment = reorder(sentiment, -pct_total))
+
+ggplot(dewey_sentiments_all, aes(sentiment, pct_total, fill=pct_total)) +
+  geom_bar(stat="identity", position="dodge") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.01)) +  # Format y-axis as percentages
+  labs(title = "Sentiment of Thomas Dewey Articles",
+        x = "Sentiment",
+        y = "Percentage of Total Text", 
+        caption = "Newsweek articles, Graphic by Rob Wells and Bridget Lang") +
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5),legend.position = "none") 
+```
+
+### Nixon
+
+```{r}
+
+nixon_text <- articles_text |>
+  select(filename, year, sentence) |>
+  filter(filename %in% nixon_articles$filename)
+
+
+nixon_text_tokenized <- nixon_text |> 
+  select(sentence) |> 
+  mutate(sentence = str_replace_all(sentence, "- ", "")) |> 
+  unnest_tokens(word, sentence) |> 
+  filter(!word %in% stop_words$word) |> 
+  filter(!grepl('[0-9]', word))
+
+nixon_sentiments_all <- nixon_text_tokenized |>
+  inner_join(nrc_sentiments, relationship = "many-to-many") |>
+  count(sentiment, sort = TRUE) |> 
+  mutate(pct_total = round(n/sum(n), digits=4)) |>
+  mutate(president = "Nixon") |>
+  # Reorder sentiment based on pct_total
+  mutate(sentiment = reorder(sentiment, -pct_total))
+
+ggplot(nixon_sentiments_all, aes(sentiment, pct_total, fill=pct_total)) +
+  geom_bar(stat="identity", position="dodge") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.01)) +  # Format y-axis as percentages
+  labs(title = "Sentiment of Nixon Articles",
+        x = "Sentiment",
+        y = "Percentage of Total Text", 
+        caption = "Newsweek articles, Graphic by Rob Wells and Bridget Lang") +
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5),legend.position = "none") 
+```
+
+### Nixon v Dewey Sentiment
+
+```{r}
+
+nixon_dewey_sentiments <- dewey_sentiments_all |>
+  bind_rows(nixon_sentiments_all)
+
+
+ggplot(nixon_dewey_sentiments, aes(sentiment, pct_total, fill=president)) +
+  geom_bar(stat="identity", position="dodge") +
+  scale_y_continuous(labels = scales::percent, limits=c(0, .30)) +
+  geom_text(aes(label=scales::percent(pct_total, accuracy=0.01), group=president), 
+            position = position_dodge(width=0.9),  # Match the dodge width of bars
+            angle = 90,                            # Rotate text 90 degrees
+            hjust = -0.2,                         # Adjust horizontal position
+            size=3) +
+  labs(title = "Sentiment Nixon vs. Dewey in Moley Newspaper Columns",
+       x = "Sentiment",
+       y = "Percentage of Total Text",
+       caption = "Graphic by Rob Wells and Bridget Lang, 6/22/2025") + 
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5)) + 
+  scale_fill_manual(values = c("forestgreen", "purple"))
+
+
+```
+
+
+# Kennedy sentiment
+```{r echo = F, results = 'hide', error=F, warning=F, message=F}
+
+kennedy_text <- articles_text |>
+  select(filename, year, sentence) |>
+  filter(filename %in% kennedy_articles$filename)
+
+
+kennedy_text_tokenized <- kennedy_text |> 
+  select(sentence) |> 
+  mutate(sentence = str_replace_all(sentence, "- ", "")) |> 
+  unnest_tokens(word, sentence) |> 
+  filter(!word %in% stop_words$word) |> 
+  filter(!grepl('[0-9]', word))
+
+kennedy_sentiments_all <- kennedy_text_tokenized |>
+  inner_join(nrc_sentiments, relationship = "many-to-many") |>
+  count(sentiment, sort = TRUE) |> 
+  mutate(pct_total = round(n/sum(n), digits=4)) |>
+  mutate(president = "Kennedy") |>
+  # Reorder sentiment based on pct_total
+  mutate(sentiment = reorder(sentiment, -pct_total))
+
+ggplot(kennedy_sentiments_all, aes(sentiment, pct_total, fill=pct_total)) +
+  geom_bar(stat="identity", position="dodge") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 0.01)) +  # Format y-axis as percentages
+  labs(title = "Sentiment of Kennedy Articles",
+        x = "Sentiment",
+        y = "Percentage of Total Text", 
+        caption = "Newspaper articles, Graphic by Rob Wells and Bridget Lang") +
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5),legend.position = "none") 
+```
+
+# Kennedy v Nixon sentiment
+```{r}
+
+nixon_kennedy_sentiments <- kennedy_sentiments_all |>
+  bind_rows(nixon_sentiments_all)
+
+
+ggplot(nixon_kennedy_sentiments, aes(sentiment, pct_total, fill=president)) +
+  geom_bar(stat="identity", position="dodge") +
+  scale_y_continuous(labels = scales::percent, limits=c(0, .30)) +
+  geom_text(aes(label=scales::percent(pct_total, accuracy=0.01), group=president), 
+            position = position_dodge(width=0.9),  # Match the dodge width of bars
+            angle = 90,                            # Rotate text 90 degrees
+            hjust = -0.2,                         # Adjust horizontal position
+            size=3) +
+  labs(title = "Sentiment Nixon vs. kennedy in Moley Newspaper Columns",
+       x = "Sentiment",
+       y = "Percentage of Total Text",
+       caption = "Graphic by Rob Wells and Bridget Lang, 6/22/2025") + 
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5)) + 
+  scale_fill_manual(values = c("forestgreen", "purple"))
+
+
+```
+
+
+
+
+# Words in headlines
+Count the words in the Perspective column headlines
+```{r}
+
+headlines_tokens <- article_index |> 
+  mutate(text= str_squish(title), 
+      text = tolower(text),
+      text = str_remove_all(text, "[[:punct:]]")) |> 
+  unnest_tokens(word, text, token="ngrams", n=1 ) |>
+  filter(!word %in% stop_words$word) |>
+  filter(!is.na(word)) |> 
+  filter(!word == "perspective") |>
+  select(word, date, year, index)
+
+
+headline_counts <- headlines_tokens |>
+  count(word, sort = TRUE) |> 
+  filter(!is.na(word))
+
+datatable(headline_counts,
+          caption = "Top Words in Moley Newspaper Headlines",
+          options = list(pageLength = 15))
+
+
+```
+
+Dewey and its variants appeared in headlines 29 times, which would have made it a top xx term.
+
+Nixon and its variants appeared 46 times in headlines, which would have made it a top 4 term.
+
+Goldwater appeared 8 times. Eisenhower, 30; Wilkie, 0; Roosevelt, 13; Kennedy, 40; Truman, 49
+Republican was the with 30 mentions; Democrats, 19
+

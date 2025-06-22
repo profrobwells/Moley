@@ -1,0 +1,176 @@
+---
+title: "Compile Moley LAT articles Text"
+author: "Wells"
+date: "2025-06-21"
+output: html_document
+---
+
+This notebook compiles 2503 newspaper articles by Raymond Moley published by the Los Angeles Times from 1942 to 1969
+
+
+```{r}
+#install.packages("pdftools")
+library(tidyverse)
+library(pdftools)
+library(janitor)
+```
+
+# Compile Text into a Dataframe
+
+## Raw text compiler 
+```{r include=FALSE}
+#This creates an index with the file path to the stories. And then it compiles the stories into a dataframe
+#####################
+# Begin SM Code #####
+#####################
+
+###
+# List out text files that match pattern .txt, create DF
+###
+
+files <- list.files("./moley_lat_txt", pattern="*.txt") %>% 
+  as.data.frame() |> 
+  rename(filename = 1) |> 
+  mutate(index = as.numeric(str_replace_all(filename, "_1_page0.txt","")))
+
+#Join the file list to the index
+
+#load final data if you haven't already
+final_data <- rio::import("./data/moley_lat.csv") |> 
+  clean_names() |> 
+  rename(index = store_id) |> 
+  mutate(index = as.numeric(index))
+
+moley_lat_full_index <- rio::import("./data/moley_lat_full_index.csv") |> 
+  clean_names() |> 
+  mutate(date = lubridate::mdy(pub_date)) 
+
+final_index <- final_data |> 
+  inner_join(files, c("index")) |> 
+  mutate(filepath = paste0("./moley_lat_txt/", filename)) |> 
+  mutate(date = lubridate::mdy(entry_date)) |> 
+  select("date", "year", "title", "abstract", "authors", "filename", "filepath", "index", "issn", "pages", "document_url", "find_a_copy") |> 
+    mutate(year = lubridate::year(date))
+head(final_index)
+
+write.csv(final_index, "./data/moley_lat_final_index_scanned_june_21.csv")
+
+```
+
+#### Misc Notes:
+
+           authors    n
+1                                     Moley, Raymond 2480
+2                                     RAYMOND MOLEY:    5
+3                                 Moley, Raymond, Jr    4
+4                                   Moley--, Raymond    4
+5                    Lippmann, Walter;Moley, Raymond    2
+6                  Moley, Raymond;Moley, Raymond, Jr    2
+7                   Holmes, Alexander;Moley, Raymond    1
+8  Lippmann, Walter; Mowrer, Edgar A; Moley, Raymond    1
+9                     Moley, Raymond; Hirsch, Julius    1
+10                             WITH RAYMOND MOLEY JR    1
+
+Fact Check
+final_data$dates_match <- final_data$entry_date != final_data$pubdate
+
+final_data |> count(pubtitle) |> arrange(desc(n))
+
+### List of Missing Files
+
+```{r}
+
+#38 MISSING FILES from 2547, 1.5% missing. GOOD!
+
+missing_lat_scans <- moley_lat_full_index |> 
+  anti_join(final_index, by=c("date"))
+
+
+write.csv(missing_lat_scans, "./data/MISSING_moley_lat_SCANS.csv")
+
+```
+
+
+
+
+## Text compiler
+```{r}
+###
+# Define function to loop through each text file 
+###
+
+create_article_text <- function(row_value) {
+  
+  #row_value is the single argument that is passed to the function
+  # Take each row of the dataframe
+  temp <- final_index %>%
+    slice(row_value)
+  
+  # Store the filename for  use in constructing articles dataframe
+  temp_filename <- temp$filename
+  
+  # Create a dataframe by reading in lines of a given textfile
+  # Add a filename column 
+  articles_df_temp <- read_lines(temp$filepath) %>%
+    as_tibble() %>%
+    mutate(filename = temp_filename)
+  
+  # Bind results to master articles_df
+  # <<- returns to global environment
+  articles_df <<- articles_df %>%
+    bind_rows(articles_df_temp)
+}
+
+###
+# Create elements needed to run function
+###
+
+# Create empty tibble to store results
+articles_df <- tibble()
+#running once to test
+#create_article_text(2) 
+# Create an array of numbers to loop through, from 1 to the number of rows in our index dataframe 
+row_values <- 1:nrow(final_index)
+
+###
+# Execute function using lapply
+# This loops through each row of the dataframe and append results to master file
+###
+
+lapply(row_values, create_article_text)
+
+###
+# Clean up articles_df and join to index dataframe
+###
+
+articles_df <- articles_df %>%
+  select(filename, sentence=value) %>%
+  inner_join(final_index)
+
+
+
+```
+
+# Clean text
+
+```{r}
+articles_df <- articles_df %>%
+  group_by(filename) %>%
+  mutate(row_num = row_number()) %>%
+  filter(!(row_num == 1 & str_detect(sentence, "^Here's"))) %>%
+  select(-row_num) %>%
+  ungroup() |> 
+  mutate(year = lubridate::year(date))
+
+write.csv(articles_df, "moley_lat_text_june_21.csv")
+```
+
+
+```{r}
+cleaned_articles_df %>%
+  group_by(filename) %>%
+  slice(1) %>%
+  select(filename, sentence) %>%
+  head(10)
+```
+

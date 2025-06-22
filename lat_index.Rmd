@@ -78,7 +78,7 @@ updated_lat_moley_index <- lat_index |>
   inner_join(files_downloaded, by=c("filename1")) |> 
   select(date, entryDate, year1, Title, Abstract, StoreId, filename1,filename)  
 
-write.csv(updated_lat_moley_index, "updated_lat_moley_index.csv")
+#write.csv(updated_lat_moley_index, "updated_lat_moley_index.csv")
 ```
 
 ## fact check
@@ -92,16 +92,61 @@ anti <- files_downloaded |>
 #Load Libraries
 ```{r}
 library(pdftools)
+#install.packages("tesseract")
 library(tesseract)
 library(magick)
 
 ```
 
+# Convert to .png
+```{r}
+# Install required packages if not already installed
+# install.packages(c("pdftools", "magick"))
+
+# Load the libraries
+library(pdftools)
+library(magick)
+
+# Function to convert PDF to PNG
+convert_pdf_to_png <- function(input_dir, output_dir, dpi = 300) {
+  # Create output directory if it doesn't exist
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir)
+  }
+  
+  # Get list of PDF files in input directory
+  pdf_files <- list.files(input_dir, pattern = "\\.pdf$", full.names = TRUE)
+  
+  # Process each PDF file
+  for (pdf_file in pdf_files) {
+    # Get base filename without extension
+    base_name <- tools::file_path_sans_ext(basename(pdf_file))
+    
+    # Convert PDF to PNG
+    pdf_convert(pdf_file,
+               format = "png",
+               dpi = dpi,
+               filenames = file.path(output_dir, paste0(base_name, "_%d.png")))
+    
+    cat("Converted:", pdf_file, "\n")
+  }
+}
+
+# Usage example:
+# Replace these paths with your actual directories
+input_directory <- "./lat_sample"
+output_directory <- "./lat_png"
+
+# Convert all PDFs in the input directory
+convert_pdf_to_png(input_directory, output_directory)
+```
+
+
 #Loop Through PDFs in a Directory
 
 ```{r}
 # Define paths
-pdf_folder <- "./lat_sample"
+png_folder <- "./lat_png"
 extracted_folder <- "./lat_scanned"
 
 # Create extracted folder if it doesn't exist
@@ -109,8 +154,8 @@ if (!dir.exists(extracted_folder)) {
   dir.create(extracted_folder)
 }
 
-# Loop through all files in the PDF folder
-pdf_files <- list.files(pdf_folder, pattern = "\\.png$", full.names = TRUE)
+# Loop through all files in the PNG folder
+pdf_files <- list.files(png_folder, pattern = "\\.png$", full.names = TRUE)
 for (pdf_file in pdf_files) {
   output_file <- file.path(extracted_folder, paste0(tools::file_path_sans_ext(basename(pdf_file)), ".txt"))
   pdf_text <- pdf_text(pdf_file)
@@ -125,7 +170,7 @@ library(pdftools)
 library(tesseract)
 library(magick)
 # Define paths
-pdf_folder <- "./lat_sample"
+pdf_folder <- "./lat_png"
 extracted_folder <- "./lat_scanned"
 
 # Create extracted folder if it doesn't exist
