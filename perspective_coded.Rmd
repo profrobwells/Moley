@@ -1,0 +1,144 @@
+---
+title: "Perspective coding"
+author: "Wells"
+date: "2025-06-25"
+output: html_document
+---
+# Load Libraries
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+library(textdata)
+library(tidyverse)
+library(rio)
+library(tidytext)
+library(janitor)
+
+```
+
+## Load Data
+```{r echo = F}
+
+perspective_coded <-read.csv("./data/Perspective_coded.csv") |> 
+  mutate(date = lubridate::mdy(date_cleaned)) |>   clean_names() 
+
+
+```
+
+```{r}
+library(dplyr)
+library(lubridate)
+
+perspective_coded <- perspective_coded %>%
+  mutate(
+    date = case_when(
+      # If it's already a 4-digit year format, use mdy directly
+      grepl("\\d{4}", date_cleaned) ~ lubridate::mdy(date_cleaned),
+      # If it has 2-digit years, fix them first
+      grepl("\\d{1,2}/\\d{1,2}/\\d{2}$", date_cleaned) ~ {
+        # Split and fix the year
+        parts <- strsplit(date_cleaned, "/")
+        year_2digit <- as.numeric(sapply(parts, function(x) x[3]))
+        # Convert 2-digit to 4-digit (adjust cutoff as needed)
+        year_4digit <- ifelse(year_2digit > 25, 1900 + year_2digit, 2000 + year_2digit)
+        month <- sapply(parts, function(x) x[1])
+        day <- sapply(parts, function(x) x[2])
+        
+        as.Date(paste(month, day, year_4digit, sep = "/"), format = "%m/%d/%Y")
+      },
+      TRUE ~ as.Date(NA)
+    )
+  )
+
+```
+Part 2
+
+```{r}
+
+perspective_coded <- perspective_coded %>%
+  mutate(
+    date1 = str_extract(date_bak, "^\\d{4}_\\d{1,2}_\\d{1,2}"),  # Extract YYYY_M_D pattern
+    date1 = str_replace_all(date1, "_", "-"),  # Replace underscores with dashes
+    date1 = as.Date(date1)  # Convert to date
+  )
+
+
+perspective_coded$date2 <- as.Date(trimws(as.character(perspective_coded$date_bak)), 
+                                  format = "%b %d, %Y")
+
+perspective_coded <- perspective_coded |> 
+  mutate(final_date = coalesce(date, date1, date2)) |> 
+  select(-date,-date1,-date2, -date_cleaned) |> 
+  rename(date = final_date)
+
+perspective_coded <- perspective_coded |> 
+  mutate(year = lubridate::year(date))
+
+
+write.csv(perspective_coded, "./data/perspective_coded_june_25.csv")
+```
+
+
+```{r}
+perspective_coded |> 
+  count(code) |> 
+  arrange(desc(n))
+
+
+```
+
+```{r}
+perspective_coded |> 
+  group_by(year, code) |> 
+  count(code) |> 
+  arrange(desc(n))
+
+
+
+
+```
+
+```{r}
+politics <- perspective_coded |> 
+  filter(str_detect(code, "Political")) |> 
+  group_by(year) |> 
+  count() |> 
+  ggplot(aes(x = year, y = n, fill = n)) +
+  geom_col(position = "dodge") + 
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = seq(1934, 1966, by = 2))+
+  labs(title = "Moley Politics in Newsweek by Year", 
+       subtitle = "Extracted Text Only",
+       caption = "Graphic by Rob Wells, 6/21/2025",
+       y="Count of Pages",
+       x="Year")
+
+politics
+
+
+```
+
+An analysis of Moley’s Newsweek columns shows a rise in political commentary in presidential election years: Dewey in 1948, Eisenhower in 1952, and to a less extent, Nixon in 1960 and Goldwater in 1964.
+
+
+Timeline of FDR criticism
+```{r}
+
+perspective_coded |> 
+  filter(str_detect(code, "FDR_criticism")) |> 
+  group_by(year) |> 
+  count() |> 
+  ggplot(aes(x = year, y = n, fill = n)) +
+  geom_col(position = "dodge") + 
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = seq(1934, 1966, by = 2))+
+  labs(title = "Moley Critism of FDR in Newsweek by Year", 
+       caption = "Graphic by Rob Wells, 6/25/2025",
+       y="Count of Pages",
+       x="Year")
+
+
+```
+
+An analysis of Moley’s Newsweek column showed it was often critical of FDR from 1937-1939 and less so after that time period.  [perspective_coded.rmd]One explanation for the drop-off in critical tone could be the looming crisis of World War II.
+
+

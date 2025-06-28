@@ -245,6 +245,67 @@ articles_text %>%
   arrange(desc(count))
 ```
 
+## Business Coverage
+
+```{r}
+business_articles2 <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  group_by(filename, year, date) %>%
+  summarize(mentions = sum(str_detect(sentence, "business"), na.rm = TRUE)) %>%
+  filter(mentions >= 2)
+```
+
+
+```{r}
+# Let's also check the intermediate steps to debug:
+# First check if we're finding any Nixon mentions at all
+business_mentions <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  filter(str_detect(sentence, "business")) |> 
+  
+
+print(paste("Total number of sentences mentioning business:", nrow(business_mentions)))
+```
+
+#### KWIC search, with metadata
+
+```{r}
+# 
+
+
+# Create corpus
+my_corpus <- corpus(articles_text, text_field = "sentence")
+# Tokenize 
+my_tokens <- tokens(my_corpus)
+# KWIC with 20 words on each side
+business_kwic <- kwic(my_tokens, "business", window = 100)
+
+# quanteda_test2 <- kwic(my_tokens, phrase(c("journalist", "reporter", "newspaper", "killer", "murdered", "killed", "investigate crimes against")), window = 50, valuetype = "regex") %>% as.data.frame() 
+
+kwic_biz <- data.frame(
+  docname = business_kwic$docname,
+ filename = docvars(my_corpus, "filename")[as.numeric(gsub("text", "", business_kwic$docname))],
+  year = docvars(my_corpus, "year")[as.numeric(gsub("text", "", business_kwic$docname))],
+  pre = business_kwic$pre,
+  keyword = business_kwic$keyword,
+  post = business_kwic$post,
+  stringsAsFactors = FALSE
+) |> 
+  filter(str_detect(pre, "politic")) |> 
+  arrange(year)
+
+write.table(kwic_biz, "business_kwic.txt", 
+            sep = "\t", 
+            row.names = FALSE, 
+            quote = FALSE,
+            fileEncoding = "UTF-8")
+
+```
+
+
+
+
+
 
 
 
@@ -389,6 +450,8 @@ afinn_sentiments <- get_sentiments("afinn")
 
 ```
 
+## Sentiment
+
 ### Dewey
 
 ```{r echo = F, results = 'hide', error=F, warning=F, message=F}
@@ -423,6 +486,36 @@ ggplot(dewey_sentiments_all, aes(sentiment, pct_total, fill=pct_total)) +
   theme(axis.text.x = element_text(angle = 45, vjust=0.5),legend.position = "none") 
 ```
 
+### Dewey Sentiment Over Time
+
+```{r}
+dewey_text_tokenized  <- dewey_text |> 
+  filter(!is.na(sentence), sentence != "") |>  # ADD THIS LINE
+  mutate(sentence = str_replace_all(sentence, "- ", "")) |> 
+  unnest_tokens(word, sentence) |> 
+  filter(!word %in% stop_words$word) |> 
+  filter(!grepl('[0-9]', word)) |> 
+  inner_join(afinn_sentiments, relationship = "many-to-many") |> 
+  group_by(filename, year) |>  
+  summarise(sentiment_score = sum(value), .groups = "drop") |>  
+  group_by(year) |> 
+  summarise(total_score = sum(sentiment_score))
+
+
+ggplot(dewey_text_tokenized, aes(x= year, y=total_score, fill=total_score)) +
+  geom_bar(stat="identity", position="dodge") +
+   scale_x_continuous(breaks = seq(1936, 1968, by = 2))+
+  labs(title = "Sentiment of Thomas Dewey Articles Over Time",
+        x = "Sentiment",
+        y = "Percentage of Total Text", 
+        caption = "Newsweek articles, Graphic by Rob Wells. June 25, 2025") +
+  theme(axis.text.x = element_text(angle = 90, vjust=0.5),legend.position = "none") 
+
+```
+
+
+
+
 ### Nixon
 
 ```{r}
@@ -456,6 +549,40 @@ ggplot(nixon_sentiments_all, aes(sentiment, pct_total, fill=pct_total)) +
         caption = "Newsweek articles, Graphic by Rob Wells and Bridget Lang") +
   theme(axis.text.x = element_text(angle = 45, vjust=0.5),legend.position = "none") 
 ```
+
+### Nixon Sentiment Over Time
+
+```{r}
+nixon_text <- articles_text %>%
+  select(filename, year, sentence) %>%
+  filter(filename %in% nixon_articles$filename)
+
+nixon_text_tokenized  <- nixon_text |> 
+  filter(!is.na(sentence), sentence != "") |>  # ADD THIS LINE
+  mutate(sentence = str_replace_all(sentence, "- ", "")) |> 
+  unnest_tokens(word, sentence) |> 
+  filter(!word %in% stop_words$word) |> 
+  filter(!grepl('[0-9]', word)) |> 
+  inner_join(afinn_sentiments, relationship = "many-to-many") |> 
+  group_by(filename, year) |>  
+  summarise(sentiment_score = sum(value), .groups = "drop") |>  
+  group_by(year) |> 
+  summarise(total_score = sum(sentiment_score))
+
+
+ggplot(nixon_text_tokenized, aes(x= year, y=total_score, fill=total_score)) +
+  geom_bar(stat="identity", position="dodge") +
+   scale_x_continuous(breaks = seq(1936, 1968, by = 2))+
+  labs(title = "Moley's Coverage of Nixon in 1960 Campaign: Suddenly Positive",
+       subtitle = "Sentiment of Moley's Nixon Coverage in Newsweek",
+        x = "Sentiment",
+        y = "Percentage of Total Text", 
+        caption = "Newsweek articles, Graphic by Rob Wells. June 25, 2025") +
+  theme(axis.text.x = element_text(angle = 90, vjust=0.5),legend.position = "none") 
+```
+
+
+
 
 ### Nixon v Dewey Sentiment
 
