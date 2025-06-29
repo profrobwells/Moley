@@ -303,6 +303,33 @@ write.table(kwic_biz, "business_kwic.txt",
 ```
 
 
+### KWIC Conservative Group Mentions
+```{r}
+# Create corpus
+my_corpus <- corpus(articles_text, text_field = "sentence")
+# Tokenize 
+my_tokens <- tokens(my_corpus)
+# KWIC with 20 words on each side
+#groups_kwic <- kwic(my_tokens, "nixon", window = 100)
+
+groups_kwic <- kwic(my_tokens, phrase(c("National Association of Manufacturers", "DuPont", "John Birch Society", "Liberty League", "Americans for Constitutional Action", "Buckley", "Freeman", "National Review", "Chamber of Commerce", "Milton Friedman", "Hayek")), window = 100, valuetype = "regex") %>% as.data.frame() 
+
+groups_kwic <- data.frame(
+  docname = groups_kwic$docname,
+ filename = docvars(my_corpus, "filename")[as.numeric(gsub("text", "", groups_kwic$docname))],
+  year = docvars(my_corpus, "year")[as.numeric(gsub("text", "", groups_kwic$docname))],
+  pre = groups_kwic$pre,
+  keyword = groups_kwic$keyword,
+  post = groups_kwic$post,
+  stringsAsFactors = FALSE
+) 
+
+write.table(groups_kwic, "groups_kwic.txt", 
+            sep = "\t", 
+            row.names = FALSE, 
+            quote = FALSE,
+            fileEncoding = "UTF-8")
+```
 
 
 
@@ -927,12 +954,382 @@ write_combined_files(nixon_list, file_paths1, "combined_nixon_files.txt")
 
 Now, open a Google Sheet, import nixon_ai_verification.csv, read the articles and rate the responses
 
+# Dependency parsing
+
+# ---------------------------
+
+# Extracting adjectives, adverbs
+
+# ---------------------------
+
+**From Claude.ai**
+This code will:
+
+Install and load necessary packages
+Download and load the English language model for POS tagging
+Annotate your text with POS tags
+Extract only the adjectives
+Create two summaries:
+
+Overall frequency count of adjectives across all articles
+Frequency count of adjectives by article
+
+
+
+The output will show you:
+
+The adjective word (token)
+How many times it appears total (frequency)
+In how many different articles it appears (articles)
+
+
+
+## Dependency parsing
+```{r}
+# Install and load required packages
+if (!require(udpipe)) install.packages("udpipe")
+if (!require(dplyr)) install.packages("dplyr")
+library(udpipe)
+library(tidyverse)
+```
+
+```{r}
+
+# Download and load the English language model (only need to do this once)
+udmodel <- udpipe_download_model(language = "english")
+udmodel <- udpipe_load_model(udmodel$file_model)
+```
+
+
+```{r}
+# Process the text and extract adjectives
+# This will create a data frame with POS tags
+annotated_text_moley <- udpipe_annotate(udmodel, x = articles_text$sentence, doc_id = articles_text$filename)
+annotated_df_moley <- as.data.frame(annotated_text_moley)
+```
+
+### Extract adjective-noun pairs
+
+**From claude.ai**
+This modified version will:
+
+Extract adjective-noun pairs where the adjective directly modifies the noun (amod dependency relation)
+Create a summary showing:
+
+The adjective-noun pair
+How many times this pair appears (frequency)
+In how many different articles the pair appears (articles)
+
+
+Optionally show the distribution of pairs by article
+
+The output will show combinations like "big house", "red car", "important issue", etc., along with their frequencies. Note that this will only catch direct adjectival modifications - more complex relationships might need additional parsing rules.
+
+
+```{r}
+adj_noun_pairs_moley <- annotated_df_moley %>%
+  # Join the dataframe with itself to connect adjectives to their head words
+  inner_join(
+    annotated_df_moley %>% select(doc_id, sentence_id, token, token_id, upos),
+    by = c("doc_id", "sentence_id", "head_token_id" = "token_id")
+  ) %>%
+  # Filter for adjectives modifying nouns
+  filter(
+    dep_rel == "amod" &    # amod = adjectival modifier
+    upos.x == "ADJ" &      # first token is adjective
+    upos.y == "NOUN"       # head word is noun
+  ) %>%
+  # Select and rename relevant columns
+  select(
+    article_id = doc_id,
+    sentence_id,
+    adjective = token.x,
+    noun = token.y
+  )
+
+# Count frequencies of adjective-noun pairs
+adj_noun_counts_moley <- adj_noun_pairs_moley %>%
+  group_by(adjective, noun) %>%
+  summarise(
+    frequency = n(),
+    articles = n_distinct(article_id)
+  ) %>%
+  arrange(desc(frequency))
+
+top_200_moley <- adj_noun_counts_moley |> 
+  head(200)
+
+write.csv(top_200_moley, "./output/top_200_moley_adj_noun_counts.csv")
+
+write.csv(adj_noun_counts_moley, "./output/all_adj_noun_counts_moley.csv")
+
+# datatable(adj_noun_counts_moley,
+#           caption = "Top adjectives-noun pairs in Moley Perspective coverage",
+#           options = list(pageLength = 50)) 
+
+```
+
+From Claude.ai
+Based on my analysis of the top 200 adjective-noun combinations from what appears to be Raymond Moley's writings, here are the 10 major themes:
+10 Common Themes from the Data
+1. Federal Government Authority
+Central focus on federal power, government control, and administrative authority (Federal government, Federal power, political government)
+2. Political Parties & Partisanship
+Extensive discussion of party politics, Republican and Democratic parties, and political organizations
+3. American Identity & Citizenship
+Emphasis on the American people, national character, and civic identity (American people, American government, American war)
+4. Temporal & Historical Context
+Heavy focus on time periods, historical reflection, and duration (many years, past years, long time, last week)
+5. Public Opinion & Social Discourse
+Discussion of public sentiment, social attitudes, and collective viewpoints (public opinion, public power, public government)
+6. National vs. State Authority
+Tension between federal and state power, jurisdictional questions (Federal state, national government, own government)
+7. War & Foreign Policy
+International relations, military conflicts, and diplomatic strategy (American war, foreign policy, war-related terms)
+8. Economic Policy & Business
+Government's role in economics, federal aid, and business regulation (Federal money, Federal aid, economic matters)
+9. Political Leadership & Terms
+Focus on political leadership, electoral cycles, and governmental terms (third term, political leadership)
+10. Social Groups & Demographics
+References to various population segments and social categories (great people, other people, many people)
+
+
+```{r}
+# Load required libraries
+install.packages("spacyr")
+library(spacyr)
+library(dplyr)
+library(tidyr)
+
+# Step 1: Install spaCy (this creates the Python environment)
+spacy_install()
+
+# Step 2: Download the English model
+spacy_download_langmodel(model = "en_core_web_sm")
+
+# Step 3: Initialize spaCy
+spacy_initialize(model = "en_core_web_sm")
+
+# Assuming your text data is in a dataframe with columns like 'doc_id' and 'text'
+# If your data is in a different format, adjust accordingly
+
+# Extract named entities from your corpus
+# Replace 'your_text_data' with your actual dataframe name
+entities_moley <- spacy_parse(
+  x = articles_text$sentence,  # Your text column
+  tag = FALSE,              # Don't need POS tags
+  lemma = FALSE,            # Don't need lemmas
+  entity = TRUE,            # DO extract entities
+  nounphrase = FALSE        # Don't need noun phrases
+)
+
+# Extract just the named entities
+named_entities <- spacy_extract_entity(
+  x =  articles_text$sentence,
+  type = "all"  # Extract all entity types
+)
+
+# Filter for person entities specifically
+person_entities <- named_entities %>%
+  filter(ent_type == "PERSON") %>%
+  select(doc_id, text, ent_type)
+
+# Count most frequent person names
+count_moley_names <- person_entities %>%
+  count(text, sort = TRUE) %>%
+  head(1000)
+
+write_csv(count_moley_names, "./output/count_moley_names.csv")
+```
+
+
+Asked claude.ai
+take this list, clean it up, and group similar names such as nixon to richard nixon and roosevelt to frankling roosevelts and retabulate the totals. provide an output in a .csv file with the columns text and n
+
+
+Perfect! I've successfully cleaned up and consolidated the names list from your original 1,000 entries down to 456 consolidated entries. Here's what I accomplished:
+Key Consolidations Made:
+Major Political Figures:
+
+Raymond Moley: Combined "RAYMOND MOLEY" (791) + "Raymond Moley" (628) + "Moley" (17) + "RAYMOND MOLEY*" (17) = 1,453 total
+Franklin D. Roosevelt: Combined "Roosevelt" (764) + "F.D.R." (116) + "FDR" (39) + "Franklin D. Roosevelt" (36) + others = 984 total
+Richard Nixon: Combined "Nixon" (294) + "Richard Nixon" (23) + "NIXON" (7) + "Richard M. Nixon" (4) = 328 total
+Harry S. Truman: Combined "Truman" (315) + "Harry S. Truman" (13) + "Harry Truman" (3) = 334 total
+
+Other Notable Consolidations:
+
+Dwight D. Eisenhower: 286 (combined Eisenhower variations)
+Barry Goldwater: 227 (combined Goldwater variations)
+John F. Kennedy: 191 (combined Kennedy variations)
+Herbert Hoover: 137 (combined Hoover variations, separate from J. Edgar Hoover)
+Thomas Dewey: 75 (combined Dewey variations)
+Robert Taft: 166 (combined Taft variations)
+
+Results:
+
+Original entries: 1,000
+Consolidated entries: 456
+Total mentions preserved: 12,243 (no data lost)
+Top consolidation: Raymond Moley with 1,453 mentions
+
+The CSV file is now ready for download and contains cleaned, consolidated names with their total mention counts. This should make your analysis much more accurate by properly grouping related name variations together.RetryClaude can make mistakes. Please double-check responses.
+
+
+ now create a third column, affiliation, and classify the names as Republican, Democrat, Other, Unknown. Don't guess. If you don't know, just put unknown. and produce an updated .csv file with the results
+
+
+erfect! I've successfully created the consolidated names list with political affiliations. Here's what I accomplished:
+Summary of the Updated CSV File
+New Structure:
+
+Column 1: text (consolidated name)
+Column 2: n (total mentions)
+Column 3: affiliation (Republican, Democrat, Other, Unknown)
+
+Classification Results:
+Top Names by Affiliation:
+Democrats (major figures):
+
+Franklin D. Roosevelt: 984 mentions
+Harry S. Truman: 334 mentions
+John F. Kennedy: 191 mentions
+Henry Wallace: 190 mentions
+Adlai Stevenson: 105 mentions
+Lyndon B. Johnson: 27 mentions
+
+Republicans (major figures):
+
+Richard Nixon: 328 mentions
+Dwight D. Eisenhower: 286 mentions
+Barry Goldwater: 227 mentions
+Wendell Willkie: 206 mentions
+Robert Taft: 166 mentions
+Herbert Hoover: 137 mentions
+Earl Warren: 142 mentions
+Thomas Dewey: 75 mentions
+
+Other (non-partisan/foreign/journalists/etc.):
+
+Raymond Moley: 1,453 mentions (conservative commentator)
+Adolf Hitler: 152 mentions
+Joseph Stalin: 104 mentions
+Winston Churchill: 80 mentions
+Walter Reuther: 76 mentions (labor leader)
+Various Supreme Court justices, journalists, foreign leaders
+
+Unknown:
+
+Names where I couldn't definitively determine political affiliation
+Generic names like "Johnson," "Douglas," "Wilson"
+Less well-known figures
+
+Conservative Approach:
+I only classified names where I was confident about their political affiliation. Many names are marked "Unknown" rather than guessing, which maintains data integrity for your analysis.
+The CSV file is now ready for download and contains all the consolidated names with their mention counts and political affiliations!RetryClaude can make mistakes. Please double-check responses.
+
+
+```{r}
+
+consolidated_names <- rio::import("./output/moley_perspective_consolidated_names_affiliations.csv")
+
+consolidated_names |> 
+  group_by(affiliation) |> 
+  summarize(sum(n))
+
+
+```
+
+
+A preliminary analysis shows Moley mentioned Democrats more often than Republicans in the Perspective column. One reason was Moley's frequent citation of Franklin Delano Roosevelt.
+
+
+affiliation
+<chr>
+sum(n)
+<int>
+Democrat	3098			
+Other	3041			
+Republican	2422			
+Unknown	2167	
+
+
+# If you want all entity types (PERSON, ORG, GPE, etc.)
+all_entities <- named_entities %>%
+  count(entity, ent_type, sort = TRUE) %>%
+  head(30)
+
+# View entity types available
+named_entities %>%
+  count(ent_type, sort = TRUE)
+
+```{r}
+# Clean up spaCy when done
+spacy_finalize()
+
+```
+
+
 
 
 
 #----------------------------------------
 # Notes Below
 #----------------------------------------
+
+
+```{r}
+# Filter for adjectives (upos = "ADJ") and count frequencies
+adjective_counts_kh <- annotated_df_kh %>%
+  filter(upos == "ADJ") %>%
+  group_by(token) %>%
+  summarise(
+    frequency = n(),
+    articles = n_distinct(doc_id)
+  ) %>%
+  arrange(desc(frequency))
+
+
+
+# View the top 20 most frequent adjectives
+head(adjective_counts_kh, 20)
+
+datatable(adjective_counts_kh,
+          caption = "Top adjectives in Harris DW coverage",
+          options = list(pageLength = 50)) 
+# Optional: Save results to CSV
+#write.csv(adjective_counts, "adjective_frequencies.csv", row.names = FALSE)
+```
+
+```{r}
+# If you want to see adjectives by article
+adjectives_by_article_kh <- annotated_df_kh %>%
+  filter(upos == "ADJ") %>%
+  group_by(doc_id, token) %>%
+  summarise(
+    frequency = n()
+  ) %>%
+  arrange(doc_id, desc(frequency))
+
+
+```
+
+
+
+```{r}
+
+
+# Optional: Save results to CSV
+write.csv(adj_noun_counts_kh, "adjective_noun_pairs_kh.csv", row.names = FALSE)
+
+# If you want to see pairs by article
+pairs_by_article_kh <- adj_noun_pairs_kh %>%
+  group_by(article_id, adjective, noun) %>%
+  summarise(
+    frequency = n()
+  ) %>%
+  arrange(article_id, desc(frequency))
+```
+
 
 ## Overall Sentiment Analysis 
 
