@@ -9,7 +9,7 @@ This notebook performs a basic narrative and topic analysis of the syndicated ne
 
 The goal of this project is to **measure patterns in wording, verbiage, themes, and sentiment** of Raymond Moley's poltitical reporting over time. This research will support a larger effort in analyzing the **influence of journalism and polticial activism on American elections, voting, and democracy at large**. 
 
-I am focusing on the time period of Moley's work from **1937-1968**, with **1400 articles**  analyzed. 
+I am focusing on the time period of Moley's work from **1942-1969**, with **2,501 articles**  analyzed. 
 
 The full index has 2547 articles
 
@@ -283,8 +283,6 @@ kennedy_articles2 <- articles_text |>
   filter(mentions >= 2) |> 
   mutate(politician = "Kennedy")
 
-# Let's also check the intermediate steps to debug:
-# First check if we're finding any kennedy mentions at all
 kennedy_mentions <- articles_text |>
   filter(!is.na(sentence)) |>
   filter(str_detect(sentence, "Kennedy"))
@@ -302,8 +300,7 @@ truman_articles2 <- articles_text |>
   filter(mentions >= 2) |> 
   mutate(politician = "Truman")
 
-# Let's also check the intermediate steps to debug:
-# First check if we're finding any Truman mentions at all
+
 truman_mentions <- articles_text |>
   filter(!is.na(sentence)) |>
   filter(str_detect(sentence, "Truman"))
@@ -321,8 +318,7 @@ nixon_articles2 <- articles_text |>
   filter(mentions >= 2) |> 
   mutate(politician = "Nixon")
 
-# Let's also check the intermediate steps to debug:
-# First check if we're finding any Nixon mentions at all
+
 nixon_mentions <- articles_text |>
   filter(!is.na(sentence)) |>
   filter(str_detect(sentence, "Nixon"))
@@ -338,8 +334,7 @@ goldwater_articles2 <- articles_text |>
   filter(mentions >= 2) |> 
     mutate(politician = "Goldwater")
 
-# Let's also check the intermediate steps to debug:
-# First check if we're finding any Nixon mentions at all
+
 goldwater_mentions <- articles_text |>
   filter(!is.na(sentence)) |>
   filter(str_detect(sentence, "Goldwater"))
@@ -355,8 +350,7 @@ roosevelt_articles2 <- articles_text |>
   filter(mentions >= 2) |> 
     mutate(politician = "Roosevelt")
 
-# Let's also check the intermediate steps to debug:
-# First check if we're finding any Nixon mentions at all
+
 roosevelt_mentions <- articles_text |>
   filter(!is.na(sentence)) |>
   filter(str_detect(sentence, "Roosevelt"))
@@ -372,8 +366,7 @@ eisenhower_articles2 <- articles_text |>
   filter(mentions >= 2) |> 
     mutate(politician = "Eisenhower")
 
-# Let's also check the intermediate steps to debug:
-# First check if we're finding any Nixon mentions at all
+
 eisenhower_mentions <- articles_text |>
   filter(!is.na(sentence)) |>
   filter(str_detect(sentence, "Eisenhower"))
@@ -389,8 +382,7 @@ dewey_articles2 <- articles_text |>
   filter(mentions >= 2) |> 
     mutate(politician = "Dewey")
 
-# Let's also check the intermediate steps to debug:
-# First check if we're finding any Nixon mentions at all
+
 dewey_mentions <- articles_text |>
   filter(!is.na(sentence)) |>
   filter(str_detect(sentence, "Dewey"))

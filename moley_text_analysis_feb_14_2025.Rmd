@@ -257,8 +257,7 @@ business_articles2 <- articles_text %>%
 
 
 ```{r}
-# Let's also check the intermediate steps to debug:
-# First check if we're finding any Nixon mentions at all
+
 business_mentions <- articles_text %>%
   filter(!is.na(sentence)) %>%
   filter(str_detect(sentence, "business")) |> 
@@ -266,6 +265,19 @@ business_mentions <- articles_text %>%
 
 print(paste("Total number of sentences mentioning business:", nrow(business_mentions)))
 ```
+
+#### Statism
+```{r}
+statism<- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  group_by(filename, year, date) %>%
+   summarize(mentions = sum(str_detect(sentence, "statism"), na.rm = TRUE)) %>%
+   filter(mentions >= 1) |> 
+  arrange(date)
+```
+
+The search shows Moley used the term "statism" in about 27 different Perspective columns, beginning in 1941.
+
 
 #### KWIC search, with metadata
 
