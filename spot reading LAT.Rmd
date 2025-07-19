@@ -1,0 +1,106 @@
+---
+title: "Compile Moley LAT articles Text"
+author: "Wells"
+date: "2025-06-21"
+output: html_document
+---
+
+This notebook allows a simple collection of articles by date
+
+It pulls from a collection of 2503 newspaper articles by Raymond Moley published by the Los Angeles Times from 1942 to 1969
+
+
+```{r}
+#install.packages("pdftools")
+library(tidyverse)
+library(pdftools)
+library(janitor)
+```
+
+# Compile Text into a Dataframe
+
+## Raw text compiler 
+```{r include=FALSE}
+
+
+files <- list.files("./moley_lat_txt", pattern="*.txt") %>% 
+  as.data.frame() |> 
+  rename(filename = 1) |> 
+  mutate(index = as.numeric(str_replace_all(filename, "_1_page0.txt","")))
+
+final_data <- rio::import("./data/moley_lat.csv") |> 
+  clean_names() |> 
+  rename(index = store_id) |> 
+  mutate(index = as.numeric(index))
+
+moley_lat_full_index <- rio::import("./data/moley_lat_full_index.csv") |> 
+  clean_names() |> 
+  mutate(date = lubridate::mdy(pub_date)) 
+
+final_index <- read.csv("./data/moley_lat_final_index_scanned_june_21.csv")
+
+```
+
+
+# Filter articles by date
+```{r}
+
+index_filtered <- final_index |> 
+  mutate(date = as.Date(date)) |>  # Convert to Date type
+  filter(date > as.Date("1957-09-01") & date < as.Date("1957-10-15")) |> 
+  select(filepath)
+
+```
+
+
+# capture a folder of articles using a filtered index
+```{r}
+# Example usage:
+# Specify source and destination folders
+source_folder <- "./moley_lat_txt"
+dest_folder <- "./output/reading_brown"
+
+#name of filtered index: brown
+# index_filtered <- final_index |> 
+#   filter(date > "1954-05-01" & date < "1954-09-01" ) |> 
+#   select(filename)
+
+# Function to copy selected text files from source to destination folder
+copy_selected_files <- function(source_folder, dest_folder, index_filtered) {
+  # Create destination folder if it doesn't exist
+  if (!dir.exists(dest_folder)) {
+    dir.create(dest_folder, recursive = TRUE)
+  }
+  
+  # List all text files in the source folder
+  all_files <- list.files(source_folder, pattern = "\\.txt$", full.names = TRUE)
+  
+  # Extract filenames from index_filtered (assuming it's a data frame with 'filepath' column)
+  if (is.data.frame(index_filtered)) {
+    filtered_filenames <- basename(index_filtered$filepath)
+  } else {
+    # If it's already a character vector of filenames
+    filtered_filenames <- index_filtered
+  }
+  
+  # Filter files based on the index_filtered list
+  files_to_copy <- all_files[basename(all_files) %in% filtered_filenames]
+  
+  # Copy selected files
+  if (length(files_to_copy) > 0) {
+    file.copy(
+      from = files_to_copy, 
+      to = file.path(dest_folder, basename(files_to_copy)),
+      overwrite = TRUE
+    )
+    
+    cat("Copied", length(files_to_copy), "files to", dest_folder, "\n")
+  } else {
+    cat("No files found to copy.\n")
+  }
+}
+
+# Call the function to copy files
+copy_selected_files(source_folder, dest_folder, index_filtered)
+```
+
