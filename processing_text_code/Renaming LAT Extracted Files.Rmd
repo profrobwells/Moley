@@ -1,0 +1,95 @@
+---
+title: "Renaming Extracted Files"
+author: "Wells"
+date: "2025-05-22"
+output: html_document
+---
+This code renames the extracted perspective columns so they are represented by dates and not obscure batch numbers
+
+```{r}
+library(tidyverse)
+library(rio)
+library(janitor)
+library(googlesheets4)
+```
+Import the main Perspective index
+```{r}
+lat_index <- rio::import("./data/moley_lat_final_index_scanned_june_21.csv") |> 
+  clean_names() |> 
+  mutate(date = lubridate::ymd(date)) 
+```
+
+
+copy and rename
+```{r}
+results <- lat_index |> 
+  rowwise() %>%
+  mutate(
+    old_path = file.path("./moley_lat_txt", filename),  
+    file_exists = file.exists(old_path),
+    new_filename = paste0(date,"_", filename),
+    new_path = file.path("./lat_txt_renamed", new_filename),
+    success = ifelse(file_exists, 
+                    file.copy(old_path, new_path), 
+                    FALSE)
+  ) %>%
+  ungroup()
+
+# Check results
+print(paste("Successfully copied:", sum(results$success), "files"))
+print(paste("Failed to copy:", sum(!results$success), "files"))
+
+# Analyze failures
+failed_files <- results %>% filter(!success)
+missing_files <- failed_files %>% filter(!file_exists)
+copy_failures <- failed_files %>% filter(file_exists)
+
+print(paste("Files that don't exist:", nrow(missing_files)))
+print(paste("Files that exist but failed to copy:", nrow(copy_failures)))
+
+```
+#wrote out to disk: 
+write.csv(results, "lat_txt_index_renamed_7_23.csv")
+
+rename pdfs 
+```{r}
+pdf_final <- lat_index %>%
+  rowwise() %>%
+  mutate(
+    index_new = str_replace_all(filename, "_page0.txt", ".pdf"),
+    old_path = file.path("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/Moley_LAT_column_pdfs", index_new),  
+    file_exists = file.exists(old_path),
+    new_filename = paste0(date,"_", index_new),
+    new_path = file.path("./lat_pdf_renamed", new_filename),
+    success = ifelse(file_exists, 
+                    file.copy(old_path, new_path), 
+                    FALSE)
+  ) %>%
+  ungroup()
+
+# Check results
+print(paste("Successfully copied:", sum(results$success), "files"))
+print(paste("Failed to copy:", sum(!results$success), "files"))
+
+# Analyze failures
+failed_files <- results %>% filter(!success)
+missing_files <- failed_files %>% filter(!file_exists)
+copy_failures <- failed_files %>% filter(file_exists)
+
+print(paste("Files that don't exist:", nrow(missing_files)))
+print(paste("Files that exist but failed to copy:", nrow(copy_failures)))
+
+
+
+
+```
+ 
+write.csv(pdf_final, "lat_pdf_index_renamed_7_23-.csv")
+
+
+```{r}
+missing_scans <- results |> 
+  filter(success == "FALSE")
+
+write_csv(missing_scans, "missing_scans.csv")
+```
