@@ -10,10 +10,10 @@ library(tidyverse)
 library(glue)
 library(janitor)
 
-#Sys.setenv(GOOGLE_API_KEY = "XXXX")
+#Sys.setenv(GOOGLE_API_KEY = "")
 
 ```
-## Load Data
+## Load Newsweek Data
 ```{r echo = F}
 #1562 articles in index
 article_index <-  rio::import("matching with extract-Perspective_full_index_1967_1937.xls") |> 
@@ -22,7 +22,7 @@ article_index <-  rio::import("matching with extract-Perspective_full_index_1967
          date = as.Date(pubdate, format="%b %d, %Y"))
 
 #136596 rows of text
-articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/moley_cleaned_perspective_text.csv") |> 
+articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/moley_cleaned_perspective_text.csv") |> 
     mutate(year = as.numeric(year),
          date = as.Date(pubdate, format="%b %d, %Y"))
 ```
@@ -99,7 +99,74 @@ articles_for_analysis <- processed_llm_test %>%
 # Combine with clear separators
 combined_text_with_filenames <- paste(articles_for_analysis$article_data, 
                                     collapse = "\n\n---ARTICLE SEPARATOR---\n\n")
+```
 
+
+#LLM Prompt
+
+###Classify by topic
+```{r}
+# Update system prompt to request the specific format you want
+chat <- chat_gemini(
+  system_prompt = "You are an academic researcher performing context analysis on selected Newsweek articles. Analyze each article and classify it based on these criteria:
+  
+  1. If an article contains two or more mentions of President Richard Nixon, classify it as 'nixon'
+  2. If an article contains two or more mentions of vote or voter registration, classify it as 'voter_turnout'
+  3. If an article contains two or more mentions the Vietnam War, classify it as 'vietnam'
+  4. If an article has adjectives that criticize Democrats, classify it as 'democrat_critique'
+  5. If an article meets multiple criteria, assign multiple categories separated by semicolons
+  6. If an article meets none of the criteria, classify it as 'other'
+  
+  Return ONLY a CSV-formatted result with exactly two columns:
+  filename,category
+  
+  For example:
+  filename,category
+  article1.txt,nixon
+  article2.txt,voter_turnout
+  article3.txt,nixon;voter_turnout
+  article4.txt,other
+  
+  No additional text, explanations, or summary counts."
+)
+
+# Send to the LLM
+response <- chat$chat(combined_text_with_filenames)
+```
+
+
+```{r}
+chat2 <- chat_gemini(
+  system_prompt = "You are an academic researcher performing context analysis on selected Newsweek articles. Analyze each article and classify it based on these criteria:
+  
+  1. If an article contains two or more mentions of an upcoming election or electoral politics, classify it as 'politics'
+  2. If an article contains two or more mentions of vote or voter registration, classify it as 'voter_turnout'
+  3. If an article contains two or more mentions the economic developments, classify it as 'economy'
+  4. If an article contains two or more mentions of business issues, classify it as 'business'
+  5. If an article meets multiple criteria, assign multiple categories separated by semicolons
+  6. If an article meets none of the criteria, classify it as 'other'
+  
+  Return ONLY a CSV-formatted result with exactly THREE (3) columns:
+  filename, category, explanation
+  
+  For example:
+  filename, category, explanation
+  article1.txt,politics, warning about upcoming election
+  article2.txt,democrat_critique, these words were critical of democrats: xyz
+  article3.txt,business;politics, business mentioned three times voter turnout twice
+  article4.txt,other
+  
+  No additional text, explanations, or summary counts."
+)
+
+# Send to the LLM
+politics <- chat2$chat(combined_text_with_filenames)
+```
+
+
+
+
+```{r}
 # Update system prompt to request the specific format you want
 chat <- chat_gemini(
   system_prompt = "You are an academic researcher performing context analysis on selected Newsweek articles. Analyze each article and classify it based on these criteria:
@@ -227,8 +294,13 @@ process_llm_response_to_df <- function(response) {
     )
   }
 }
-result_df2 <- process_llm_response_to_df(response2)
+result_df2 <- process_llm_response_to_df(politics)
 ```
+
+
+
+
+
 
 #old version lacks the explanation column
 ```{r}
@@ -396,6 +468,199 @@ writeLines(
 ```
 
 
+# LAT Data
+## Load LAT Data
+```{r echo = F}
+#2501 articles in index
+lat_article_index <-  rio::import("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/lat_txt_index_renamed_7_23.csv") |> 
+  clean_names() |> 
+  mutate(year = lubridate::year(date))
+  
+
+#284067 rows of text
+# lat_articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/moley_lat_text_june_21.csv") |> 
+#    clean_names() |> 
+#     mutate(year = as.numeric(year))
+
+lat_articles_text <- experiment
+```
+
+
+```{r}
+#1956 articles: 14,218 lines
+llm_lat <- lat_articles_text[126052:140269, ]
+
+llm_lat <- llm_lat |> 
+  mutate(sentence = gsub("\n", " ", sentence)) |> 
+  mutate(sentence = gsub("\\s+", " ", sentence))
+
+```
+
+```{r}
+process_articles <- function(df) {
+  # First group by article identifiers and concatenate sentences
+  # Using filename as the identifier, but you might need to use other columns
+  compiled_df <- df %>%
+    group_by(new_filename) %>%
+    summarize(
+      sentence = paste(na.omit(sentence), collapse = " "),
+      title = first(title),
+      abstract = first(abstract),
+      old_filename = first(old_filename),
+      authors = first(authors),
+      filepath = first(filepath),
+      index = first(index),
+      issn = first(issn),
+      pages = first(pages),
+      new_filename = first(new_filename),
+      new_path = first(new_path),
+      title = first(title),
+      year = first(year),
+      document_url = first(document_url),
+      find_a_copy = first(find_a_copy),
+      date = first(date)
+    )
+  
+  # Remove punctuation and spaces from the sentence column
+  compiled_df <- compiled_df %>%
+    mutate(sentence = str_replace_all(sentence, "[[:punct:][:space:]]", "")) |> 
+    mutate(sentence = tolower(sentence))
+  
+  return(compiled_df)
+}
+
+# Make sure to load the necessary libraries
+library(dplyr)
+library(stringr)
+
+# Apply the function to your dataframe
+processed_llm_test <- process_articles(llm_lat)
+```
+
+```{r}
+# Prepare data with filenames and content
+articles_for_analysis <- processed_llm_test %>%
+  select(new_filename, sentence) %>%
+  mutate(article_data = paste("FILENAME:", new_filename, "\nCONTENT:", sentence))
+
+# Combine with clear separators
+combined_text_with_filenames <- paste(articles_for_analysis$article_data, 
+                                    collapse = "\n\n---ARTICLE SEPARATOR---\n\n")
+```
+
+## Political coverage prompt
+```{r}
+chat2 <- chat_gemini(
+  system_prompt = "You are an academic researcher performing context analysis on selected Newsweek articles. Analyze each article and classify it based on these criteria:
+  
+  1. If an article contains two or more mentions of an upcoming election or electoral politics, classify it as 'politics'
+  2. If an article contains two or more mentions of vote or voter registration, classify it as 'voter_turnout'
+  3. If an article contains two or more mentions the economic developments, classify it as 'economy'
+  4. If an article contains two or more mentions of business issues, classify it as 'business'
+  5. If an article meets multiple criteria, assign multiple categories separated by semicolons
+  6. If an article meets none of the criteria, classify it as 'other'
+  
+  Return ONLY a CSV-formatted result with exactly THREE (3) columns:
+  filename, category, explanation
+  
+  For example:
+  filename, category, explanation
+  article1.txt,politics, warning about upcoming election
+  article2.txt,democrat_critique, these words were critical of democrats: xyz
+  article3.txt,business;politics, business mentioned three times voter turnout twice
+  article4.txt,other
+  
+  No additional text, explanations, or summary counts."
+)
+
+# Send to the LLM
+lat_politics_llm <- chat2$chat(combined_text_with_filenames)
+```
+
+
+```{r}
+process_llm_response_to_df <- function(response) {
+  # Extract lines
+  lines <- strsplit(response, "\n")[[1]]
+  
+  # Remove markdown code block markers if present
+  lines <- lines[!grepl("^```", lines)]
+  
+  # Initialize vectors for data
+  filenames <- c()
+  categories <- c()
+  explanations <- c()
+  
+  # Flag to track if we're processing data (after header)
+  header_found <- FALSE
+  
+  for (line in lines) {
+    # Skip empty lines
+    if (trimws(line) == "") next
+    
+    # Skip row numbers or other artifacts (lines with asterisks)
+    if (grepl("\\*\\*", line)) next
+    
+    # Check if this is the header line
+    if (grepl("filename.*category.*explanation", line, ignore.case = TRUE)) {
+      header_found <- TRUE
+      next
+    }
+    
+    # Process data lines (only after header is found)
+    if (header_found || grep("batch.*\\.txt", line)) {
+      # Parse each row with better handling of commas within explanations
+      parts <- strsplit(line, ",\\s*", perl = TRUE, fixed = FALSE)[[1]]
+      
+      if (length(parts) >= 1) {
+        filename <- parts[1]
+        category <- ifelse(length(parts) >= 2, parts[2], "")
+        
+        # Handle the explanation (everything after second comma)
+        if (length(parts) >= 3) {
+          explanation <- paste(parts[3:length(parts)], collapse = ", ")
+        } else {
+          explanation <- NA
+        }
+        
+        filenames <- c(filenames, filename)
+        categories <- c(categories, category)
+        explanations <- c(explanations, explanation)
+      }
+    }
+  }
+  
+  # Create and return the dataframe
+  if (length(filenames) > 0) {
+    data.frame(
+      filename = filenames,
+      category = categories,
+      explanation = explanations,
+      stringsAsFactors = FALSE
+    )
+  } else {
+    # Return empty dataframe with correct structure if no data found
+    data.frame(
+      filename = character(0),
+      category = character(0),
+      explanation = character(0),
+      stringsAsFactors = FALSE
+    )
+  }
+}
+lat_1956_results <- process_llm_response_to_df(lat_politics)
+write.csv(lat_1956_results, "./output/lat_1956_results.csv")
+```
+
+
+count the results
+```{r}
+lat_1956_results |> 
+  count(category)
+
+```
+
+
 
 
 ```{r}
@@ -483,6 +748,36 @@ chat$chat(statenarrative$base_narrative[[2]])
 ```
 
 
+#fixed lat article text with new filename
+```{r}
+skinny <- lat_article_index |> 
+  select(index,filename, new_filename,date, new_path) |> 
+  mutate(index = as.numeric(index))
 
+experiment <- lat_articles_text |> 
+  inner_join(skinny, by=c("index", "filename"))
+
+# Specify the variables to compare (common columns)
+vars_to_compare <- intersect(names(lat_articles_text), names(experiment))
+
+# Compare the specified variables in the two dataframes
+is_identical <- all.equal(lat_articles_text[, vars_to_compare], experiment[, vars_to_compare])
+
+# Check the comparison result
+if (is_identical == TRUE) {
+  cat("The common variables in the two dataframes are identical.\n")
+} else {
+  cat("The common variables in the two dataframes are not identical.\n")
+  cat("Differences:\n")
+  print(is_identical)
+}
+
+experiment <- experiment |> 
+  rename(date = date.x)
+  # rename(old_filename = filename, old_date = date.y)
+
+#write.csv(experiment, "lat_articles_text_update_7_23.csv")
+
+```
 
 

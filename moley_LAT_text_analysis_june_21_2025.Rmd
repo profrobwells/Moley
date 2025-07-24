@@ -49,7 +49,7 @@ library(flextable)
 library(janitor)
 ```
 
-## Load Data
+## Load LAT Data
 ```{r echo = F}
 #2501 articles in index
 article_index <-  rio::import("./data/moley_lat_final_index_scanned_june_21.csv") |> 
@@ -58,8 +58,13 @@ article_index <-  rio::import("./data/moley_lat_final_index_scanned_june_21.csv"
   
 
 #284067 rows of text
-articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Moley_LAT_column/moley_lat_text_june_21.csv") |> 
+articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/moley_lat_text_june_21.csv") |> 
    clean_names() |> 
+    mutate(year = as.numeric(year))
+
+#284067 rows of text
+articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/lat_articles_text_update_7_23.csv") |>
+   clean_names() |>
     mutate(year = as.numeric(year))
 
 ```
@@ -103,7 +108,7 @@ nrows1 <- nrow(articles_text)
 ncols1 <- ncol(articles_text)
 
 articles <- articles_text |> 
-  distinct(filename) |> 
+  distinct(new_filename) |> 
   count()
 
 
@@ -119,7 +124,7 @@ glue::glue("The article text dataframe is huge, with {nrows1} rows and {ncols1} 
 
 #Here is a chart, Figure x, that counts columns by year
 count_year <- articles_text |> 
-  distinct(filename, .keep_all = TRUE) |> 
+  distinct(new_filename, .keep_all = TRUE) |> 
 count(year) |> 
 #Sandwich it onto a simple ggplot
   ggplot(aes(x = year, y = n, fill = n)) +
@@ -137,6 +142,362 @@ count_year
 #ggsave(here::here("Figure_X_ columns_by_year_2_14_2025.png"),device = "png",width=9,height=6, dpi=800)
 
 ```
+
+
+### Checking Narratives
+# Bigrams
+```{r}
+bigrams <- articles_text |> mutate(sentence= str_squish(sentence)) |> 
+  mutate(text = tolower(sentence)) |>  
+  mutate(text = gsub("\\d+", "", text)) |>
+  mutate(text = str_replace_all(text, "raymond", "")) |>
+  mutate(text = str_replace_all(text, "newsweek", "")) |>
+  mutate(text = str_replace_all(text, "image", "")) |>
+  mutate(text = str_replace_all(text, "perspective", "")) |>
+  mutate(text = str_replace_all(text, "registered u.s. patent office", "")) |>
+  mutate(text = str_replace_all(text, "reproduced with permission of the copyright owner", "")) |>
+  mutate(text = str_replace_all(text, "further reproduction prohibited without permission", "")) |>
+  mutate(text = str_replace_all(text, "copyright", "")) |>
+  mutate(text = str_replace_all(text, "new york city", "")) |>
+  mutate(text = str_replace_all(text, "- ", "")) |>
+  mutate(text = str_replace_all(text, " -", "")) |>
+  mutate(text = str_replace_all(text, " - ", "")) |>
+  unnest_tokens(word, text, token="ngrams", n=2 ) |>
+  filter(!word %in% stop_words$word) |>
+  filter(!word == "minor inaccuracies") |>
+  filter(!word == "text extraction") |>
+  filter(!word == "text version") |>
+  filter(!word == "copyright owner") |>
+  filter(!word == "reproduction prohibited") |>
+  filter(!is.na(word))
+
+bigrams <- bigrams |>
+  select(word, date, year, new_filename)
+
+```
+#### Statism
+```{r}
+statism <- bigrams |> 
+ filter(str_detect(word, "statism"))
+
+statism |> 
+  group_by(year) |> 
+  count() |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1941, 1964, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "'Statism' in Raymond Moley Newspaper Articles, 1937-1967",
+       subtitle = "Analysis of 2,501 Newspaper columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Source: Newspaper. Graphic by Rob Wells, 6-19-2025")
+
+# ggsave("output/statism_Newspaper_6-19_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+#### Free Enterprise
+```{r}
+free <- c("private enterprise", "free enterprise",
+"business enterprise", "individual enterprise", "enterprise system", "business enterprises",
+"industrial enterprises")
+
+enterprise <- bigrams |> 
+ filter(str_detect(word, paste(free, collapse = "|")))
+
+
+
+# enterprise |> 
+#   count(word) |> 
+#   arrange(desc(n))
+
+
+enterprise |> 
+  group_by(year) |> 
+  count() |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1937, 1966, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "Free Enterprise in Raymond Moley Newspaper Articles, 1937-1967",
+       subtitle = "Analysis of 2,501 Newspaper columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Free enterprise and six variants of phrase. Source: Newspaper. Graphic by Rob Wells, 6-19-2025")
+
+# ggsave("output/free_enterprise_Newspaper_6-19_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+#### Communism
+```{r}
+free <- c("communis", "socialis", "marxis")
+
+marx <- bigrams |> 
+ filter(str_detect(word, paste(free, collapse = "|")))
+
+
+
+# enterprise |> 
+#   count(word) |> 
+#   arrange(desc(n))
+
+
+marx |> 
+  group_by(year) |> 
+  count() |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1937, 1967, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "Marxism in Raymond Moley Newspaper Articles, 1937-1967",
+       subtitle = "Analysis of 2,501 Newspaper columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Marxism, communism, socialism. Source: Newspaper. Graphic by Rob Wells, 6-19-2025")
+
+# ggsave("output/marxism_Newspaper_6-19_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+#### Bureaucracy
+```{r}
+free <- c("bureaucra", "socialis", "marxis")
+
+bureaucrat <- bigrams |> 
+ filter(str_detect(word, "bureaucr"))
+
+
+
+bureaucrat |>
+  count(word) |>
+  arrange(desc(n))
+
+bureaucrat |> 
+  group_by(year) |> 
+  count() |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1937, 1967, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "Bureaucracy in Raymond Moley Newspaper Articles, 1937-1967",
+       subtitle = "Analysis of 2,501 Newspaper columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Source: Newspaper. Graphic by Rob Wells, 6-19-2025")
+
+# ggsave("output/bureaucracy_Newspaper_6-19_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+#### Spending
+
+expenditures
+
+```{r}
+free <- c("expenditures", "spending p", "appropriations")
+
+spend <- bigrams |> 
+ filter(str_detect(word, paste(free, collapse = "|")))
+
+
+
+spend |>
+  count(word) |>
+  arrange(desc(n))
+
+spend |> 
+  group_by(year) |> 
+  count() |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1937, 1967, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "Government Spending Topics in Raymond Moley Newspaper Articles, 1937-1967",
+       subtitle = "Analysis of 2,501 Newspaper columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Source: Newspaper. Graphic by Rob Wells, 6-19-2025")
+
+# ggsave("output/spending_Newspaper_6-19_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+
+#Quanteda search
+### Build corpus with unique field id
+```{r}
+
+lat_corpus <- articles_text %>%
+  mutate(unique_file_id = paste0(new_filename, "_", row_number()))
+
+# Create a corpus using the 'sentence' column as the text field
+my_corpus <- corpus(lat_corpus, text_field = "sentence",  docid_field = "unique_file_id") 
+
+# Tokenize the corpus
+my_tokens <- tokens(my_corpus)
+
+
+```
+
+## kwic on politics
+
+```{r}
+
+# Perform KWIC (Key Word in Context) search on the tokens
+# quanteda_test <- kwic(my_tokens, pattern = "politics", valuetype = "regex") %>% 
+#   as.data.frame()
+
+lat_politics <- kwic(my_tokens, phrase(c("politics", "election", "voter", "precinct")), window = 50, valuetype = "regex") %>% as.data.frame() 
+
+#write.csv(quanteda_test, "quanteda_test.csv")
+
+```
+
+### Extract date and filename
+```{r}
+lat_politics <- lat_politics |> 
+  mutate(date = str_sub(docname, 1, 10)) |> 
+  mutate(file_id = str_sub(docname, 12, 22)) |> 
+  mutate(date = lubridate::ymd(date)) |> 
+  mutate(year = year(date))
+
+lat_politics_unique <- lat_politics |> 
+  group_by(date) |> 
+  count() |> 
+  arrange(desc(n))
+
+```
+
+### Chart newspaper political coverage trends
+
+```{r}
+
+lat_politics |> 
+  group_by(year) |> 
+  count() |> 
+  arrange(desc(n)) |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1942, 1969, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "Politics Mentioned in Raymond Moley Newspaper Articles, 1937-1967",
+       subtitle = "Analysis of 2,501 Newspaper columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Source: LAT newspaper coverage. Graphic by Rob Wells, 7-24-2025")
+
+# ggsave("output/political_coverage_trends_Newspaper_7-24_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+# Complacency
+
+
+
+
+
+```{r}
+lat_complacent <- kwic(my_tokens, phrase(c("complacency", "apathy", "self-delusion", "fantastic idea", "blinded them", "lack of active support", "smugness", "overconfidence", "self-satisfaction", "contentment", "inertia", "lethargy", "nonchalance", "indifference", "carelessness", "unconcern", "inattentiveness", "obliviousness", "passivity", "stagnation", "sloth", "negligence", "disregard", "heedlessness", "rashness", "shortsightedness", "overoptimism", "hubris", "presumption", "false sense of security", "lack of urgency", "laissez-faire attitude", "blasé outlook", "unresponsiveness", "torpor", "dormancy")), window = 50, valuetype = "regex") %>% as.data.frame() 
+
+#write.csv(quanteda_test, "quanteda_test.csv")
+
+```
+
+### Extract date and filename
+```{r}
+lat_complacent <- lat_complacent |> 
+  mutate(date = str_sub(docname, 1, 10)) |> 
+  mutate(file_id = str_sub(docname, 12, 22)) |> 
+  mutate(date = lubridate::ymd(date)) |> 
+  mutate(year = year(date))
+
+lat_complacent_unique <- lat_complacent|> 
+  group_by(date) |> 
+  count() |> 
+  arrange(desc(n))
+
+```
+
+### Chart newspaper political coverage trends
+
+```{r}
+
+lat_complacent |> 
+  group_by(year) |> 
+  count() |> 
+  arrange(desc(n)) |> 
+ggplot(aes(x= year, y=n, fill=n)) +
+  geom_bar(stat="identity", position="dodge") +
+scale_x_continuous(breaks = seq(1942, 1969, by = 1)) +
+  theme(legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_text(aes(label=n), vjust = -.5, size=3) +
+  labs(title = "Complacency Mentioned in Raymond Moley Newspaper Articles, 1937-1967",
+       subtitle = "Analysis of 2,501 Newspaper columns",
+       x = "Year",
+       y = "Frequency",
+       caption = "Source: LAT newspaper coverage. Graphic by Rob Wells, 7-24-2025")
+
+# ggsave("output/complacency_newspaper_7-24_2025.png", device = "png", width = 9, height = 6, dpi = 800)
+
+```
+
+
+# Link the results with the metadata
+```{r}
+#Strips out unique file name from article index 
+kwic_results <- kwic_results |>  
+    mutate(matchrow = str_extract(docname, "^[^_]+_[^_]+"))
+
+metadata <- extracted_articles_index_oct_16_2024
+
+# Join KWIC results with metadata 
+kwic_with_metadata <- kwic_results %>%
+  inner_join(metadata, by = c("matchrow"="file_id")) |> 
+  distinct(docname, .keep_all= TRUE) |> 
+  select(matchrow, date, from, to, pre, keyword, post, pattern, newspaper_name, newspaper_city, newspaper_state,black_press,url, docname)
+```
+
+
+# Housecleaning
+```{r}
+#cut useless returns
+mobjunk <- c("mobile",  "automobile",  "automobiles", "mobilize", "mobley", "mobilizing", "democratic party of", "mobe", "moberly",  "mobil", "mobiles", "mobilized", "mobold")
+kwic_with_metadata <- kwic_with_metadata %>%
+  filter(!keyword %in% mobjunk)
+
+
+#Eliminate duplication
+kwic_with_metadata  <- kwic_with_metadata  %>% 
+  distinct(docname, pre, keyword, post, newspaper_name, date, url) %>% 
+  rename('Beginning of Passage' = pre, 'End of Passage' = post, Newspaper = newspaper_name, Date = date) 
+
+kwic_with_metadata_csv <- kwic_with_metadata  %>%
+  add_column(Code = NA) %>% 
+  add_column(Comments = NA) %>% 
+  select(docname, Newspaper, Date, 'Beginning of Passage', keyword, 'End of Passage', Code, Comments)
+
+#write_csv(kwic_with_metadata_csv, "../exercises/assets/data/kwic_with_metadata.csv")
+
+```
+
+
+
+
 
 
 # Bigrams

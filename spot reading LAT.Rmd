@@ -52,13 +52,12 @@ index_filtered <- final_index |>
 
 ```
 
-
 # capture a folder of articles using a filtered index
 ```{r}
 # Example usage:
 # Specify source and destination folders
-source_folder <- "./moley_lat_txt"
-dest_folder <- "./output/reading_brown"
+source_folder <- "./Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/lat_txt_renamed"
+dest_folder <- "./output/llm_fact_check"
 
 #name of filtered index: brown
 # index_filtered <- final_index |> 
@@ -102,5 +101,69 @@ copy_selected_files <- function(source_folder, dest_folder, index_filtered) {
 
 # Call the function to copy files
 copy_selected_files(source_folder, dest_folder, index_filtered)
+```
+
+```{r}
+politics_index_filtered <- read.csv("./output/lat_1956_results.csv")
+
+lat_renamed_index <- read.csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/lat_txt_index_renamed_7_23.csv")
+
+
+politics_index_filtered <- politics_index_filtered |> 
+  inner_join(lat_renamed_index, by=c("filename"="new_filename"))
+
+```
+
+
+
+# capture a folder of articles using a filtered index
+```{r}
+# Example usage:
+# Specify source and destination folders
+source_folder <- "/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/lat_txt_renamed"
+dest_folder <- "./output/llm_fact_check"
+
+#name of filtered index: brown
+# index_filtered <- final_index |> 
+#   filter(date > "1954-05-01" & date < "1954-09-01" ) |> 
+#   select(filename)
+
+# Function to copy selected text files from source to destination folder
+copy_selected_files <- function(source_folder, dest_folder, politics_index_filtered) {
+  # Create destination folder if it doesn't exist
+  if (!dir.exists(dest_folder)) {
+    dir.create(dest_folder, recursive = TRUE)
+  }
+  
+  # List all text files in the source folder
+  all_files <- list.files(source_folder, pattern = "\\.txt$", full.names = TRUE)
+  
+  # Extract filenames from index_filtered (assuming it's a data frame with 'filepath' column)
+  if (is.data.frame(politics_index_filtered)) {
+    filtered_filenames <- basename(politics_index_filtered$new_path)
+  } else {
+    # If it's already a character vector of filenames
+    filtered_filenames <- politics_index_filtered
+  }
+  
+  # Filter files based on the index_filtered list
+  files_to_copy <- all_files[basename(all_files) %in% filtered_filenames]
+  
+  # Copy selected files
+  if (length(files_to_copy) > 0) {
+    file.copy(
+      from = files_to_copy, 
+      to = file.path(dest_folder, basename(files_to_copy)),
+      overwrite = TRUE
+    )
+    
+    cat("Copied", length(files_to_copy), "files to", dest_folder, "\n")
+  } else {
+    cat("No files found to copy.\n")
+  }
+}
+
+# Call the function to copy files
+copy_selected_files(source_folder, dest_folder, politics_index_filtered)
 ```
 
