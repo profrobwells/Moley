@@ -1,0 +1,352 @@
+---
+title: "R Notebook"
+output: null
+---
+
+```{r}
+#install.packages("ellmer")
+library(ellmer)
+library(tidyverse)
+library(glue)
+library(janitor)
+
+#Sys.setenv(GOOGLE_API_KEY = "")
+
+```
+
+#Check Gemini is working
+
+```{r}
+chat <- chat_gemini()
+
+chat$chat("Tell me three jokes about journalists")
+```
+# LAT Data
+## Load LAT Data
+```{r echo = F}
+#2501 articles in index
+lat_article_index <-  rio::import("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/lat_txt_index_renamed_7_23.csv") |> 
+  clean_names() |> 
+  mutate(year = lubridate::year(date))
+  
+
+#284067 rows of text
+lat_articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/moley_lat_text_june_21.csv") |>
+   clean_names() |>
+    mutate(year = as.numeric(year))
+
+# lat_articles_text <- experiment
+```
+
+
+```{r}
+#1956 articles: 14,218 lines
+llm_lat <- lat_articles_text[126052:140269, ]
+
+llm_lat <- llm_lat |> 
+  mutate(sentence = gsub("\n", " ", sentence)) |> 
+  mutate(sentence = gsub("\\s+", " ", sentence))
+
+```
+
+```{r}
+process_articles <- function(df) {
+  # First group by article identifiers and concatenate sentences
+  # Using filename as the identifier, but you might need to use other columns
+  compiled_df <- df %>%
+    group_by(filename) %>%
+    summarize(
+      sentence = paste(na.omit(sentence), collapse = " "),
+      title = first(title),
+      abstract = first(abstract),
+      authors = first(authors),
+      filepath = first(filepath),
+      index = first(index),
+      issn = first(issn),
+      pages = first(pages),
+      title = first(title),
+      year = first(year),
+      document_url = first(document_url),
+      find_a_copy = first(find_a_copy),
+      date = first(date),
+      year=first(year)
+    )
+  
+  # Remove punctuation and spaces from the sentence column
+  compiled_df <- compiled_df %>%
+    mutate(sentence = str_replace_all(sentence, "[[:punct:][:space:]]", "")) |> 
+    mutate(sentence = tolower(sentence))
+  
+  return(compiled_df)
+}
+
+# Make sure to load the necessary libraries
+library(dplyr)
+library(stringr)
+
+# Apply the function to your dataframe
+processed_llm_test <- process_articles(llm_lat)
+```
+
+```{r}
+# Prepare data with filenames and content
+articles_for_analysis <- processed_llm_test %>%
+  select(filename, sentence) %>%
+  mutate(article_data = paste("FILENAME:", filename, "\nCONTENT:", sentence))
+
+# Combine with clear separators
+combined_text_with_filenames <- paste(articles_for_analysis$article_data, 
+                                    collapse = "\n\n---ARTICLE SEPARATOR---\n\n")
+```
+
+# LLM Prompt
+ver 10-1-2025
+```{r}
+chat2 <- chat_gemini(
+  system_prompt = "You are an academic researcher performing context analysis on selected Newsweek articles. Analyze each article and classify it based on these criteria:
+  
+  1. POLITICS classification: Classify an article as 'POLITICS' if it contains two or more mentions of electoral politics.
+
+'Electoral politics' is defined as:
+- Upcoming elections (primaries, general elections, special elections)
+- Election results and outcomes
+- Political campaigns and campaign strategies
+- Candidate announcements, debates, or endorsements
+- Election polling and predictions
+- Political party activities related to elections
+
+EXCLUSIONS:
+- Policy debates or legislation without electoral context → classify as 'other'
+- Appointed officials or bureaucratic actions → not electoral politics unless tied to an election
+
+
+2. VOTER TURNOUT Classification: 
+Classify an article as 'voter_turnout' if it contains two or more mentions of voter participation or turnout-related issues.
+
+'Voter turnout' is defined as:
+- Voter registration drives or registration statistics
+- Early voting, absentee voting, or mail-in ballot usage
+- Voter turnout rates or participation levels
+- Get-out-the-vote (GOTV) campaigns or efforts
+- Barriers to voting or voter access issues (polling locations, ID requirements, wait times)
+- Demographic breakdowns of voter participation
+
+  3. ECONOMY classification: Classify an article as 'economy' if it contains two or more mentions of macroeconomic issues or economic policy.
+
+'Economy' is defined as:
+- Macroeconomic indicators (GDP, inflation, unemployment rates, economic growth)
+- Monetary policy (Federal Reserve actions, interest rates, money supply)
+- Trade policy (tariffs, trade agreements, import/export regulations)
+- Fiscal policy (government spending, taxation, budget deficits)
+- Economic forecasts or recession/expansion predictions
+- Currency markets and exchange rates
+- National or global economic conditions and trends
+
+EXCLUSIONS:
+- Individual company financial performance → classify as 'business'
+- Industry-specific trends without macroeconomic context → classify as 'business'
+- Stock market movements alone (unless tied to broader economic analysis) → classify as 'business'
+
+  4. BUSINESS classification: Classify an article as 'business' if it contains two or more mentions of business issues.
+  
+BUSINESS ISSUES is defined as articles that primarily discuss:
+- **Companies**: Corporate entities, their operations, or strategic decisions
+- **Executives**: Business leaders, appointments, departures, or leadership actions
+- **Business Activity**: Including but not limited to:
+  - Product launches and announcements
+  - Marketing campaigns
+  - Regulatory compliance matters
+  - Mergers and acquisitions
+  - Partnerships and collaborations
+  - Corporate strategy changes
+- **Financial Dealings**: Earnings, investments, funding, stock performance, financial results
+- **Industry**: Sector trends, market analysis, competitive dynamics
+
+EXCLUSIONS:
+- Labor issues (strikes, unionization, worker disputes) should be classified separately as LABOR, not business issues
+- Articles that only mention a company tangentially (e.g., 'Apple CEO attended a charity gala') without discussing business matters
+
+  5.LABOR CLASSIFICATION: Classify an article as 'LABOR' if it contains two or more mentions of organized labor issues.
+
+'Organized labor' is defined as:
+- Strikes or work stoppages
+- Unionization efforts or union elections
+- Worker disputes involving unions or collective bargaining
+- Public policy issues focusing on organized labor (e.g., labor law reforms, right-to-work legislation)
+- Statements or actions by union leaders or labor organizations
+
+IMPORTANT:
+- The threshold is two or more mentions to avoid misclassifying articles that only reference labor tangentially
+- General workplace issues (individual employee disputes, non-union worker complaints, HR policies) do NOT count as organized labor unless unions are involved
+
+  6. If an article meets multiple criteria, assign multiple categories separated by semicolons. 'Multiple criteria' would mean two mentions of politics AND two mentions of business resulting in the category 'politics;business'
+  7. If an article meets none of the criteria, classify it as 'other'
+  
+  Return ONLY a CSV-formatted result with exactly THREE (3) columns:
+  filename, category, explanation
+  
+  For example:
+  filename, category, explanation
+  article1.txt,politics, warning about upcoming election
+  article2.txt,democrat_critique, these words were critical of democrats: xyz
+  article3.txt,business;politics, business mentioned three times voter turnout twice
+  article4.txt,other
+  
+  No additional text, explanations, or summary counts."
+)
+
+# Send to the LLM
+politics <- chat2$chat(combined_text_with_filenames)
+```
+
+#Process results
+
+```{r}
+process_llm_response_to_df <- function(response) {
+  # Extract lines
+  lines <- strsplit(response, "\n")[[1]]
+  
+  # Remove markdown code block markers if present
+  lines <- lines[!grepl("^```", lines)]
+  
+  # Initialize vectors for data
+  filenames <- c()
+  categories <- c()
+  explanations <- c()
+  
+  # Flag to track if we're processing data (after header)
+  header_found <- FALSE
+  
+  for (line in lines) {
+    # Skip empty lines
+    if (trimws(line) == "") next
+    
+    # Skip row numbers or other artifacts (lines with asterisks)
+    if (grepl("\\*\\*", line)) next
+    
+    # Check if this is the header line
+    if (grepl("filename.*category.*explanation", line, ignore.case = TRUE)) {
+      header_found <- TRUE
+      next
+    }
+    
+    # Process data lines (only after header is found)
+    if (header_found || grep("batch.*\\.txt", line)) {
+      # Parse each row with better handling of commas within explanations
+      parts <- strsplit(line, ",\\s*", perl = TRUE, fixed = FALSE)[[1]]
+      
+      if (length(parts) >= 1) {
+        filename <- parts[1]
+        category <- ifelse(length(parts) >= 2, parts[2], "")
+        
+        # Handle the explanation (everything after second comma)
+        if (length(parts) >= 3) {
+          explanation <- paste(parts[3:length(parts)], collapse = ", ")
+        } else {
+          explanation <- NA
+        }
+        
+        filenames <- c(filenames, filename)
+        categories <- c(categories, category)
+        explanations <- c(explanations, explanation)
+      }
+    }
+  }
+  
+  # Create and return the dataframe
+  if (length(filenames) > 0) {
+    data.frame(
+      filename = filenames,
+      category = categories,
+      explanation = explanations,
+      stringsAsFactors = FALSE
+    )
+  } else {
+    # Return empty dataframe with correct structure if no data found
+    data.frame(
+      filename = character(0),
+      category = character(0),
+      explanation = character(0),
+      stringsAsFactors = FALSE
+    )
+  }
+}
+lat_1956_results <- process_llm_response_to_df(politics)
+write.csv(lat_1956_results, "./output/ai_classified_lat_1956_oct_1_2025.csv")
+```
+
+
+count the results
+```{r}
+lat_1956_results |> 
+  count(category)
+
+```
+
+
+
+
+
+
+#Notes
+
+Prompt guidance from Claude.ai
+Suggested Prompt Structure
+You are analyzing news articles to identify and categorize business issues.
+
+BUSINESS ISSUES are defined as articles that primarily discuss:
+- **Companies**: Corporate entities, their operations, or strategic decisions
+- **Executives**: Business leaders, appointments, departures, or leadership actions
+- **Business Activity**: Including but not limited to:
+  - Product launches and announcements
+  - Marketing campaigns
+  - Regulatory compliance matters
+  - Mergers and acquisitions
+  - Partnerships and collaborations
+  - Corporate strategy changes
+- **Financial Dealings**: Earnings, investments, funding, stock performance, financial results
+- **Industry**: Sector trends, market analysis, competitive dynamics
+
+EXCLUSIONS:
+- Labor issues (strikes, unionization, worker disputes) should be classified separately as LABOR, not business issues
+- Articles that only mention a company tangentially (e.g., "Apple CEO attended a charity gala") without discussing business matters
+
+TASK:
+For each article, determine:
+1. Does it contain a business issue? (YES/NO)
+2. If YES, what is the primary category? (Company, Executive, Business Activity, Financial, Industry)
+3. Provide a brief justification (1 sentence)
+
+
+
+#old prompt
+
+
+#used this prompt
+```{r}
+chat2 <- chat_gemini(
+  system_prompt = "You are an academic researcher performing context analysis on selected Newsweek articles. Analyze each article and classify it based on these criteria:
+  
+  1. If an article contains two or more mentions of an upcoming election or electoral politics, classify it as 'politics'
+  2. If an article contains two or more mentions of vote or voter registration, classify it as 'voter_turnout'
+  3. If an article contains two or more mentions the economic developments, classify it as 'economy'
+  4. If an article contains two or more mentions of business issues, classify it as 'business'
+  5. If an article meets multiple criteria, assign multiple categories separated by semicolons
+  6. If an article meets none of the criteria, classify it as 'other'
+  
+  Return ONLY a CSV-formatted result with exactly THREE (3) columns:
+  filename, category, explanation
+  
+  For example:
+  filename, category, explanation
+  article1.txt,politics, warning about upcoming election
+  article2.txt,democrat_critique, these words were critical of democrats: xyz
+  article3.txt,business;politics, business mentioned three times voter turnout twice
+  article4.txt,other
+  
+  No additional text, explanations, or summary counts."
+)
+
+# Send to the LLM
+politics <- chat2$chat(combined_text_with_filenames)
+```
