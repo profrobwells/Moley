@@ -105,7 +105,7 @@ combined_text_with_filenames <- paste(articles_for_analysis$article_data,
 ver 10-3-2025
 ```{r}
 chat2 <- chat_gemini(
-  system_prompt = "You are an academic researcher performing context analysis on selected news articles. Analyze each article and classify it based on these criteria:
+  system_prompt = "You are an academic researcher performing context analysis on selected news articles. Analyze each article and classify it based on these criteria,
   
   1. POLITICS classification: Classify an article as 'politics' if it contains two or more mentions of electoral politics.
 
@@ -133,6 +133,7 @@ Classify an article as 'voter_turnout' if it contains two or more mentions of vo
 - Get-out-the-vote (GOTV) campaigns or efforts
 - Barriers to voting or voter access issues (polling locations, ID requirements, wait times)
 - Demographic breakdowns of voter participation
+- Voter suppression
 - **Terms**: Classify an article as 'voter_turnout' if it contains the issues above and also mentions terms such as 'ballot box'
 
   3. ECONOMY classification: Classify an article as 'economy' if it contains two or more mentions of macroeconomic issues or economic policy.
@@ -180,29 +181,70 @@ EXCLUSIONS:
 - Public policy issues focusing on organized labor (e.g., labor law reforms, right-to-work legislation)
 - Statements or actions by union leaders or labor organizations
 
-- **Terms**: Classify an article as 'labor' if it contains the issues above and also mentions terms such as 'CIO',
+- **Terms**: Classify an article as 'labor' if it contains the issues above and also mentions terms such as 'AFL' and or 'CIO' (Congress of Industrial Organizations),
 
 IMPORTANT:
 - The threshold is two or more mentions to avoid misclassifying articles that only reference labor tangentially
 - General workplace issues (individual employee disputes, non-union worker complaints, HR policies) do NOT count as organized labor unless unions are involved
 
-  6. If an article meets multiple criteria, assign multiple categories separated by semicolons. 'Multiple criteria' would mean two mentions of politics AND two mentions of business resulting in the category 'politics;business'
+6. OVERLAPPING CLASSIFICATIONS:
+An article should receive multiple classifications if it meets the threshold 
+(two or more mentions) for more than one category.
+
+- Assign all applicable classifications separated by semicolons
+- List classifications in alphabetical order for consistency
+- Example: An article with 3 mentions of electoral politics AND 2 mentions 
+  of business issues would be classified as 'business;politics'
+
+
+COUNTING METHODOLOGY:
+- Count distinct mentions, not repeated references to the same fact
+- A single sentence can contain multiple mentions if it discusses 
+  multiple distinct aspects of a category
+- When in doubt, count conservatively
+
+
+EDGE CASES:
+- If an article has exactly 2 mentions but you're uncertain if they're 
+  distinct enough, err on the side of inclusion
+- If an article discusses the same election/company/policy throughout, 
+  count each substantive new point, not repetitions
+- Introductory context-setting doesn't count toward thresholds
+
+**Terms**: An article must contain BOTH the substantive issues described 
+above AND at least one of these terms to qualify for this classification.
+
+IMPORTANT: Each category must independently meet its own threshold of 
+two or more mentions to be included in the classification.
+  
   7. If an article meets none of the criteria, classify it as 'other'
   
-  Return ONLY a CSV-formatted result with exactly THREE (3) columns:
-  new_filename, category, explanation
+ REQUIRED OUTPUT FORMAT:
+Return ONLY a CSV with exactly THREE columns and NO additional text:
+
+Column 1: new_filename (the article identifier)
+Column 2: category (one or more classifications separated by semicolons)
+Column 3: explanation (brief justification citing specific counts)
+
+Rules:
+- Include a header row: new_filename,category,explanation
+- No quotes around values unless they contain commas
+- Multiple categories in alphabetical order separated by semicolons
+- Explanation must specify the count for each assigned category
+- Maximum 15 words per explanation
+
+Examples:
+article1.txt,politics,`3 mentions of election campaigns, 2 candidate endorsements`
+article2.txt,business;economy,`4 company strategy mentions, 2 GDP references'
+article3.txt,other, `No categories met 2-mention threshold` 
+  No additional text, explanations, or summary counts.")
+
+
+```
   
-  For example:
-  new_filename, category, explanation
-  article1.txt,politics, warning about upcoming election
-  article2.txt,democrat_critique, these words were critical of democrats: xyz
-  article3.txt,business;politics, business mentioned three times voter turnout twice
-  article4.txt,other
-  
-  No additional text, explanations, or summary counts."
-)
 
 # Send to the LLM
+```{r}
 politics <- chat2$chat(combined_text_with_filenames)
 ```
 
@@ -279,7 +321,7 @@ process_llm_response_to_df <- function(response) {
   }
 }
 lat_1956_results <- process_llm_response_to_df(politics)
-write.csv(lat_1956_results, "./output/ai_classified_lat_1956_oct_3_2025.csv")
+write.csv(lat_1956_results, "./output/ai_classified_lat_1956_oct_20_2025.csv")
 ```
 
 
@@ -296,7 +338,7 @@ lat_1956_results |>
 july24 <- rio::import("https://docs.google.com/spreadsheets/d/1Y-IWU_AgbyE-2G2jyT15MIO2jtv_Qpgi1imRwKTjPHQ/edit?gid=1373544130#gid=1373544130", which = "July24_results", header = TRUE) |> 
   clean_names()
 
-oct3 <- rio::import("https://docs.google.com/spreadsheets/d/1Y-IWU_AgbyE-2G2jyT15MIO2jtv_Qpgi1imRwKTjPHQ/edit?gid=1553901874#gid=1553901874", which = "Oct3_results", header = TRUE) |> 
+oct20 <- rio::import("https://docs.google.com/spreadsheets/d/1Y-IWU_AgbyE-2G2jyT15MIO2jtv_Qpgi1imRwKTjPHQ/edit?gid=1553901874#gid=1553901874", which = "Oct20_results", header = TRUE) |> 
   clean_names() 
 
 
@@ -308,10 +350,10 @@ oct3 <- rio::import("https://docs.google.com/spreadsheets/d/1Y-IWU_AgbyE-2G2jyT1
 july24_clean <- july24 |> 
   select(filename, category, explanation, correct, human_comments) |> 
   rename(july24_category = category, july24_explanation = explanation, july24_correct = correct, july24_human_comments = human_comments)
-oct3_clean <- oct3 |> 
+oct20_clean <- oct20 |> 
   select(filename, category, explanation)
 
-combo <- oct3_clean |> 
+combo <- oct20_clean |> 
   right_join(july24_clean, by ="filename")
 
 #split crime1 into three new columns
@@ -323,12 +365,15 @@ combo <- separate(data = combo, col = july24_category, into = c("july24_category
 ```{r}
 diffs <- combo |> 
   mutate(changed = case_when(
-    category == july24_category ~ "same",
-    category != july24_category ~ "different",
+    category1 == july24_category1 ~ "same",
+    category1 != july24_category1 ~ "different",
+     category2 == july24_category2 ~ "same",
+    category2 != july24_category2 ~ "different",
     .default = NA_character_
-  ))
+  )) |> 
+  select(changed, category1, july24_category1, category2, july24_category2, july24_correct, july24_human_comments, everything())
 
-#rite_csv(diffs, "./output/oct3_july24_diffs.csv")
+write_csv(diffs, "./output/oct20_july24_diffs.csv")
 ```
 
 

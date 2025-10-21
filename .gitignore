@@ -1,0 +1,11 @@
+.Rhistory
+.RData
+.Rproj.user/
+.Renviron
+.Rprofile
+.env
+*.env
+# API keys and secrets
+*secret*
+*password*
+*api_key*
