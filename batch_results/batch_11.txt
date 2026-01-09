@@ -1,0 +1,8 @@
+1956-12-07_167005914_1_page0.txt,politics,Multiple mentions of election, campaign, candidates, political activity, and Congress.
+1956-12-12_167107864_1_page0.txt,politics,Numerous mentions of votes, voting, and elections.
+1956-12-14_166991089_1_page0.txt,politics,Multiple mentions of political parties, campaign, election, nomination, and candidates.
+1956-12-18_167049731_1_page0.txt,politics,Multiple mentions of campaign, candidates, election, voters, and political context.
+1956-12-20_167045451_1_page0.txt,politics,Numerous mentions of voters, voting, elections, political, and politicians.
+1956-12-22_167097904_1_page0.txt,politics,Numerous mentions of political parties, Vice-President, President, votes, polls, campaign, and election outcomes.
+1956-12-26_167013872_1_page0.txt,other,
+1956-12-27_166981449_1_page0.txt,politics,Multiple mentions of politics, political ideas, and the political head of government.

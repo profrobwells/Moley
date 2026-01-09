@@ -1,0 +1,10 @@
+1956-07-17_166984053_1_page0.txt,other,
+1956-07-20_166968775_1_page0.txt,politics,7 mentions of campaigns, nominations, candidates, politicians, votes, voters, and politics.
+1956-07-25_166961624_1_page0.txt,politics,4 mentions of political parties, 1 campaign, 1 vote, and 1 political action.
+1956-07-26_166959488_1_page0.txt,politics,6 mentions of votes, 3 political parties, 2 candidates, 1 campaign, 1 primary, 1 election.
+1956-07-30_166962149_1_page0.txt,other,
+1956-08-07_166977911_1_page0.txt,politics,8 mentions of polls/pollsters, 4 elections, 2 political parties, 1 campaign.
+1956-08-09_167000759_1_page0.txt,politics,4 nominations, 2 candidates, 2 political parties, 2 politicians, 1 campaign, 1 primary.
+1956-08-11_166987545_1_page0.txt,politics,3 elect, 2 votes, 2 parties, 1 voters.
+1956-08-14_166967202_1_page0.txt,politics,7 votes, 4 political, 2 elections, 2 candidates, 2 tickets, 2 Democratic.
+1956-08-17_166972775_1_page0.txt,politics,5 polls, 4 voters, 3 candidates, 3 Republican, 2 votes, 2 parties, 2 tickets.

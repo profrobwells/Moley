@@ -1,0 +1,10 @@
+1956-11-09_167008316_1_page0.txt,other,
+1956-11-10_166980142_1_page0.txt,politics,Multiple mentions of election, party, voters, candidate, campaigns.
+1956-11-13_167052081_1_page0.txt,politics,Multiple mentions of election, party, candidates, vote, political.
+1956-11-17_167080687_1_page0.txt,politics,Multiple mentions of predictions, election, candidates, and polls.
+1956-11-20_167074206_1_page0.txt,politics,Multiple mentions of political parties, election, candidates, and national conventions.
+1956-11-22_167062881_1_page0.txt,politics,Multiple mentions of election, political education, campaign workers, and votes.
+1956-11-23_167025776_1_page0.txt,politics,Multiple mentions of election, campaign, surveys, predictions, candidates, and political reporters.
+1956-11-27_167054824_1_page0.txt,politics,Multiple mentions of election, candidates, voters, and political arms of unions.
+1956-11-29_167015571_1_page0.txt,politics,Multiple mentions of candidates, campaign, elections, parties, and political machine.
+1956-11-30_167046802_1_page0.txt,other,

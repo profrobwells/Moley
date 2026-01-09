@@ -1,0 +1,10 @@
+1956-10-12_166981548_1_page0.txt,politics,3 political mentions, 3 President mentions, 2 Republican Governor, 1 campaign, 1 appointment.
+1956-10-13_167046648_1_page0.txt,politics,6 mentions of vote/voting, 3 elections, 2 political, 2 party.
+1956-10-16_167027617_1_page0.txt,politics,Multiple mentions of political parties, candidates, elections, votes, campaigns, primary.
+1956-10-18_167040314_1_page0.txt,politics,6 mentions of political parties, 3 political, 2 candidates, 1 campaign, 1 nomination.
+1956-10-20_167038525_1_page0.txt,politics,Multiple mentions of candidates, elections, nominations, votes, campaigns, and political philosophy.
+1956-10-23_167022818_1_page0.txt,politics,Multiple mentions of candidate, government, votes, Senators, President, and political doctrines.
+1956-10-27_167015426_1_page0.txt,politics,Multiple mentions of Senators, voting record, political judgment, President, and political party.
+1956-10-31_167008470_1_page0.txt,politics,Multiple mentions of political activities, election, Congress, candidates, parties, and voting.
+1956-11-02_167062796_1_page0.txt,politics,Multiple mentions of political party, elections, candidate, President, and Democratic platform.
+1956-11-06_167070736_1_page0.txt,politics,Multiple mentions of campaign, elections, candidates, political views, and political parties.

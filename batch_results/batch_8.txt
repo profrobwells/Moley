@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1956-09-18_167011196_1_page0.txt,politics,10 mentions of politics, conventions, candidate, Democrat, campaign.
+1956-09-21_167021069_1_page0.txt,politics,Numerous mentions of elections, votes, political parties, candidates, and political organizations.
+1956-09-24_166996599_1_page0.txt,politics,Numerous mentions of Republican/Democratic parties, elections, candidates, registration, and political leadership.
+1956-09-26_167002293_1_page0.txt,politics,Numerous mentions of elections, parties, candidates, primary, political, and vote/voting.
+1956-09-29_166981483_1_page0.txt,politics,10 mentions of campaign, political parties, candidates, primary, vote, Congress.
+1956-10-02_167003681_1_page0.txt,politics,Numerous mentions of political parties, elections, campaigns, polls, candidates, and control of Congress.
+1956-10-04_167015295_1_page0.txt,politics,Numerous mentions of politicians, parties, elections, voters, campaigns, and political organizations.
+1956-10-06_166998763_1_page0.txt,politics,Numerous mentions of politics, political, campaigns, candidates, parties, elections, and organizations.
+1956-10-08_167016859_1_page0.txt,politics,11 mentions of candidates, Congress, political propaganda, votes, and political programs.
+1956-10-09_167023665_1_page0.txt,politics,Numerous mentions of Democratic/Republican, elections, candidates, campaigns, votes, political parties, and political situations.

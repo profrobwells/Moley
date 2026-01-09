@@ -1,0 +1,637 @@
+```csv
+new_filename,category,explanation
+1956-01-04_166874618_1_page0.txt,business;economy,6 business/industry mentions, 18 macroeconomic mentions.
+1956-01-05_166899746_1_page0.txt,business;economy,6 business/industry mentions, 21 macroeconomic mentions.
+1956-01-10_166876075_1_page0.txt,business;economy,14 business/company mentions, 14 macroeconomic mentions.
+1956-01-13_166912641_1_page0.txt,labor,3 labor/union mentions.
+1956-01-18_166873052_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-19_166874249_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-27_166884915_1_page0.txt,economy;labor,6 macroeconomic mentions, 16 labor/union mentions.
+1956-01-31_166876244_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-02_166888107_1_page0.txt,business;economy,13 business/company mentions, 3 macroeconomic mentions.
+1956-02-07_166907655_1_page0.txt,economy,13 macroeconomic/fiscal policy mentions.
+1956-02-10_166881514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-16_166896688_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-17_166922034_1_page0.txt,business;economy;labor,25 business mentions, 11 macroeconomic mentions, 3 labor/worker mentions.
+1956-02-21_166906514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-28_166911519_1_page0.txt,economy,11 macroeconomic/financial mentions.
+1956-03-01_166888260_1_page0.txt,business,12 business/corporate mentions.
+1956-03-07_166905237_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-09_166917090_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-15_166889978_1_page0.txt,business,27 business/corporate mentions.
+1956-03-16_166891660_1_page0.txt,economy,6 macroeconomic/economic policy mentions.
+```
+new_filename,category,explanation
+1956-01-04_166874618_1_page0.txt,business;economy,6 business mentions, 18 macroeconomic mentions.
+1956-01-05_166899746_1_page0.txt,business;economy,6 business mentions, 21 macroeconomic mentions.
+1956-01-10_166876075_1_page0.txt,business;economy,14 business/industry mentions, 14 macroeconomic mentions.
+1956-01-13_166912641_1_page0.txt,labor,3 labor/union mentions.
+1956-01-18_166873052_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-19_166874249_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-27_166884915_1_page0.txt,economy;labor,6 macroeconomic mentions, 16 labor/union mentions.
+1956-01-31_166876244_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-02_166888107_1_page0.txt,business;economy,19 business mentions, 4 macroeconomic mentions.
+1956-02-07_166907655_1_page0.txt,economy,13 macroeconomic/fiscal policy mentions.
+1956-02-10_166881514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-16_166896688_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-17_166922034_1_page0.txt,business;economy,28 business/industry mentions, 8 macroeconomic mentions.
+1956-02-21_166906514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-28_166911519_1_page0.txt,economy,9 macroeconomic mentions.
+1956-03-01_166888260_1_page0.txt,business,12 business/corporate mentions.
+1956-03-07_166905237_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-09_166917090_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-15_166889978_1_page0.txt,business,27 business/corporate mentions.
+1956-03-16_166891660_1_page0.txt,economy,9 macroeconomic mentions.
+```csv
+new_filename,category,explanation
+1956-01-04_166874618_1_page0.txt,business;economy,6 business mentions, 18 macroeconomic mentions.
+1956-01-05_166899746_1_page0.txt,business;economy,6 business mentions, 21 macroeconomic mentions.
+1956-01-10_166876075_1_page0.txt,business;economy,14 business/industry mentions, 14 macroeconomic mentions.
+1956-01-13_166912641_1_page0.txt,labor,3 union membership mentions.
+1956-01-18_166873052_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-19_166874249_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-27_166884915_1_page0.txt,economy;labor,6 macroeconomic mentions, 16 labor/union mentions.
+1956-01-31_166876244_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-02_166888107_1_page0.txt,business;economy,19 business mentions, 4 macroeconomic mentions.
+1956-02-07_166907655_1_page0.txt,economy,13 macroeconomic/fiscal policy mentions.
+1956-02-10_166881514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-16_166896688_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-17_166922034_1_page0.txt,business;economy,25 business mentions, 6 macroeconomic mentions.
+1956-02-21_166906514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-28_166911519_1_page0.txt,economy,9 macroeconomic mentions.
+1956-03-01_166888260_1_page0.txt,business,11 business mentions.
+1956-03-07_166905237_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-09_166917090_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-15_166889978_1_page0.txt,business;economy,23 business mentions, 3 macroeconomic mentions.
+1956-03-16_166891660_1_page0.txt,economy,8 macroeconomic policy mentions.
+1956-03-20_166937059_1_page0.txt,business;economy,13 business mentions, 3 macroeconomic mentions.
+1956-03-26_166904773_1_page0.txt,business;economy,3 business mentions, 18 macroeconomic mentions.
+1956-03-27_166923452_1_page0.txt,business;labor,8 business mentions, 25 labor/union mentions.
+1956-03-29_166909981_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-03_166935666_1_page0.txt,labor,20 labor/union mentions.
+1956-04-10_166951384_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-13_166915845_1_page0.txt,labor,12 labor/union mentions.
+1956-04-17_166910108_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-19_166931315_1_page0.txt,economy,12 macroeconomic mentions.
+1956-04-25_166936535_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-04_166942067_1_page0.txt,economy,19 macroeconomic mentions.
+1956-05-08_166912917_1_page0.txt,business;economy,9 business mentions, 5 macroeconomic mentions.
+1956-05-15_166921781_1_page0.txt,economy,19 macroeconomic mentions.
+1956-05-18_166972318_1_page0.txt,business,3 business mentions.
+1956-05-23_166967752_1_page0.txt,economy,30 macroeconomic mentions.
+1956-05-24_166952012_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-29_166942378_1_page0.txt,business;labor,3 business mentions, 23 labor/union mentions.
+1956-05-31_166955164_1_page0.txt,business,3 business mentions.
+1956-06-06_166953689_1_page0.txt,business;economy,4 business mentions, 3 economic policy mentions.
+1956-06-07_166972889_1_page0.txt,business;economy,15 business mentions, 17 macroeconomic mentions.
+1956-06-12_166965487_1_page0.txt,labor,6 labor/union mentions.
+1956-06-13_166981229_1_page0.txt,economy,4 macroeconomic mentions.
+1956-06-14_166942731_1_page0.txt,labor,3 labor mentions.
+1956-06-19_166927499_1_page0.txt,business;economy;labor,8 business mentions, 12 macroeconomic mentions, 3 labor/worker mentions.
+1956-06-21_166961475_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-06-26_166936987_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-07-02_166987194_1_page0.txt,economy;labor,24 macroeconomic mentions, 5 labor/union mentions.
+1956-07-03_166977307_1_page0.txt,labor,23 labor/union mentions.
+1956-07-05_166973311_1_page0.txt,economy,6 macroeconomic mentions.
+1956-07-11_166959354_1_page0.txt,economy,19 macroeconomic mentions.
+1956-07-17_166984053_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-07-20_166968775_1_page0.txt,business,22 business mentions.
+1956-07-25_166961624_1_page0.txt,business;economy;labor,6 business mentions, 20 macroeconomic mentions, 11 labor/union mentions.
+1956-07-26_166959488_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-07-30_166962149_1_page0.txt,economy,11 macroeconomic mentions.
+1956-08-07_166977911_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-09_167000759_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-11_166987545_1_page0.txt,economy,28 macroeconomic mentions.
+1956-08-14_166967202_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-17_166972775_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-20_167030467_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-21_167026995_1_page0.txt,labor,10 labor/union mentions.
+1956-08-22_167024006_1_page0.txt,labor,7 labor/union mentions.
+1956-08-28_166992768_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-31_166992300_1_page0.txt,economy,8 macroeconomic mentions.
+1956-09-04_166989848_1_page0.txt,business;economy,6 business mentions, 8 macroeconomic mentions.
+1956-09-05_166996171_1_page0.txt,labor,24 labor/union mentions.
+1956-09-07_167016888_1_page0.txt,business;economy,3 business mentions, 18 macroeconomic mentions.
+1956-09-11_167036433_1_page0.txt,economy,19 macroeconomic mentions.
+1956-09-15_167014181_1_page0.txt,economy;labor,5 macroeconomic mentions, 5 labor/union mentions.
+1956-09-18_167011196_1_page0.txt,business,6 business mentions.
+1956-09-21_167021069_1_page0.txt,business;labor,5 business mentions, 4 labor/union mentions.
+1956-09-24_166996599_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-09-26_167002293_1_page0.txt,business;labor,6 business mentions, 5 labor/union mentions.
+1956-09-29_166981483_1_page0.txt,business;economy;labor,11 business mentions, 12 macroeconomic mentions, 5 labor/union mentions.
+1956-10-02_167003681_1_page0.txt,business,3 business mentions.
+1956-10-04_167015295_1_page0.txt,economy;labor,3 macroeconomic mentions, 5 labor/union mentions.
+1956-10-06_166998763_1_page0.txt,economy;labor,3 macroeconomic mentions, 4 labor/union mentions.
+1956-10-08_167016859_1_page0.txt,economy,7 macroeconomic mentions.
+1956-10-09_167023665_1_page0.txt,business;economy,9 business mentions, 3 macroeconomic mentions.
+1956-10-12_166981548_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-13_167046648_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-16_167027617_1_page0.txt,labor,3 labor/union mentions.
+1956-10-18_167040314_1_page0.txt,business;labor,5 business mentions, 3 labor mentions.
+1956-10-20_167038525_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-23_167022818_1_page0.txt,business;economy;labor,8 business mentions, 7 macroeconomic mentions, 3 labor/worker mentions.
+1956-10-27_167015426_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-31_167008470_1_page0.txt,business;labor,11 business mentions, 15 labor/union mentions.
+1956-11-02_167062796_1_page0.txt,economy,18 macroeconomic mentions.
+1956-11-06_167070736_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-09_167008316_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-10_166980142_1_page0.txt,labor,3 labor/union mentions.
+1956-11-13_167052081_1_page0.txt,economy;labor,3 macroeconomic mentions, 3 labor/union mentions.
+1956-11-17_167080687_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-20_167074206_1_page0.txt,business;labor,4 business mentions, 6 labor/union mentions.
+1956-11-22_167062881_1_page0.txt,labor,13 labor/union mentions.
+1956-11-23_167025776_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-27_167054824_1_page0.txt,business;economy,4 business mentions, 8 macroeconomic mentions.
+1956-11-29_167015571_1_page0.txt,economy;labor,22 macroeconomic mentions, 3 labor/union mentions.
+1956-11-30_167046802_1_page0.txt,business;economy,29 business mentions, 7 macroeconomic mentions.
+1956-12-07_167005914_1_page0.txt,business;economy;labor,11 business mentions, 7 macroeconomic mentions, 18 labor/union mentions.
+1956-12-12_167107864_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-14_166991089_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-18_167049731_1_page0.txt,economy;labor,18 macroeconomic mentions, 4 labor/union mentions.
+1956-12-20_167045451_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-22_167097904_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-26_167013872_1_page0.txt,economy;labor,3 macroeconomic mentions, 5 labor/worker mentions.
+1956-12-27_166981449_1_page0.txt,business,3 business mentions.
+```
+```csv
+new_filename,category,explanation
+1956-01-04_166874618_1_page0.txt,business;economy,20 business/industry mentions, 60 macroeconomic mentions.
+1956-01-05_166899746_1_page0.txt,business;economy,17 business/industry mentions, 23 macroeconomic mentions.
+1956-01-10_166876075_1_page0.txt,business;economy,20 business/industry mentions, 17 macroeconomic mentions.
+1956-01-13_166912641_1_page0.txt,labor,7 labor/union mentions.
+1956-01-18_166873052_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-19_166874249_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-27_166884915_1_page0.txt,economy;labor,16 macroeconomic mentions, 18 labor/union mentions.
+1956-01-31_166876244_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-02_166888107_1_page0.txt,business,20 business/company mentions.
+1956-02-07_166907655_1_page0.txt,economy,18 macroeconomic/fiscal policy mentions.
+1956-02-10_166881514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-16_166896688_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-17_166922034_1_page0.txt,business;economy;labor,28 business mentions, 12 macroeconomic mentions, 4 labor/worker mentions.
+1956-02-21_166906514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-28_166911519_1_page0.txt,economy,12 macroeconomic/financial mentions.
+1956-03-01_166888260_1_page0.txt,business,14 business/corporate/management mentions.
+1956-03-07_166905237_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-09_166917090_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-15_166889978_1_page0.txt,business;economy,28 business mentions, 4 macroeconomic mentions.
+1956-03-16_166891660_1_page0.txt,economy,10 macroeconomic mentions.
+1956-03-20_166937059_1_page0.txt,business;economy,13 business mentions, 5 macroeconomic mentions.
+1956-03-26_166904773_1_page0.txt,business;economy,5 business mentions, 25 macroeconomic mentions.
+1956-03-27_166923452_1_page0.txt,business;labor,8 business mentions, 19 labor/union mentions.
+1956-03-29_166909981_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-03_166935666_1_page0.txt,business;labor,4 business mentions, 21 labor/union mentions.
+1956-04-10_166951384_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-13_166915845_1_page0.txt,labor,16 labor/union mentions.
+1956-04-17_166910108_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-19_166931315_1_page0.txt,economy,14 macroeconomic mentions.
+1956-04-25_166936535_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-04_166942067_1_page0.txt,economy,28 macroeconomic/fiscal policy mentions.
+1956-05-08_166912917_1_page0.txt,business;economy,11 business/company mentions, 5 macroeconomic mentions.
+1956-05-15_166921781_1_page0.txt,economy,19 macroeconomic/financial mentions.
+1956-05-18_166972318_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-23_166967752_1_page0.txt,economy,30 macroeconomic/financial mentions.
+1956-05-24_166952012_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-29_166942378_1_page0.txt,business;labor,4 business mentions, 23 labor/union mentions.
+1956-05-31_166955164_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-06-06_166953689_1_page0.txt,business;labor,7 business mentions, 3 labor/union mentions.
+1956-06-07_166972889_1_page0.txt,business;economy,16 business mentions, 27 macroeconomic mentions.
+1956-06-12_166965487_1_page0.txt,labor,6 labor/union mentions.
+1956-06-13_166981229_1_page0.txt,economy,9 macroeconomic mentions.
+1956-06-14_166942731_1_page0.txt,labor,4 labor mentions.
+1956-06-19_166927499_1_page0.txt,business;economy,6 business mentions, 12 macroeconomic mentions.
+1956-06-21_166961475_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-06-26_166936987_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-07-02_166987194_1_page0.txt,economy;labor,29 macroeconomic mentions, 17 labor/union mentions.
+1956-07-03_166977307_1_page0.txt,labor,25 labor/union mentions.
+1956-07-05_166973311_1_page0.txt,economy,7 macroeconomic mentions.
+1956-07-11_166959354_1_page0.txt,business;economy,4 business mentions, 22 macroeconomic mentions.
+1956-07-17_166984053_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-07-20_166968775_1_page0.txt,business,22 business/management mentions.
+1956-07-25_166961624_1_page0.txt,business;economy;labor,7 business mentions, 22 macroeconomic mentions, 11 labor/union mentions.
+1956-07-26_166959488_1_page0.txt,business;labor,6 business mentions, 6 labor/union mentions.
+1956-07-30_166962149_1_page0.txt,economy,11 macroeconomic mentions.
+1956-08-07_166977911_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-09_167000759_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-11_166987545_1_page0.txt,economy,29 macroeconomic/fiscal policy mentions.
+1956-08-14_166967202_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-17_166972775_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-20_167030467_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-21_167026995_1_page0.txt,labor,18 labor/union mentions.
+1956-08-22_167024006_1_page0.txt,labor,7 labor/union mentions.
+1956-08-28_166992768_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-31_166992300_1_page0.txt,economy,8 macroeconomic mentions.
+1956-09-04_166989848_1_page0.txt,business;economy,9 business/company mentions, 12 macroeconomic mentions.
+1956-09-05_166996171_1_page0.txt,labor,25 labor/union mentions.
+1956-09-07_167016888_1_page0.txt,business;economy,3 business mentions, 20 macroeconomic mentions.
+1956-09-11_167036433_1_page0.txt,economy,29 macroeconomic/fiscal policy mentions.
+1956-09-15_167014181_1_page0.txt,economy;labor,7 macroeconomic mentions, 7 labor/union mentions.
+1956-09-18_167011196_1_page0.txt,business,6 business mentions.
+1956-09-21_167021069_1_page0.txt,business;labor,5 business mentions, 6 labor/union mentions.
+1956-09-24_166996599_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-09-26_167002293_1_page0.txt,business;labor,8 business mentions, 7 labor/union mentions.
+1956-09-29_166981483_1_page0.txt,business;economy;labor,12 business mentions, 24 macroeconomic mentions, 6 labor/union mentions.
+1956-10-02_167003681_1_page0.txt,business,5 business mentions.
+1956-10-04_167015295_1_page0.txt,labor,8 labor/union mentions.
+1956-10-06_166998763_1_page0.txt,economy;labor,4 macroeconomic mentions, 4 labor/union mentions.
+1956-10-08_167016859_1_page0.txt,economy,8 macroeconomic mentions.
+1956-10-09_167023665_1_page0.txt,business;economy;labor,11 business mentions, 4 macroeconomic mentions, 4 labor/union mentions.
+1956-10-12_166981548_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-13_167046648_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-16_167027617_1_page0.txt,labor,5 labor/union mentions.
+1956-10-18_167040314_1_page0.txt,business,6 business mentions.
+1956-10-20_167038525_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-23_167022818_1_page0.txt,business;economy;labor,9 business mentions, 9 macroeconomic mentions, 3 labor/worker mentions.
+1956-10-27_167015426_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-31_167008470_1_page0.txt,business;labor,12 business/corporate mentions, 15 labor/union mentions.
+1956-11-02_167062796_1_page0.txt,business;economy,5 business mentions, 20 macroeconomic mentions.
+1956-11-06_167070736_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-09_167008316_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-10_166980142_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-13_167052081_1_page0.txt,economy;labor,3 macroeconomic mentions, 3 labor/union mentions.
+1956-11-17_167080687_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-20_167074206_1_page0.txt,business;labor,5 business mentions, 6 labor/union mentions.
+1956-11-22_167062881_1_page0.txt,labor,15 labor/union mentions.
+1956-11-23_167025776_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-27_167054824_1_page0.txt,business;economy,5 business mentions, 10 macroeconomic mentions.
+1956-11-29_167015571_1_page0.txt,economy;labor,29 macroeconomic mentions, 4 labor/union mentions.
+1956-11-30_167046802_1_page0.txt,business;economy,29 business mentions, 9 macroeconomic mentions.
+1956-12-07_167005914_1_page0.txt,business;economy;labor,14 business mentions, 7 macroeconomic mentions, 18 labor/union mentions.
+1956-12-12_167107864_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-14_166991089_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-18_167049731_1_page0.txt,economy;labor,21 macroeconomic mentions, 5 labor/union mentions.
+1956-12-20_167045451_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-22_167097904_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-26_167013872_1_page0.txt,labor,7 labor/worker mentions.
+1956-12-27_166981449_1_page0.txt,business,4 business mentions.
+```
+new_filename,category,explanation
+1956-01-04_166874618_1_page0.txt,business;economy,7 business mentions, 14 macroeconomic mentions.
+1956-01-05_166899746_1_page0.txt,business;economy,5 business mentions, 12 macroeconomic mentions.
+1956-01-10_166876075_1_page0.txt,business;economy,7 business mentions, 13 macroeconomic mentions.
+1956-01-13_166912641_1_page0.txt,labor,3 labor/union mentions.
+1956-01-18_166873052_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-19_166874249_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-27_166884915_1_page0.txt,economy;labor,6 macroeconomic mentions, 18 labor/union mentions.
+1956-01-31_166876244_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-02_166888107_1_page0.txt,business,12 business/company mentions.
+1956-02-07_166907655_1_page0.txt,economy,9 macroeconomic mentions.
+1956-02-10_166881514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-16_166896688_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-17_166922034_1_page0.txt,business;economy,20 business/industry mentions, 9 macroeconomic mentions.
+1956-02-21_166906514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-28_166911519_1_page0.txt,economy,10 macroeconomic/financial mentions.
+1956-03-01_166888260_1_page0.txt,business,11 business/management mentions.
+1956-03-07_166905237_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-09_166917090_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-15_166889978_1_page0.txt,business,27 business mentions.
+1956-03-16_166891660_1_page0.txt,economy,15 macroeconomic mentions.
+1956-03-20_166937059_1_page0.txt,business;economy,10 business/company mentions, 4 macroeconomic mentions.
+1956-03-26_166904773_1_page0.txt,economy,25 macroeconomic mentions.
+1956-03-27_166923452_1_page0.txt,business;labor,12 business mentions, 26 labor/union mentions.
+1956-03-29_166909981_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-03_166935666_1_page0.txt,business;labor,5 business mentions, 24 labor/union mentions.
+1956-04-10_166951384_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-13_166915845_1_page0.txt,labor,11 labor/union mentions.
+1956-04-17_166910108_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-19_166931315_1_page0.txt,economy,11 macroeconomic mentions.
+1956-04-25_166936535_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-04_166942067_1_page0.txt,economy,19 macroeconomic mentions.
+1956-05-08_166912917_1_page0.txt,business;economy,10 business/company mentions, 3 macroeconomic mentions.
+1956-05-15_166921781_1_page0.txt,economy,15 macroeconomic/financial mentions.
+1956-05-18_166972318_1_page0.txt,business,3 business mentions.
+1956-05-23_166967752_1_page0.txt,economy,21 macroeconomic/financial mentions.
+1956-05-24_166952012_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-29_166942378_1_page0.txt,business;labor,4 business mentions, 23 labor/union mentions.
+1956-05-31_166955164_1_page0.txt,business,3 manufacturers mentions.
+1956-06-06_166953689_1_page0.txt,business,5 business mentions.
+1956-06-07_166972889_1_page0.txt,business;economy,14 business mentions, 11 macroeconomic mentions.
+1956-06-12_166965487_1_page0.txt,labor,6 labor/union mentions.
+1956-06-13_166981229_1_page0.txt,economy,7 macroeconomic mentions.
+1956-06-14_166942731_1_page0.txt,labor,3 American Labor Party mentions.
+1956-06-19_166927499_1_page0.txt,business;economy,3 business mentions, 9 macroeconomic mentions.
+1956-06-21_166961475_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-06-26_166936987_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-07-02_166987194_1_page0.txt,economy;labor,16 macroeconomic mentions, 11 labor/union mentions.
+1956-07-03_166977307_1_page0.txt,labor,23 labor/union mentions.
+1956-07-05_166973311_1_page0.txt,economy,7 macroeconomic mentions.
+1956-07-11_166959354_1_page0.txt,business;economy,3 business mentions, 13 macroeconomic mentions.
+1956-07-17_166984053_1_page0.txt,economy,3 macroeconomic mentions.
+1956-07-20_166968775_1_page0.txt,business,19 business/management mentions.
+1956-07-25_166961624_1_page0.txt,business;economy;labor,11 business mentions, 20 macroeconomic mentions, 14 labor/union mentions.
+1956-07-26_166959488_1_page0.txt,business;labor,4 business mentions, 4 labor/union mentions.
+1956-07-30_166962149_1_page0.txt,economy,6 macroeconomic mentions.
+1956-08-07_166977911_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-09_167000759_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-11_166987545_1_page0.txt,economy,22 macroeconomic mentions.
+1956-08-14_166967202_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-17_166972775_1_page0.txt,business,3 business mentions.
+1956-08-20_167030467_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-21_167026995_1_page0.txt,labor,17 labor/union mentions.
+1956-08-22_167024006_1_page0.txt,labor,6 labor/union mentions.
+1956-08-28_166992768_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-31_166992300_1_page0.txt,economy,9 macroeconomic mentions.
+1956-09-04_166989848_1_page0.txt,business;economy,9 business mentions, 9 macroeconomic mentions.
+1956-09-05_166996171_1_page0.txt,labor,22 labor/union mentions.
+1956-09-07_167016888_1_page0.txt,business;economy,3 business mentions, 16 macroeconomic mentions.
+1956-09-11_167036433_1_page0.txt,economy,19 macroeconomic mentions.
+1956-09-15_167014181_1_page0.txt,economy;labor,6 macroeconomic mentions, 5 labor/union mentions.
+1956-09-18_167011196_1_page0.txt,business,4 business mentions.
+1956-09-21_167021069_1_page0.txt,labor,5 labor/union mentions.
+1956-09-24_166996599_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-09-26_167002293_1_page0.txt,business;labor,6 business mentions, 8 labor/union mentions.
+1956-09-29_166981483_1_page0.txt,business;economy;labor,10 business mentions, 11 macroeconomic mentions, 5 labor/union mentions.
+1956-10-02_167003681_1_page0.txt,business,3 business mentions.
+1956-10-04_167015295_1_page0.txt,labor,5 labor/union mentions.
+1956-10-06_166998763_1_page0.txt,economy;labor,3 macroeconomic mentions, 4 labor/union mentions.
+1956-10-08_167016859_1_page0.txt,economy,7 macroeconomic mentions.
+1956-10-09_167023665_1_page0.txt,business,9 business mentions.
+1956-10-12_166981548_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-13_167046648_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-16_167027617_1_page0.txt,labor,5 labor/union mentions.
+1956-10-18_167040314_1_page0.txt,business,6 business mentions.
+1956-10-20_167038525_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-23_167022818_1_page0.txt,business;economy;labor,8 business mentions, 10 macroeconomic mentions, 3 labor/union mentions.
+1956-10-27_167015426_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-31_167008470_1_page0.txt,business;labor,13 business/corporate mentions, 19 labor/union mentions.
+1956-11-02_167062796_1_page0.txt,business;economy,3 business mentions, 19 macroeconomic mentions.
+1956-11-06_167070736_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-09_167008316_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-10_166980142_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-13_167052081_1_page0.txt,economy;labor,3 macroeconomic mentions, 3 labor/union mentions.
+1956-11-17_167080687_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-20_167074206_1_page0.txt,business;labor,6 business mentions, 6 labor/union mentions.
+1956-11-22_167062881_1_page0.txt,labor,13 labor/union mentions.
+1956-11-23_167025776_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-27_167054824_1_page0.txt,business;economy,5 business mentions, 9 macroeconomic mentions.
+1956-11-29_167015571_1_page0.txt,economy;labor,22 macroeconomic mentions, 3 labor/union mentions.
+1956-11-30_167046802_1_page0.txt,business,13 business mentions.
+1956-12-07_167005914_1_page0.txt,business;economy;labor,12 business mentions, 8 macroeconomic mentions, 22 labor/union mentions.
+1956-12-12_167107864_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-14_166991089_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-18_167049731_1_page0.txt,economy;labor,18 macroeconomic mentions, 4 labor/union mentions.
+1956-12-20_167045451_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-22_167097904_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-26_167013872_1_page0.txt,labor,5 labor/worker mentions.
+1956-12-27_166981449_1_page0.txt,business,4 business mentions.
+```csv
+new_filename,category,explanation
+1956-08-14_166967202_1_page0.txt,labor,3 labor/union mentions.
+1956-08-17_166972775_1_page0.txt,business,3 business/corporate/publisher mentions.
+1956-08-20_167030467_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-21_167026995_1_page0.txt,labor,16 labor/union mentions.
+1956-08-22_167024006_1_page0.txt,business;labor,3 coal business mentions, 7 labor/union mentions.
+1956-08-28_166992768_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-31_166992300_1_page0.txt,economy,5 macroeconomic mentions.
+1956-09-04_166989848_1_page0.txt,business;economy,9 business/company mentions, 12 macroeconomic mentions.
+1956-09-05_166996171_1_page0.txt,labor,25 labor/union mentions.
+1956-09-07_167016888_1_page0.txt,business;economy,3 business mentions, 14 macroeconomic mentions.
+1956-09-11_167036433_1_page0.txt,economy,24 macroeconomic/fiscal policy mentions.
+1956-09-15_167014181_1_page0.txt,economy;labor,6 macroeconomic mentions, 5 labor/union mentions.
+1956-09-18_167011196_1_page0.txt,business,3 business/product sales mentions.
+1956-09-21_167021069_1_page0.txt,labor,5 labor/union mentions.
+1956-09-24_166996599_1_page0.txt,labor,3 organized labor mentions.
+1956-09-26_167002293_1_page0.txt,business;labor,8 business mentions, 6 labor/union mentions.
+1956-09-29_166981483_1_page0.txt,business;economy;labor,11 business/industry mentions, 14 macroeconomic mentions, 5 labor/union mentions.
+1956-10-02_167003681_1_page0.txt,business,3 businessmen mentions.
+1956-10-04_167015295_1_page0.txt,economy;labor,5 economic burden mentions, 4 labor/union mentions.
+1956-10-06_166998763_1_page0.txt,economy;labor,3 stock market mentions, 4 labor/union mentions.
+1956-10-08_167016859_1_page0.txt,economy,7 macroeconomic mentions.
+1956-10-09_167023665_1_page0.txt,business;economy;labor,10 business/industry mentions, 3 macroeconomic mentions, 4 labor mentions.
+1956-10-12_166981548_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-13_167046648_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-16_167027617_1_page0.txt,labor,4 labor/union mentions.
+1956-10-18_167040314_1_page0.txt,labor,3 AFL-CIO mentions.
+1956-10-20_167038525_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-23_167022818_1_page0.txt,business;economy;labor,8 business mentions, 9 macroeconomic mentions, 3 labor/worker mentions.
+1956-10-27_167015426_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-31_167008470_1_page0.txt,business;labor,16 business/corporate mentions, 18 labor/union mentions.
+1956-11-02_167062796_1_page0.txt,business;economy,3 business mentions, 17 macroeconomic mentions.
+1956-11-06_167070736_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-09_167008316_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-10_166980142_1_page0.txt,labor,3 labor/union mentions.
+1956-11-13_167052081_1_page0.txt,economy;labor,3 macroeconomic mentions, 3 labor/union mentions.
+1956-11-17_167080687_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-20_167074206_1_page0.txt,business;labor,5 business mentions, 7 labor/union mentions.
+1956-11-22_167062881_1_page0.txt,labor,15 labor/union mentions.
+1956-11-23_167025776_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-27_167054824_1_page0.txt,business;economy;labor,3 power companies mentions, 7 economic policy mentions, 3 unions mentions.
+1956-11-29_167015571_1_page0.txt,economy;labor,24 macroeconomic mentions, 3 labor/union mentions.
+1956-11-30_167046802_1_page0.txt,business;economy,24 business/corporate mentions, 7 macroeconomic mentions.
+1956-12-07_167005914_1_page0.txt,business;labor,13 business/corporate mentions, 22 labor/union mentions.
+1956-12-12_167107864_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-14_166991089_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-18_167049731_1_page0.txt,economy;labor,18 macroeconomic mentions, 4 labor/union mentions.
+1956-12-20_167045451_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-22_167097904_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-26_167013872_1_page0.txt,economy;labor,3 economic condition mentions, 7 labor/worker mentions.
+1956-12-27_166981449_1_page0.txt,business,3 business/publisher mentions.
+```
+new_filename,category,explanation
+1956-08-20_167030467_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-21_167026995_1_page0.txt,labor,19 labor/union mentions.
+1956-08-22_167024006_1_page0.txt,labor,7 labor/union mentions.
+1956-08-28_166992768_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-31_166992300_1_page0.txt,economy,6 macroeconomic mentions.
+1956-09-04_166989848_1_page0.txt,business;economy,9 business mentions, 9 macroeconomic mentions.
+1956-09-05_166996171_1_page0.txt,labor,25 labor/union mentions.
+1956-09-07_167016888_1_page0.txt,business;economy,3 business mentions, 20 macroeconomic mentions.
+1956-09-11_167036433_1_page0.txt,economy,24 macroeconomic mentions.
+1956-09-15_167014181_1_page0.txt,economy;labor,6 macroeconomic mentions, 5 labor/union mentions.
+new_filename,category,explanation
+1956-08-20_167030467_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-21_167026995_1_page0.txt,labor,16 labor/union mentions.
+1956-08-22_167024006_1_page0.txt,labor,5 labor/union mentions.
+1956-08-28_166992768_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-31_166992300_1_page0.txt,economy,5 macroeconomic/economic mentions.
+1956-09-04_166989848_1_page0.txt,business;economy,14 business mentions, 11 macroeconomic/trade mentions.
+1956-09-05_166996171_1_page0.txt,labor,16 labor/union mentions.
+1956-09-07_167016888_1_page0.txt,economy,14 macroeconomic/fiscal/trade mentions.
+1956-09-11_167036433_1_page0.txt,economy,24 macroeconomic/fiscal policy mentions.
+1956-09-15_167014181_1_page0.txt,economy;labor,4 macroeconomic mentions, 4 labor/union mentions.
+1956-09-18_167011196_1_page0.txt,business,6 business/product mentions.
+1956-09-21_167021069_1_page0.txt,labor,5 labor/union mentions.
+1956-09-24_166996599_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-09-26_167002293_1_page0.txt,business;labor,7 business mentions, 5 labor/union mentions.
+1956-09-29_166981483_1_page0.txt,business;economy;labor,11 business/industry mentions, 10 macroeconomic/trade mentions, 4 labor/union mentions.
+1956-10-02_167003681_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-04_167015295_1_page0.txt,economy;labor,3 economic burden mentions, 3 labor/union mentions.
+1956-10-06_166998763_1_page0.txt,labor,4 labor/union mentions.
+1956-10-08_167016859_1_page0.txt,economy,9 macroeconomic mentions.
+1956-10-09_167023665_1_page0.txt,business,10 business/industry mentions.
+1956-10-12_166981548_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-13_167046648_1_page0.txt,economy,4 Census Bureau/statistics mentions.
+1956-10-16_167027617_1_page0.txt,labor,3 CIO/AFL/Labor mentions.
+1956-10-18_167040314_1_page0.txt,business,3 business/fund/employer mentions.
+1956-10-20_167038525_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-23_167022818_1_page0.txt,business;economy;labor,6 business mentions, 6 economic policy mentions, 3 labor mentions.
+1956-10-27_167015426_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-31_167008470_1_page0.txt,business;labor,9 business/corporate mentions, 14 labor/union mentions.
+1956-11-02_167062796_1_page0.txt,economy,13 macroeconomic/financial/trade mentions.
+1956-11-06_167070736_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-09_167008316_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-10_166980142_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-13_167052081_1_page0.txt,economy,3 welfare state/economic differences mentions.
+1956-11-17_167080687_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-20_167074206_1_page0.txt,business;labor,5 business mentions, 4 labor/union mentions.
+1956-11-22_167062881_1_page0.txt,labor,10 labor/union mentions.
+1956-11-23_167025776_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-27_167054824_1_page0.txt,business;economy,3 business mentions, 8 macroeconomic/fiscal mentions.
+1956-11-29_167015571_1_page0.txt,economy,21 macroeconomic/fiscal policy mentions.
+1956-11-30_167046802_1_page0.txt,business,31 business/corporate/industry mentions.
+1956-12-07_167005914_1_page0.txt,business;economy;labor,12 business mentions, 7 expenditure mentions, 18 labor/union mentions.
+1956-12-12_167107864_1_page0.txt,economy,3 Census Bureau/statistics mentions.
+1956-12-14_166991089_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-18_167049731_1_page0.txt,economy;labor,25 macroeconomic/income mentions, 4 labor/union mentions.
+1956-12-20_167045451_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-22_167097904_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-26_167013872_1_page0.txt,labor,5 labor/worker mentions.
+1956-12-27_166981449_1_page0.txt,business,3 business/publisher mentions.
+```csv
+new_filename,category,explanation
+1956-01-04_166874618_1_page0.txt,business;economy,6 business mentions, 18 macroeconomic mentions.
+1956-01-05_166899746_1_page0.txt,business;economy,5 business mentions, 21 macroeconomic mentions.
+1956-01-10_166876075_1_page0.txt,business;economy,14 business/industry mentions, 14 macroeconomic mentions.
+1956-01-13_166912641_1_page0.txt,labor,3 union membership mentions.
+1956-01-18_166873052_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-19_166874249_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-27_166884915_1_page0.txt,economy;labor,6 macroeconomic mentions, 16 labor/union mentions.
+1956-01-31_166876244_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-02_166888107_1_page0.txt,business,12 business/company mentions.
+1956-02-07_166907655_1_page0.txt,economy,13 macroeconomic/fiscal policy mentions.
+1956-02-10_166881514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-16_166896688_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-17_166922034_1_page0.txt,business;economy,20 business/industry mentions, 9 macroeconomic mentions.
+1956-02-21_166906514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-28_166911519_1_page0.txt,economy,10 macroeconomic/financial mentions.
+1956-03-01_166888260_1_page0.txt,business,11 business/management mentions.
+1956-03-07_166905237_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-09_166917090_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-15_166889978_1_page0.txt,business,27 business mentions.
+1956-03-16_166891660_1_page0.txt,economy,15 macroeconomic mentions.
+1956-03-20_166937059_1_page0.txt,business;economy,10 business/company mentions, 4 macroeconomic mentions.
+1956-03-26_166904773_1_page0.txt,business;economy,3 business mentions, 25 macroeconomic mentions.
+1956-03-27_166923452_1_page0.txt,business;labor,12 business mentions, 26 labor/union mentions.
+1956-03-29_166909981_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-03_166935666_1_page0.txt,business;labor,5 business mentions, 24 labor/union mentions.
+1956-04-10_166951384_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-13_166915845_1_page0.txt,labor,11 labor/union mentions.
+1956-04-17_166910108_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-19_166931315_1_page0.txt,economy,11 macroeconomic mentions.
+1956-04-25_166936535_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-04_166942067_1_page0.txt,economy,19 macroeconomic mentions.
+1956-05-08_166912917_1_page0.txt,business;economy,10 business/company mentions, 3 macroeconomic mentions.
+1956-05-15_166921781_1_page0.txt,economy,15 macroeconomic/financial mentions.
+1956-05-18_166972318_1_page0.txt,business,3 business mentions.
+1956-05-23_166967752_1_page0.txt,economy,21 macroeconomic/financial mentions.
+1956-05-24_166952012_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-29_166942378_1_page0.txt,business;labor,4 business mentions, 23 labor/union mentions.
+1956-05-31_166955164_1_page0.txt,business,3 manufacturers mentions.
+1956-06-06_166953689_1_page0.txt,business,5 business mentions.
+1956-06-07_166972889_1_page0.txt,business;economy,14 business mentions, 11 macroeconomic mentions.
+1956-06-12_166965487_1_page0.txt,labor,6 labor/union mentions.
+1956-06-13_166981229_1_page0.txt,economy,7 macroeconomic mentions.
+1956-06-14_166942731_1_page0.txt,labor,3 American Labor Party mentions.
+1956-06-19_166927499_1_page0.txt,business;economy,3 business mentions, 9 macroeconomic mentions.
+1956-06-21_166961475_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-06-26_166936987_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-07-02_166987194_1_page0.txt,economy;labor,16 macroeconomic mentions, 11 labor/union mentions.
+1956-07-03_166977307_1_page0.txt,labor,23 labor/union mentions.
+1956-07-05_166973311_1_page0.txt,economy,7 macroeconomic mentions.
+1956-07-11_166959354_1_page0.txt,business;economy,3 business mentions, 13 macroeconomic mentions.
+1956-07-17_166984053_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-07-20_166968775_1_page0.txt,business,19 business/management mentions.
+1956-07-25_166961624_1_page0.txt,business;economy;labor,11 business mentions, 20 macroeconomic mentions, 14 labor/union mentions.
+1956-07-26_166959488_1_page0.txt,business;labor,4 business mentions, 4 labor/union mentions.
+1956-07-30_166962149_1_page0.txt,economy,11 macroeconomic mentions.
+1956-08-07_166977911_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-09_167000759_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-11_166987545_1_page0.txt,economy,22 macroeconomic mentions.
+1956-08-14_166967202_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-17_166972775_1_page0.txt,business,3 business mentions.
+1956-08-20_167030467_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-21_167026995_1_page0.txt,labor,17 labor/union mentions.
+1956-08-22_167024006_1_page0.txt,labor,6 labor/union mentions.
+1956-08-28_166992768_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-08-31_166992300_1_page0.txt,economy,9 macroeconomic mentions.
+1956-09-04_166989848_1_page0.txt,business;economy,9 business mentions, 9 macroeconomic mentions.
+1956-09-05_166996171_1_page0.txt,labor,24 labor/union mentions.
+1956-09-07_167016888_1_page0.txt,business;economy,3 business mentions, 16 macroeconomic mentions.
+1956-09-11_167036433_1_page0.txt,economy,19 macroeconomic mentions.
+1956-09-15_167014181_1_page0.txt,economy;labor,6 macroeconomic mentions, 5 labor/union mentions.
+1956-09-18_167011196_1_page0.txt,business,4 business mentions.
+1956-09-21_167021069_1_page0.txt,labor,5 labor/union mentions.
+1956-09-24_166996599_1_page0.txt,labor,3 organized labor mentions.
+1956-09-26_167002293_1_page0.txt,business;labor,6 business mentions, 8 labor/union mentions.
+1956-09-29_166981483_1_page0.txt,business;economy;labor,10 business mentions, 11 macroeconomic mentions, 5 labor/union mentions.
+1956-10-02_167003681_1_page0.txt,business,3 business mentions.
+1956-10-04_167015295_1_page0.txt,economy;labor,3 economic burden mentions, 5 labor/union mentions.
+1956-10-06_166998763_1_page0.txt,economy;labor,3 stock market mentions, 4 labor/union mentions.
+1956-10-08_167016859_1_page0.txt,economy,7 macroeconomic mentions.
+1956-10-09_167023665_1_page0.txt,business,9 business mentions.
+1956-10-12_166981548_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-13_167046648_1_page0.txt,economy,4 Census Bureau mentions.
+1956-10-16_167027617_1_page0.txt,labor,3 CIO/AFL/Labor mentions.
+1956-10-18_167040314_1_page0.txt,business,4 business/publication/employer mentions.
+1956-10-20_167038525_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-23_167022818_1_page0.txt,business;economy;labor,5 business mentions, 3 economic mentions, 3 labor mentions.
+1956-10-27_167015426_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-10-31_167008470_1_page0.txt,business;labor,13 business mentions, 25 labor/union mentions.
+1956-11-02_167062796_1_page0.txt,economy,15 macroeconomic/financial/trade mentions.
+1956-11-06_167070736_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-09_167008316_1_page0.txt,economy,3 economic conditions mentions.
+1956-11-10_166980142_1_page0.txt,labor,3 labor/union mentions.
+1956-11-13_167052081_1_page0.txt,economy;labor,4 economic mentions, 3 labor/union mentions.
+1956-11-17_167080687_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-20_167074206_1_page0.txt,business;labor,6 business mentions, 6 labor/union mentions.
+1956-11-22_167062881_1_page0.txt,labor,11 labor/union mentions.
+1956-11-23_167025776_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-27_167054824_1_page0.txt,business;economy,4 business mentions, 8 macroeconomic mentions.
+1956-11-29_167015571_1_page0.txt,economy;labor,29 macroeconomic mentions, 3 labor/union mentions.
+1956-11-30_167046802_1_page0.txt,business;economy,20 business mentions, 6 macroeconomic mentions.
+1956-12-07_167005914_1_page0.txt,business;economy;labor,15 business mentions, 27 financial dealings mentions, 24 labor/union mentions.
+1956-12-12_167107864_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-14_166991089_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-18_167049731_1_page0.txt,economy;labor,20 macroeconomic mentions, 5 labor/union mentions.
+1956-12-20_167045451_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-22_167097904_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-26_167013872_1_page0.txt,economy;labor,3 economic conditions mentions, 6 labor/worker mentions.
+1956-12-27_166981449_1_page0.txt,business,3 business/publisher mentions.
+```
+new_filename,category,explanation
+1956-11-09_167008316_1_page0.txt,economy;labor,4 economy mentions, 4 labor mentions.
+1956-11-10_166980142_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-13_167052081_1_page0.txt,labor,3 labor/union mentions.
+1956-11-17_167080687_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-20_167074206_1_page0.txt,business;labor,5 business mentions, 5 labor/union mentions.
+1956-11-22_167062881_1_page0.txt,labor,9 labor/union mentions.
+1956-11-23_167025776_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-27_167054824_1_page0.txt,business;economy,4 business mentions, 7 economy mentions.
+1956-11-29_167015571_1_page0.txt,economy;labor,17 economy mentions, 3 labor/union mentions.
+1956-11-30_167046802_1_page0.txt,business;economy,18 business mentions, 5 economy mentions.
+1956-12-07_167005914_1_page0.txt,business;labor,5 business mentions, 22 labor/union mentions.
+1956-12-12_167107864_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-14_166991089_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-18_167049731_1_page0.txt,economy;labor,10 economy mentions, 4 labor mentions.
+1956-12-20_167045451_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-22_167097904_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-26_167013872_1_page0.txt,labor,6 labor mentions.
+1956-12-27_166981449_1_page0.txt,business,3 business/publisher mentions.
+new_filename,category,explanation
+1956-11-09_167008316_1_page0.txt,economy,3 macroeconomic mentions.
+1956-11-10_166980142_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-13_167052081_1_page0.txt,economy;labor,3 macroeconomic mentions, 4 labor/union mentions.
+1956-11-17_167080687_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-20_167074206_1_page0.txt,business;labor,4 business mentions, 5 labor/union mentions.
+1956-11-22_167062881_1_page0.txt,labor,13 labor/union mentions.
+1956-11-23_167025776_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-11-27_167054824_1_page0.txt,business;economy,3 business mentions, 6 macroeconomic mentions.
+1956-11-29_167015571_1_page0.txt,economy;labor,22 macroeconomic mentions, 3 labor/union mentions.
+1956-11-30_167046802_1_page0.txt,business;economy,15 business mentions, 6 economy mentions.
+1956-12-07_167005914_1_page0.txt,business;economy;labor,11 business mentions, 13 economic policy mentions, 21 labor/union mentions.
+1956-12-12_167107864_1_page0.txt,economy,3 macroeconomic mentions.
+1956-12-14_166991089_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-18_167049731_1_page0.txt,economy,18 macroeconomic mentions.
+1956-12-20_167045451_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-22_167097904_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-12-26_167013872_1_page0.txt,labor,7 labor/worker mentions.
+1956-12-27_166981449_1_page0.txt,business,3 business/publisher mentions.

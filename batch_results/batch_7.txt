@@ -1,0 +1,10 @@
+1956-08-20_167030467_1_page0.txt,politics,Multiple mentions of politics, conventions, candidate, Democrat, and President-elect.
+1956-08-21_167026995_1_page0.txt,politics,Multiple mentions of candidates, elections, political parties, voting, and campaign strategies.
+1956-08-22_167024006_1_page0.txt,politics,Multiple mentions of conventions, candidates, political parties, elections, campaigns, and strategies.
+1956-08-28_166992768_1_page0.txt,politics,Multiple mentions of political parties, candidates, conventions, campaigner, and politics/politicians.
+1956-08-31_166992300_1_page0.txt,politics,Multiple mentions of acceptance speech, Republican/Democratic parties, campaign, political appeals, and predictions.
+1956-09-04_166989848_1_page0.txt,politics,Multiple mentions of campaign, candidates, Presidential/Vice-Presidential, tickets, and partisanship.
+1956-09-05_166996171_1_page0.txt,politics,Multiple mentions of candidates, endorsements, political parties, campaigns, elections, voting, and politics.
+1956-09-07_167016888_1_page0.txt,politics,Multiple mentions of Republicanism, New Dealism, candidate, party, convention, and opponent.
+1956-09-11_167036433_1_page0.txt,politics,Multiple mentions of elections, elect, politicians, election year, campaign, party platform, and candidates.
+1956-09-15_167014181_1_page0.txt,politics,Numerous mentions of elections, political parties, campaigns, outcomes, voters, politicians, and candidates.
