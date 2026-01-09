@@ -1,10 +1,10 @@
-1956-11-09_167008316_1_page0.txt,other,
-1956-11-10_166980142_1_page0.txt,politics,Multiple mentions of election, party, voters, candidate, campaigns.
-1956-11-13_167052081_1_page0.txt,politics,Multiple mentions of election, party, candidates, vote, political.
-1956-11-17_167080687_1_page0.txt,politics,Multiple mentions of predictions, election, candidates, and polls.
-1956-11-20_167074206_1_page0.txt,politics,Multiple mentions of political parties, election, candidates, and national conventions.
-1956-11-22_167062881_1_page0.txt,politics,Multiple mentions of election, political education, campaign workers, and votes.
-1956-11-23_167025776_1_page0.txt,politics,Multiple mentions of election, campaign, surveys, predictions, candidates, and political reporters.
-1956-11-27_167054824_1_page0.txt,politics,Multiple mentions of election, candidates, voters, and political arms of unions.
-1956-11-29_167015571_1_page0.txt,politics,Multiple mentions of candidates, campaign, elections, parties, and political machine.
+1956-10-16_167027617_1_page0.txt,voter_turnout,16 mentions of elections, campaigns, candidates, and voting levels.
+1956-08-20_167030467_1_page0.txt,other,
+1956-09-11_167036433_1_page0.txt,voter_turnout,7 mentions of elections, election year, campaign, and candidates.
+1956-10-20_167038525_1_page0.txt,voter_turnout,13 mentions of campaigns, elections, candidates, and voting records.
+1956-10-18_167040314_1_page0.txt,voter_turnout,12 mentions of political, party, nominations, and campaign efforts.
+1956-12-20_167045451_1_page0.txt,voter_turnout,24 mentions of voting laws, election, registration, absentee ballots, and barriers to voting.
+1956-10-13_167046648_1_page0.txt,voter_turnout,21 mentions of voting age, participation levels, elections, and barriers to voting.
 1956-11-30_167046802_1_page0.txt,other,
+1956-12-18_167049731_1_page0.txt,voter_turnout,4 mentions of campaign, voters, and candidates.
+1956-11-13_167052081_1_page0.txt,voter_turnout,16 mentions of elections, vote, candidates, voter participation, and political efforts.

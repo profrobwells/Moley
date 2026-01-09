@@ -1,10 +1,10 @@
-1956-06-12_166965487_1_page0.txt,politics,Multiple mentions of elections, candidates, political parties, voting, and election outcomes.
-1956-06-13_166981229_1_page0.txt,other,
-1956-06-14_166942731_1_page0.txt,politics,Multiple mentions of nominations, elections, campaigns, candidates, and political parties.
-1956-06-19_166927499_1_page0.txt,politics,5 mentions of elections, voting, political party activities, and election outcomes.
-1956-06-21_166961475_1_page0.txt,politics,3 mentions of partisan sources, serving another term, and running again.
-1956-06-26_166936987_1_page0.txt,politics,Multiple mentions of candidates, campaigns, political parties, convention, and political strategy.
-1956-07-02_166987194_1_page0.txt,politics,Numerous mentions of political parties, upcoming Presidential year, and political party platforms.
-1956-07-03_166977307_1_page0.txt,politics,Multiple mentions of candidates, endorsements, political parties, conventions, and political campaign strategies.
-1956-07-05_166973311_1_page0.txt,other,
 1956-07-11_166959354_1_page0.txt,other,
+1956-07-26_166959488_1_page0.txt,voter_turnout,7 mentions of votes, vote, primary, candidate, and voter appeal.
+1956-06-21_166961475_1_page0.txt,other,
+1956-07-25_166961624_1_page0.txt,voter_turnout,3 mentions of voted, campaign for Presidency, and political action.
+1956-07-30_166962149_1_page0.txt,other,
+1956-06-12_166965487_1_page0.txt,voter_turnout,9 mentions of election returns, vote, votes, and candidates.
+1956-08-14_166967202_1_page0.txt,voter_turnout,11 mentions of vote, election, candidates, and "Catholic Vote" theme.
+1956-05-23_166967752_1_page0.txt,other,
+1956-07-20_166968775_1_page0.txt,voter_turnout,9 mentions of campaign, candidates, votes, voters, and voting population.
+1956-05-18_166972318_1_page0.txt,voter_turnout,9 mentions of campaign years, vote, elections, voters, turnout, and candidate.

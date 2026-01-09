@@ -1,0 +1,678 @@
+---
+title: "AI Classifier"
+output: null
+date: 1-7-2026
+---
+
+```{r}
+#install.packages("ellmer")
+library(ellmer)
+library(tidyverse)
+library(glue)
+library(janitor)
+library(purrr)
+library(stringr)
+
+#Sys.setenv(GOOGLE_API_KEY = "")
+
+```
+
+#Check Gemini is working
+
+```{r}
+chat <- chat_google_gemini()
+
+chat$chat("Tell me four jokes about data journalists")
+```
+
+### Load LAT Data
+```{r echo = F}
+#2501 articles in index
+lat_article_index <-  rio::import("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/lat_txt_index_renamed_7_23.csv") |> 
+  clean_names() |> 
+  mutate(year = lubridate::year(date))
+  
+
+#284067 rows of text
+lat_articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/moley_lat_text_june_21.csv") |>
+   clean_names() |>
+    mutate(year = as.numeric(year)) |> 
+  mutate(new_filename = paste0(date,"_",filename))
+
+# lat_articles_text <- experiment
+```
+### Process LAT data
+Collapse article text into single column
+```{r}
+#tighter
+processed_llm <- lat_articles_text %>%
+  group_by(filename) %>%
+  summarize(
+    # Join sentences and clean up line-break hyphens
+    full_text = paste(na.omit(sentence), collapse = " ") %>% 
+                str_replace_all("- ", "") %>% 
+                str_squish(),
+    
+    # Keep all other metadata columns
+    across(everything(), \(x) first(na.omit(x)))
+  ) %>%
+  ungroup() %>%
+  # Filter for your target year
+  filter(year == "1956") %>%
+  subset(select = -c(filename, sentence, document_url, pages, issn)) |> 
+  # Final safety check: Ensure one row per article
+  distinct(new_filename, .keep_all = TRUE) %>%
+  # Assign Batch IDs (10 articles per batch)
+  mutate(batch_id = ceiling(row_number() / 10))
+
+```
+
+
+
+# LLM Prompts
+
+
+### Politics
+Using model = "gemini-2.5-flash".
+
+```{r}
+chat_politics <- chat_google_gemini(system_prompt = "You are an academic researcher performing context analysis on selected news articles. Analyze each article and classify it based on specified criteria.
+
+In this prompt, the phrases “category” and “classification” and any of their grammatical variations are synonymous. 
+
+An article should receive a classification if it meets the requirements for the category specified below. Each article must independently meet a threshold of three or more mentions of specified criteria to be included in a specific category.
+
+If an article meets none of the criteria, classify it as 'other'
+
+—-Start Category Criteria—---
+
+POLITICS: an article contains, in text, content, or theme, three or more of the following
+
+- Voting in a political election
+- Upcoming elections (primaries, general elections, special elections)
+- Election results and outcomes
+- Political campaigns
+- Political campaign strategies
+- Candidate announcements, debates, or endorsements
+- Election polling and predictions
+- Political party activities related to elections
+- Specific words: “election”, “vote”, “polls”, “ballots”, “candidate”
+
+
+For the above category, there are some topics that could create a classification “gray area”. For the purposes of this research, use the following descriptions to validate classifications.  Any article that any of these apply to can still be categorized as multiple categories.
+
+If the article discusses, in text, theme, or content, policy debates or legislation without electoral context, then it can be marked as 'other', among any other applicable categories
+If the article discusses, in text, theme, or content, appointed officials or bureaucratic actions, then it is not ‘politics’ category unless the discussion is tied to an election
+
+—-End Category Criteria—---
+
+
+Return ONLY a CSV with exactly THREE columns and NO additional text:
+
+Column 1: new_filename (the article identifier)
+Column 2: category 
+Column 3: explanation (brief justification citing specific counts)
+
+- Include a header row: new_filename,category,explanation
+- No quotes around values unless they contain commas
+- Multiple categories in alphabetical order separated by semicolons
+- Explanation must specify the count for each assigned category
+- Maximum 15 words per explanation
+
+Examples:
+article1.txt,politics,`3 mentions of election campaigns, 2 candidate endorsements`
+No other explanation is required for 'other'."
+)
+
+```
+
+### Voter_Turnout
+
+```{r}
+chat_voter <- chat_google_gemini(system_prompt =  "You are an academic researcher performing context analysis on selected news articles. Analyze each article and classify it based on specified criteria.
+
+In this prompt, the phrases “category” and “classification” and any of their grammatical variations are synonymous. 
+
+An article should receive a classification if it meets the requirements for the category specified below. Each article must independently meet a threshold of three or more mentions of specified criteria to be included in a specific category.
+
+If an article meets none of the criteria, classify it as 'other'
+
+
+—-Start Categories Criteria—---
+
+VOTER TURNOUT: an article contains three or more,  in text, content, or theme, mentions of 
+Amount of people participating in voting during an election
+Voter registration drives or registration statistics
+Early voting, absentee voting, or mail-in ballot usage
+Voter turnout rates or participation levels
+Efforts to get people to vote in elections
+Barriers to voting or voter access issues (polling locations, ID requirements, wait times)
+Specific details about voter participation in an election
+Efforts supress or discourage people from voting in elections
+
+
+
+—-End Categories Criteria—---
+
+
+Return ONLY a CSV with exactly THREE columns and NO additional text:
+
+Column 1: new_filename (the article identifier)
+Column 2: category (one or more classifications separated by semicolons)
+Column 3: explanation (brief justification citing specific counts)
+
+- Include a header row: new_filename,category,explanation
+- No quotes around values unless they contain commas
+- Multiple categories in alphabetical order separated by semicolons
+- Explanation must specify the count for each assigned category
+- Maximum 15 words per explanation
+
+Examples:
+article1.txt,voter_turnout,`3 mentions of Voter registration drives, 2 Get-out-the-vote efforts` 
+
+No other explanation is required for 'other'."
+)
+
+```
+
+### Business
+
+```{r}
+chat_biz <- chat_google_gemini(system_prompt =  "You are an academic researcher performing context analysis on selected news articles. Analyze each article and classify it based on specified criteria.
+
+In this prompt, the phrases “category” and “classification” and any of their grammatical variations are synonymous. 
+
+An article should receive a classification if it meets the requirements for the category specified below. Each article must independently meet a threshold of three or more mentions of specified criteria to be included in a specific category.
+
+If an article meets none of the criteria, classify it as 'other'
+
+
+—-Start Categories Criteria—---
+
+ECONOMY:  an article contains three or more,  in text, content, or theme, mentions of 
+Macroeconomic issues or economic policy.
+Macroeconomic indicators (Examples: GDP, inflation, unemployment rates, economic growth)
+Monetary policy (Federal Reserve actions, interest rates)
+Policy that directly involves with the economy
+Trade policy (Examples: tariffs, trade agreements, import/export regulations)
+Economic forecasts or recession/expansion predictions
+Currency markets and exchange rates
+National or global economic conditions and trends
+
+BUSINESS: an article contains three or more, in text, content, or theme, mentions of 
+Companies, Corporate entities, their operations, or strategic decisions
+Executives, Business leaders, appointments, departures, or leadership actions
+Product launches and announcements
+Marketing campaigns
+Regulatory compliance matters
+Mergers and acquisitions
+Partnerships and collaborations between companies or other industry groups
+Corporate strategy changes
+Financial Dealings common to business (examples: Earnings, investments, funding, stock performance, financial results)
+Industry, Sector trends, market analysis, competitive dynamics
+Terms as 'private enterprise', 'company', 'firm', 'business leaders', 'businessmen',
+
+LABOR CLASSIFICATION: an article contains three or more, in text, content, or theme,
+
+Strikes or work stoppages
+Unionization efforts
+Union elections
+Worker disputes involving unions or collective bargaining
+Public policy issues focusing on organized labor (Examples: llabor law reforms, right-to-work legislation)
+Statements or actions by union leaders or labor organizations
+Terms such as 'AFL' and or 'CIO' (Congress of Industrial Organizations)
+
+For the above categories, there are some topics that could create a classification “gray area”. For the purposes of this research, use the following descriptions to validate classifications.  Any article that any of these apply to can still be categorized as multiple categories.
+
+If the article discusses, in text, theme, or content, policy debates or legislation without electoral context, then it can be marked as 'other', among any other applicable categories
+If the article discusses, in text, theme, or content, individual company financial performance, classify it as 'business', among any other applicable categories
+If the article discusses, in text, theme, or content, industry-specific trends without macroeconomic context → classify as 'business'
+If the article discusses, in text, theme, or content, stock market movements alone without broader economic analysis or context, classify it as 'business', among any other applicable categories
+If the article discusses, in text, theme, or content, labor issues such as strikes, unionization, worker disputes, classify it as ‘labor’, not ‘business’, among any other applicable categories
+If the article only mentions a company tangentially (e.g., 'Apple CEO attended a charity gala') without discussing business matters, it does not fall under ‘business’
+
+
+—-End Categories Criteria—---
+
+
+Return ONLY a CSV with exactly THREE columns and NO additional text:
+
+Column 1: new_filename (the article identifier)
+Column 2: category (one or more classifications separated by semicolons)
+Column 3: explanation (brief justification citing specific counts)
+
+- Include a header row: new_filename,category,explanation
+- No quotes around values unless they contain commas
+- Multiple categories in alphabetical order separated by semicolons
+- Explanation must specify the count for each assigned category
+- Maximum 15 words per explanation
+
+Examples:
+article2.txt,business;economy,`4 company strategy mentions, 2 GDP references'
+article3.txt,other, `No categories met the 2-mention threshold.” 
+
+No other explanation is required for 'other'.
+
+IMPORTANT: YOU MUST PROCESS EACH ENTRY IN THE SOURCE DATA. PREVIOUS CLASSIFICATIONS HAVE STOPPED ABOUT 3/4s through. EXAMINE EACH ENTRY IN THE DATA."
+)
+
+```
+
+
+# LLM call & API pause
+```{r}
+# --- 2. RESET STORAGE ---
+# Clear out previous runs to avoid mixing old duplicated data with this clean data
+if(dir.exists("batch_results")) unlink("batch_results", recursive = TRUE)
+dir.create("batch_results")
+
+# --- 3. THE RESUMABLE BATCH FUNCTION ---
+run_biz_batch <- function(batch_data) {
+  current_b <- unique(batch_data$batch_id)
+  total_b <- max(processed_llm$batch_id)
+  batch_file <- paste0("batch_results/batch_", current_b, ".txt")
+  
+  # IF FILE EXISTS: Load it and skip the API call
+  if(file.exists(batch_file)) {
+    message(paste0("Skipping Batch ", current_b, ": Already processed."))
+    return(readr::read_file(batch_file))
+  }
+  
+  # ELSE: Format and send to Gemini
+  batch_text <- batch_data %>%
+    mutate(formatted = paste0("FILENAME: ", new_filename, "\nCONTENT: ", full_text)) %>%
+    pull(formatted) %>%
+    paste(collapse = "\n\n---ARTICLE SEPARATOR---\n\n")
+  
+  message(paste0("--- Processing Batch ", current_b, " of ", total_b, " ---"))
+  
+#-----------------------------------------------------------------------------  
+# The API Call
+  #change variable according to text
+#  response <- chat_biz$chat(batch_text)
+#  response <- chat_voter$chat(batch_text)
+    response <- chat_voter$chat(batch_text)  
+  
+  
+#-----------------------------------------------------------------------------  
+  # SAVE immediately to your hard drive
+  readr::write_file(response, batch_file)
+  
+  # Delay to respect rate limits
+  if (current_b < total_b) {
+    message("Waiting 5 seconds for rate limits...")
+    Sys.sleep(5)
+  }
+  
+  return(response)
+}
+
+# --- 4. RUN THE LOOP ---
+# Even if this crashes, the files in 'batch_results' stay safe!
+raw_batch_results <- processed_llm %>%
+  group_split(batch_id) %>%
+  map_chr(run_biz_batch)
+
+# --- 5. COMBINE RESULTS ---
+final_output_text <- paste(raw_batch_results, collapse = "\n")
+
+# Save a master backup of the whole thing
+write_lines(final_output_text, "final_classifications.csv")
+
+message("All articles processed successfully!")
+```
+
+```{r}
+
+# 1. Strip all Markdown backticks and the "csv" label
+# We use str_trim to remove leading/trailing whitespace/newlines
+clean_text <- final_output_text %>%
+  str_remove_all("```csv") %>%
+  str_remove_all("```") %>%
+  str_trim()
+
+# 2. Parse into a Data Frame
+results_df <- read_csv(
+    I(clean_text), 
+    col_names = c("new_filename", "category", "explanation"), # Manually set names
+    show_col_types = FALSE
+  ) %>%
+  # 3. Clean up the rows
+  filter(
+    !is.na(new_filename),               # Remove empty rows
+    new_filename != "new_filename",     # Remove any AI-generated headers
+    str_detect(new_filename, "\\.txt")  # Ensure row looks like a filename
+  ) %>%
+  # 4. Remove any duplicates
+  distinct(new_filename, .keep_all = TRUE)
+
+# View a summary
+print(paste("Successfully parsed", nrow(results_df), "articles."))
+```
+
+### Rename df 
+change variable according to data being processed - voter, biz etc
+
+```{r}
+
+#politics_results_df <- results_df
+```
+
+#Combine dfs
+```{r}
+biz <- biz_results_df |> 
+  rename(biz_category = category, biz_explanation = explanation)
+voter <- voter_results_df |> 
+  rename(voter_category = category, voter_explanation = explanation)
+politics <- politics_results_df |> 
+  rename(politics_category = category, politics_explanation = explanation)
+
+validate_new <- list(biz, voter, politics) |> 
+  reduce(full_join, by = "new_filename")
+
+validate_new <- validate_new |> 
+  mutate(all_categories = paste0(biz_category, "; ", voter_category, "; ",politics_category)) |> 
+  mutate(all_categories = str_remove_all(all_categories, "\\bother\\b;?\\s*|;?\\s*\\bother\\b"))
+
+```
+
+### Counts
+
+```{r}
+counts <- validate_new %>%
+  # 1. Split the category column by the semicolon
+  separate_rows(all_categories, sep = ";") %>%
+  # 2. Clean up any accidental leading/trailing spaces the AI might have left
+  mutate(all_categories = str_trim(all_categories)) |> 
+  count(all_categories, sort = TRUE)
+
+
+	
+# all_categories n 
+# politics 83
+# voter_turnout 50
+# economy 45
+# business 35
+# labor 34
+```
+
+
+
+
+### Combine categories with main data
+```{r}
+
+
+validate_new <- validate_new |> 
+  inner_join(tighter, by=c("new_filename"))
+
+validate_new <- validate_new |> 
+  select(new_filename, date, year, title, full_text, everything())
+
+
+write_csv(validate_new, "./output/validate_new_jan9.csv")
+
+validate_brief <- validate_new |> 
+  select(filename, date, year, title, full_text, biz_category, biz_explanation, voter_category, voter_explanation, politics_category, politics_explanation) |> 
+  mutate(correct_y_n = "")
+
+write_csv(validate_brief, "./output/validate_brief_new_jan7.csv")
+
+```
+
+# Validation
+
+### Print out articles for verification
+```{r}
+
+# Now create the text file with locations highlighted
+file_conn <- file("ai_classifier_moley_verify.txt", "w")
+
+for (i in 1:nrow(validate_new)) {
+  row_data <- validate_new[i, ]
+  
+  writeLines(paste0("Document ID: ", row_data$new_filename), file_conn)
+  writeLines(paste0("Date: ", row_data$date), file_conn)
+  writeLines(paste0("Headline: ", row_data$title), file_conn)
+  writeLines(paste0("-------------"), file_conn)
+  writeLines(paste0("Biz Category: ", row_data$biz_category), file_conn)
+  writeLines(paste0("AI Biz Explanation: ", row_data$biz_explanation), file_conn)
+   writeLines(paste0("-------------"), file_conn)
+  writeLines(paste0("Voter Category: ", row_data$voter_category), file_conn)
+  writeLines(paste0("AI Voter Explanation: ", row_data$voter_explanation), file_conn)
+   writeLines(paste0("-------------"), file_conn)
+  writeLines(paste0("Politics Category: ", row_data$politics_category), file_conn)
+  writeLines(paste0("AI Politics Explanation: ", row_data$politics_explanation), file_conn)
+   writeLines(paste0("-------------"), file_conn)
+  # Wrap the full text
+  wrapped_text <- strwrap(row_data$full_text, width = 80)
+  wrapped_text[1] <- paste0("Article Text: ", wrapped_text[1])
+  writeLines(wrapped_text, file_conn)
+  
+  if (i < nrow(validate)) {
+    writeLines("\n==================================================\n", file_conn)
+  }
+}
+
+close(file_conn)
+```
+
+### Quick view of any entry by row
+```{r}
+wrapped_text <- strwrap(as.character(combo$jan7_explanation[92]), width = 60)
+writeLines(wrapped_text, "temp_text.txt")
+file.edit("temp_text.txt")
+```
+
+
+#The Timeline Visualization Script
+
+```{r}
+# 1. Prepare the data for plotting
+plot_data <- validate_new %>%
+  # Split the categories into individual rows
+  separate_rows(all_categories, sep = ";") %>%
+  mutate(all_categories = str_trim(all_categories)) %>%
+  # Filter to focus on the core themes (optional: remove 'other')
+  filter(all_categories %in% c("business", "labor", "economy")) %>%
+  # Ensure the date column is a Date object and floor it to the start of the month
+  mutate(
+    date = as.Date(date),
+    month = floor_date(date, "month")
+  ) %>%
+  # Count occurrences of each all_categories per month
+  count(month, all_categories)
+
+# 2. Create the Timeline Plot
+ggplot(plot_data, aes(x = month, y = n, color = all_categories, group = all_categories)) +
+  # Add points and lines
+  geom_line(size = 1.2, alpha = 0.7) +
+  geom_point(size = 3) +
+  # Formatting the scales
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_manual(values = c(
+    "business" = "#2C3E50", # Dark Blue
+    "labor" = "#E74C3C",    # Red
+    "economy" = "#27AE60"   # Green
+  )) +
+  # Labels and Theme
+  labs(
+    title = "Coverage Trends in 1956",
+    subtitle = "Monthly frequency of mentions by category",
+    x = "Month of 1956",
+    y = "Number of Articles",
+    color = "Category"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", size = 16),
+    panel.grid.minor = element_blank()
+  )
+```
+
+#------OLDER-----------------
+count the results
+```{r}
+lat_1956_politics |> 
+  count(category) |> 
+  arrange(desc(n))
+
+#politics:
+# 1    other 20
+# 2 politics 88
+# voter_turnout	54			
+# other	52	
+# other	33			
+# labor classification	26			
+# economy	19			
+# economy;labor classification	9			
+# business	8			
+# business;labor classification	7			
+# business;economy	4			
+# business;economy;labor classification	2	
+
+#tighter = 3 or more
+# politics	81			
+# other	27	
+# other	58			
+# voter_turnout	50	
+# other	28			
+# economy	10			
+# business	7			
+# business;economy	7			
+# labor	5			
+# economy;labor	2			
+# 1			
+# business;economy;labor	1			
+# business;labor	1	
+
+```
+
+#Compare the results
+```{r}
+july24 <- rio::import("https://docs.google.com/spreadsheets/d/1Y-IWU_AgbyE-2G2jyT15MIO2jtv_Qpgi1imRwKTjPHQ/edit?gid=1373544130#gid=1373544130", which = "July24_results", header = TRUE) |> 
+  clean_names()
+
+oct20 <- rio::import("https://docs.google.com/spreadsheets/d/1Y-IWU_AgbyE-2G2jyT15MIO2jtv_Qpgi1imRwKTjPHQ/edit?gid=1553901874#gid=1553901874", which = "Oct20_results", header = TRUE) |> 
+  clean_names() 
+
+
+```
+
+
+### Process to join
+Politics
+```{r}
+july24_clean <- july24 |> 
+  select(filename, category, explanation, correct, human_comments) |> 
+  rename(july24_category = category, july24_explanation = explanation, july24_correct = correct, july24_human_comments = human_comments)
+oct20_clean <- oct20 |> 
+  select(filename, category, explanation) |> 
+  rename(oct20_category = category, oct_20explanation = explanation)
+
+
+#change variable names for voter, politics etc
+jan_7 <- lat_1956_biz |> 
+   rename(jan7_category = category, jan7_explanation = explanation)
+
+combo <- oct20_clean |> 
+  right_join(july24_clean, by ="filename") |> 
+  right_join(jan_7, by = "filename")
+
+
+#split crime1 into three new columns
+combo <- separate(data = combo, col = jan7_category, into = c("jan7_category1", "jan7_category2"), sep = ";", extra = "merge", fill = "right")
+combo <- separate(data = combo, col = oct20_category, into = c("Oct20_category1", "Oct20_category2"), sep = ";", extra = "merge", fill = "right")
+combo <- separate(data = combo, col = july24_category, into = c("july24_category1", "july24_category2"), sep = ";", extra = "merge", fill = "right")
+
+
+
+
+# combo <- jan_7 |> 
+#   right_join(combo, by ="filename")
+
+
+```
+
+
+
+
+
+
+### Analyze differences
+```{r}
+diffs_biz <- combo |> 
+  mutate(changed_july24 = case_when(
+    jan7_category1 == july24_category1 ~ "same",
+    jan7_category1 != july24_category1 ~ "different",
+    jan7_category2 == july24_category2 ~ "same",
+    jan7_category2 != july24_category2 ~ "different",
+    .default = NA_character_
+  )) |> 
+    mutate(changed_oct20 = case_when(
+    jan7_category1 == Oct20_category1 ~ "same",
+    jan7_category1 != Oct20_category1 ~ "different",
+    jan7_category2 == Oct20_category2 ~ "same",
+    jan7_category2 != Oct20_category2 ~ "different",
+    .default = NA_character_
+  )) |> 
+  
+  select(changed_july24, jan7_category1, jan7_category2, july24_category1, jan7_category1, jan7_category2, july24_category2, changed_oct20, jan7_category1, jan7_category2, Oct20_category1, Oct20_category2, july24_correct, july24_human_comments, everything())
+
+write_csv(diffs_biz, "./output/jan7_biz_july24_diffs.csv")
+```
+
+```{r}
+diffs_voter <- read_csv("./output/jan7_voter_july24_diffs.csv")
+diffs_biz <- read_csv("./output/jan7_biz_july24_diffs.csv")
+
+```
+
+
+### Count categories
+```{r}
+
+current_counts <- combo |>
+  select(filename, jan7_category1, jan7_category2) |>
+  pivot_longer(cols = c(jan7_category1, jan7_category2), 
+               names_to = "category_type", 
+               values_to = "category") |>
+  filter(!is.na(category)) |>
+  count(category, name = "current_count")
+
+# Count all july24_category1 and july24_category2 together
+oct20_counts <- combo |>
+  select(filename, Oct20_category1, Oct20_category2) |>
+  pivot_longer(cols = c(Oct20_category1, Oct20_category2), 
+               names_to = "category_type", 
+               values_to = "category") |>
+  filter(!is.na(category)) |>
+  count(category, name = "Oct20_count")
+
+# Count all july24_category1 and july24_category2 together
+july24_counts <- combo |>
+  select(filename, july24_category1, july24_category2) |>
+  pivot_longer(cols = c(july24_category1, july24_category2), 
+               names_to = "category_type", 
+               values_to = "category") |>
+  filter(!is.na(category)) |>
+  count(category, name = "july24_count")
+
+
+
+# comparison_voter <- comparison
+
+
+
+comparison_biz <- list(current_counts, oct20_counts, july24_counts) |> 
+  reduce(full_join, by = "category") |> 
+  arrange(desc(current_count))
+
+# # Combine them side by side
+# comparison_biz <- current_counts |> 
+#   full_join(oct20_counts, by = "category") |> 
+#   full_join(july24_counts, by = "category") |> # Now it's properly included
+#   replace_na(list(current_count = 0, Oct20_count = 0, july24_count = 0)) |> 
+#   arrange(desc(current_count))
+```

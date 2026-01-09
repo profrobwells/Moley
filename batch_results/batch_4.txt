@@ -1,10 +1,11 @@
-1956-05-04_166942067_1_page0.txt,politics,6 mentions of elections, parties, votes, and political campaigns.
-1956-05-08_166912917_1_page0.txt,other,
-1956-05-15_166921781_1_page0.txt,other,
-1956-05-18_166972318_1_page0.txt,politics,Multiple mentions of candidates, elections, political parties, voting, and campaigns.
-1956-05-23_166967752_1_page0.txt,other,
+new_filename,category,explanation
+1956-04-25_166936535_1_page0.txt,other,
+1956-06-26_166936987_1_page0.txt,other,
+1956-03-20_166937059_1_page0.txt,other,
+1956-05-04_166942067_1_page0.txt,other,
+1956-05-29_166942378_1_page0.txt,voter_turnout,3 mentions of election year, elect Congressmen, political activity.
+1956-06-14_166942731_1_page0.txt,voter_turnout,11 mentions of nomination, elected, campaign, election day, voters.
+1956-04-10_166951384_1_page0.txt,other,
 1956-05-24_166952012_1_page0.txt,other,
-1956-05-29_166942378_1_page0.txt,politics,4 mentions of election year, elect Congressmen, and political organizations.
+1956-06-06_166953689_1_page0.txt,voter_turnout,13 mentions of electing, vote, campaign, re-election, election, candidate.
 1956-05-31_166955164_1_page0.txt,other,
-1956-06-06_166953689_1_page0.txt,politics,Multiple mentions of elections, candidates, political parties, voting, and campaigns.
-1956-06-07_166972889_1_page0.txt,other,

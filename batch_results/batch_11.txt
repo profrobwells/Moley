@@ -1,8 +1,10 @@
-1956-12-07_167005914_1_page0.txt,politics,Multiple mentions of election, campaign, candidates, political activity, and Congress.
-1956-12-12_167107864_1_page0.txt,politics,Numerous mentions of votes, voting, and elections.
-1956-12-14_166991089_1_page0.txt,politics,Multiple mentions of political parties, campaign, election, nomination, and candidates.
-1956-12-18_167049731_1_page0.txt,politics,Multiple mentions of campaign, candidates, election, voters, and political context.
-1956-12-20_167045451_1_page0.txt,politics,Numerous mentions of voters, voting, elections, political, and politicians.
-1956-12-22_167097904_1_page0.txt,politics,Numerous mentions of political parties, Vice-President, President, votes, polls, campaign, and election outcomes.
-1956-12-26_167013872_1_page0.txt,other,
-1956-12-27_166981449_1_page0.txt,politics,Multiple mentions of politics, political ideas, and the political head of government.
+1956-10-27_167015426_1_page0.txt,voter_turnout,9 mentions of voting record and roll calls.
+1956-11-29_167015571_1_page0.txt,voter_turnout,8 mentions of elections, campaigns, and political expenditures.
+1956-10-08_167016859_1_page0.txt,voter_turnout,5 mentions of candidates, votes, and "scramble for votes."
+1956-09-07_167016888_1_page0.txt,voter_turnout,4 mentions of candidates, convention, and opponent.
+1956-09-21_167021069_1_page0.txt,voter_turnout,21 mentions of election, vote, voters, and getting people to the polls.
+1956-10-23_167022818_1_page0.txt,voter_turnout,6 mentions of Vice-President, President, and Senators as candidates.
+1956-10-09_167023665_1_page0.txt,voter_turnout,19 mentions of elections, candidates, turnout, and votes.
+1956-08-22_167024006_1_page0.txt,voter_turnout,21 mentions of campaigns, elections, candidates, and roll calls.
+1956-11-23_167025776_1_page0.txt,voter_turnout,16 mentions of elections, campaigns, candidates, and surveys.
+1956-08-21_167026995_1_page0.txt,voter_turnout,14 mentions of nominations, elections, candidates, and getting the vote out.

@@ -1,112 +1,113 @@
 new_filename,category,explanation
-1956-01-04_166874618_1_page0.txt,other,
-1956-01-05_166899746_1_page0.txt,other,
-1956-01-10_166876075_1_page0.txt,politics,4 mentions of Presidential year, Presidential, candidate, election.
-1956-01-13_166912641_1_page0.txt,politics,Multiple mentions of candidate, Democratic Party, nomination, political, delegates, primary, voted.
-1956-01-18_166873052_1_page0.txt,politics,3 mentions of plebiscite, voters, vote.
+1956-01-18_166873052_1_page0.txt,voter_turnout,3 mentions of plebiscite, voters, and vote.
 1956-01-19_166874249_1_page0.txt,other,
-1956-01-27_166884915_1_page0.txt,politics,Multiple mentions of election, candidacy, political, ballot box, vote, campaigns.
-1956-01-31_166876244_1_page0.txt,politics,Multiple mentions of nominate, candidate, election, campaign, party.
-1956-02-02_166888107_1_page0.txt,politics,5 mentions of politicians, elected, elections, voters, hustings.
-1956-02-07_166907655_1_page0.txt,other,
-new_filename,category,explanation
-1956-02-10_166881514_1_page0.txt,politics,2 nominations, 2 candidates, 2 political party mentions, 2 campaign strategies, 1 primary.
-1956-02-16_166896688_1_page0.txt,other,
-1956-02-17_166922034_1_page0.txt,other,
-1956-02-21_166906514_1_page0.txt,politics,3 candidate mentions, 1 election, 1 political party, 1 voting, 1 political campaign.
-1956-02-28_166911519_1_page0.txt,other,
+1956-01-04_166874618_1_page0.txt,other,
+1956-01-10_166876075_1_page0.txt,voter_turnout,3 mentions of Presidential year and Republican candidate.
+1956-01-31_166876244_1_page0.txt,voter_turnout,9 mentions of elections, campaigns, candidates, votes, and participation.
+1956-02-10_166881514_1_page0.txt,voter_turnout,4 mentions of nominations, primary contests, and candidates.
+1956-02-02_166888107_1_page0.txt,voter_turnout,3 mentions of elections and voters' expressed preference.
 1956-03-01_166888260_1_page0.txt,other,
-1956-03-07_166905237_1_page0.txt,politics,10 candidate mentions, 7 votes, 3 nominations, 3 election mentions, 2 polls, 2 political parties.
-1956-03-09_166917090_1_page0.txt,politics,10 candidate mentions, 7 President mentions, 4 nominations, 3 political party mentions, 2 polls, 2 elections.
-1956-03-15_166889978_1_page0.txt,politics,3 votes, 3 politicians, 2 political, 1 candidate, 1 nomination, 1 political party.
-1956-03-16_166891660_1_page0.txt,politics,4 campaign mentions, 3 candidate mentions, 3 election fight mentions, 2 political party mentions.
+1956-03-15_166889978_1_page0.txt,voter_turnout,4 mentions of bids for votes, candidates, and appeals.
 new_filename,category,explanation
-1956-03-20_166937059_1_page0.txt,other,
-1956-03-26_166904773_1_page0.txt,politics,2 primary campaigns, 2 candidates, 2 politicians, 1 votes, 1 Democratic Party.
-1956-03-27_166923452_1_page0.txt,other,
-1956-03-29_166909981_1_page0.txt,politics,Multiple mentions of votes, candidates, parties, elections, politicians and electing the President.
-1956-04-03_166935666_1_page0.txt,other,
-1956-04-10_166951384_1_page0.txt,politics,4 mentions of political parties (non-Communist, Labor, Social Democrats).
-1956-04-13_166915845_1_page0.txt,politics,Multiple mentions of candidates, nomination, primary, campaign, politicians, and political themes.
-1956-04-17_166910108_1_page0.txt,politics,2 poll mentions, 1 politics, 1 party, 1 Presidency/Vice-Presidency mention.
-1956-04-19_166931315_1_page0.txt,politics,Multiple mentions of vote, candidates, Republican Party, Democratic vote, reelection, and primary votes.
-1956-04-25_166936535_1_page0.txt,politics,4 mentions of political parties, 1 mention of Democratic Chairman in an attack context.
-1956-05-04_166942067_1_page0.txt,politics,6 mentions of elections, parties, votes, and political campaigns.
+1956-03-16_166891660_1_page0.txt,voter_turnout,8 mentions of campaigning, voting patterns, and candidates.
+1956-02-16_166896688_1_page0.txt,other,
+1956-01-05_166899746_1_page0.txt,other,
+1956-03-26_166904773_1_page0.txt,voter_turnout,4 mentions of primary campaigns and promises for votes.
+1956-03-07_166905237_1_page0.txt,voter_turnout,13 mentions of candidates, votes, and campaigning.
+1956-02-21_166906514_1_page0.txt,voter_turnout,5 mentions of candidates, re-electing, and influencing voters.
+1956-02-07_166907655_1_page0.txt,other,
+1956-03-29_166909981_1_page0.txt,voter_turnout,12 mentions of election methods, electoral vote, and popular vote.
+1956-04-17_166910108_1_page0.txt,other,
+new_filename,category,explanation
+1956-01-13_166912641_1_page0.txt,voter_turnout,9 mentions of candidate selection, primary, and voting.
 1956-05-08_166912917_1_page0.txt,other,
+1956-04-13_166915845_1_page0.txt,voter_turnout,7 mentions of candidates, nomination, and campaign.
+1956-03-09_166917090_1_page0.txt,voter_turnout,21 mentions of nomination, candidates, votes, and polls.
 1956-05-15_166921781_1_page0.txt,other,
-1956-05-18_166972318_1_page0.txt,politics,Multiple mentions of candidates, elections, political parties, voting, and campaigns.
-1956-05-23_166967752_1_page0.txt,other,
-1956-05-24_166952012_1_page0.txt,other,
-1956-05-29_166942378_1_page0.txt,politics,4 mentions of election year, elect Congressmen, and political organizations.
-1956-05-31_166955164_1_page0.txt,other,
-1956-06-06_166953689_1_page0.txt,politics,Multiple mentions of elections, candidates, political parties, voting, and campaigns.
-1956-06-07_166972889_1_page0.txt,other,
-1956-06-12_166965487_1_page0.txt,politics,Multiple mentions of elections, candidates, political parties, voting, and election outcomes.
-1956-06-13_166981229_1_page0.txt,other,
-1956-06-14_166942731_1_page0.txt,politics,Multiple mentions of nominations, elections, campaigns, candidates, and political parties.
-1956-06-19_166927499_1_page0.txt,politics,5 mentions of elections, voting, political party activities, and election outcomes.
-1956-06-21_166961475_1_page0.txt,politics,3 mentions of partisan sources, serving another term, and running again.
-1956-06-26_166936987_1_page0.txt,politics,Multiple mentions of candidates, campaigns, political parties, convention, and political strategy.
-1956-07-02_166987194_1_page0.txt,politics,Numerous mentions of political parties, upcoming Presidential year, and political party platforms.
-1956-07-03_166977307_1_page0.txt,politics,Multiple mentions of candidates, endorsements, political parties, conventions, and political campaign strategies.
-1956-07-05_166973311_1_page0.txt,other,
-1956-07-11_166959354_1_page0.txt,other,
-1956-07-17_166984053_1_page0.txt,other,
-1956-07-20_166968775_1_page0.txt,politics,7 mentions of campaigns, nominations, candidates, politicians, votes, voters, and politics.
-1956-07-25_166961624_1_page0.txt,politics,4 mentions of political parties, 1 campaign, 1 vote, and 1 political action.
-1956-07-26_166959488_1_page0.txt,politics,6 mentions of votes, 3 political parties, 2 candidates, 1 campaign, 1 primary, 1 election.
-1956-07-30_166962149_1_page0.txt,other,
-1956-08-07_166977911_1_page0.txt,politics,8 mentions of polls/pollsters, 4 elections, 2 political parties, 1 campaign.
-1956-08-09_167000759_1_page0.txt,politics,4 nominations, 2 candidates, 2 political parties, 2 politicians, 1 campaign, 1 primary.
-1956-08-11_166987545_1_page0.txt,politics,3 elect, 2 votes, 2 parties, 1 voters.
-1956-08-14_166967202_1_page0.txt,politics,7 votes, 4 political, 2 elections, 2 candidates, 2 tickets, 2 Democratic.
-1956-08-17_166972775_1_page0.txt,politics,5 polls, 4 voters, 3 candidates, 3 Republican, 2 votes, 2 parties, 2 tickets.
-1956-08-20_167030467_1_page0.txt,politics,Multiple mentions of politics, conventions, candidate, Democrat, and President-elect.
-1956-08-21_167026995_1_page0.txt,politics,Multiple mentions of candidates, elections, political parties, voting, and campaign strategies.
-1956-08-22_167024006_1_page0.txt,politics,Multiple mentions of conventions, candidates, political parties, elections, campaigns, and strategies.
-1956-08-28_166992768_1_page0.txt,politics,Multiple mentions of political parties, candidates, conventions, campaigner, and politics/politicians.
-1956-08-31_166992300_1_page0.txt,politics,Multiple mentions of acceptance speech, Republican/Democratic parties, campaign, political appeals, and predictions.
-1956-09-04_166989848_1_page0.txt,politics,Multiple mentions of campaign, candidates, Presidential/Vice-Presidential, tickets, and partisanship.
-1956-09-05_166996171_1_page0.txt,politics,Multiple mentions of candidates, endorsements, political parties, campaigns, elections, voting, and politics.
-1956-09-07_167016888_1_page0.txt,politics,Multiple mentions of Republicanism, New Dealism, candidate, party, convention, and opponent.
-1956-09-11_167036433_1_page0.txt,politics,Multiple mentions of elections, elect, politicians, election year, campaign, party platform, and candidates.
-1956-09-15_167014181_1_page0.txt,politics,Numerous mentions of elections, political parties, campaigns, outcomes, voters, politicians, and candidates.
+1956-02-17_166922034_1_page0.txt,other,
+1956-03-27_166923452_1_page0.txt,other,
+1956-06-19_166927499_1_page0.txt,voter_turnout,5 mentions of votes, voters, and re-election chances.
+1956-04-19_166931315_1_page0.txt,voter_turnout,17 mentions of vote, primary results, and absentee vote.
+1956-04-03_166935666_1_page0.txt,other,
 new_filename,category,explanation
-1956-09-18_167011196_1_page0.txt,politics,10 mentions of politics, conventions, candidate, Democrat, campaign.
-1956-09-21_167021069_1_page0.txt,politics,Numerous mentions of elections, votes, political parties, candidates, and political organizations.
-1956-09-24_166996599_1_page0.txt,politics,Numerous mentions of Republican/Democratic parties, elections, candidates, registration, and political leadership.
-1956-09-26_167002293_1_page0.txt,politics,Numerous mentions of elections, parties, candidates, primary, political, and vote/voting.
-1956-09-29_166981483_1_page0.txt,politics,10 mentions of campaign, political parties, candidates, primary, vote, Congress.
-1956-10-02_167003681_1_page0.txt,politics,Numerous mentions of political parties, elections, campaigns, polls, candidates, and control of Congress.
-1956-10-04_167015295_1_page0.txt,politics,Numerous mentions of politicians, parties, elections, voters, campaigns, and political organizations.
-1956-10-06_166998763_1_page0.txt,politics,Numerous mentions of politics, political, campaigns, candidates, parties, elections, and organizations.
-1956-10-08_167016859_1_page0.txt,politics,11 mentions of candidates, Congress, political propaganda, votes, and political programs.
-1956-10-09_167023665_1_page0.txt,politics,Numerous mentions of Democratic/Republican, elections, candidates, campaigns, votes, political parties, and political situations.
-1956-10-12_166981548_1_page0.txt,politics,3 political mentions, 3 President mentions, 2 Republican Governor, 1 campaign, 1 appointment.
-1956-10-13_167046648_1_page0.txt,politics,6 mentions of vote/voting, 3 elections, 2 political, 2 party.
-1956-10-16_167027617_1_page0.txt,politics,Multiple mentions of political parties, candidates, elections, votes, campaigns, primary.
-1956-10-18_167040314_1_page0.txt,politics,6 mentions of political parties, 3 political, 2 candidates, 1 campaign, 1 nomination.
-1956-10-20_167038525_1_page0.txt,politics,Multiple mentions of candidates, elections, nominations, votes, campaigns, and political philosophy.
-1956-10-23_167022818_1_page0.txt,politics,Multiple mentions of candidate, government, votes, Senators, President, and political doctrines.
-1956-10-27_167015426_1_page0.txt,politics,Multiple mentions of Senators, voting record, political judgment, President, and political party.
-1956-10-31_167008470_1_page0.txt,politics,Multiple mentions of political activities, election, Congress, candidates, parties, and voting.
-1956-11-02_167062796_1_page0.txt,politics,Multiple mentions of political party, elections, candidate, President, and Democratic platform.
-1956-11-06_167070736_1_page0.txt,politics,Multiple mentions of campaign, elections, candidates, political views, and political parties.
+1956-04-25_166936535_1_page0.txt,other,
+1956-06-26_166936987_1_page0.txt,other,
+1956-03-20_166937059_1_page0.txt,other,
+1956-05-04_166942067_1_page0.txt,other,
+1956-05-29_166942378_1_page0.txt,voter_turnout,3 mentions of election year, elect Congressmen, political activity.
+1956-06-14_166942731_1_page0.txt,voter_turnout,11 mentions of nomination, elected, campaign, election day, voters.
+1956-04-10_166951384_1_page0.txt,other,
+1956-05-24_166952012_1_page0.txt,other,
+1956-06-06_166953689_1_page0.txt,voter_turnout,13 mentions of electing, vote, campaign, re-election, election, candidate.
+1956-05-31_166955164_1_page0.txt,other,
+1956-07-11_166959354_1_page0.txt,other,
+1956-07-26_166959488_1_page0.txt,voter_turnout,7 mentions of votes, vote, primary, candidate, and voter appeal.
+1956-06-21_166961475_1_page0.txt,other,
+1956-07-25_166961624_1_page0.txt,voter_turnout,3 mentions of voted, campaign for Presidency, and political action.
+1956-07-30_166962149_1_page0.txt,other,
+1956-06-12_166965487_1_page0.txt,voter_turnout,9 mentions of election returns, vote, votes, and candidates.
+1956-08-14_166967202_1_page0.txt,voter_turnout,11 mentions of vote, election, candidates, and "Catholic Vote" theme.
+1956-05-23_166967752_1_page0.txt,other,
+1956-07-20_166968775_1_page0.txt,voter_turnout,9 mentions of campaign, candidates, votes, voters, and voting population.
+1956-05-18_166972318_1_page0.txt,voter_turnout,9 mentions of campaign years, vote, elections, voters, turnout, and candidate.
+new_filename,category,explanation
+1956-08-17_166972775_1_page0.txt,voter_turnout,11 mentions of voters, nominations, elections, and gaining/losing votes.
+1956-06-07_166972889_1_page0.txt,other,
+1956-07-05_166973311_1_page0.txt,other,
+1956-07-03_166977307_1_page0.txt,voter_turnout,7 mentions of Presidential candidate, convention, endorsement, and political "blacklist."
+1956-08-07_166977911_1_page0.txt,voter_turnout,8 mentions of polls, election, canvasses, and voter preferences.
+1956-11-10_166980142_1_page0.txt,voter_turnout,13 mentions of election, voters, eligible voters, and efforts to get out vote.
+1956-06-13_166981229_1_page0.txt,other,
+1956-12-27_166981449_1_page0.txt,other,
+1956-09-29_166981483_1_page0.txt,voter_turnout,7 mentions of campaign, vote, primary contest, and Republican prospects.
+1956-10-12_166981548_1_page0.txt,voter_turnout,4 mentions of political overtones, political motive, and political campaign.
+1956-07-17_166984053_1_page0.txt,other,
+1956-07-02_166987194_1_page0.txt,voter_turnout,4 mentions of Presidential year, elected, and political action functions.
+1956-08-11_166987545_1_page0.txt,voter_turnout,9 mentions of votes, voters, elect, and too lazy to vote.
+1956-09-04_166989848_1_page0.txt,voter_turnout,3 mentions of campaign and Presidential candidates.
+1956-12-14_166991089_1_page0.txt,voter_turnout,6 mentions of campaign, election, and Presidential candidates.
+1956-08-31_166992300_1_page0.txt,other,
+1956-08-28_166992768_1_page0.txt,other,
+1956-09-05_166996171_1_page0.txt,voter_turnout,19 mentions of voters, candidates, campaigns, and going to the polls.
+1956-09-24_166996599_1_page0.txt,voter_turnout,10 mentions of election, registration, and political arms of labor.
+1956-10-06_166998763_1_page0.txt,voter_turnout,11 mentions of campaign, candidates, registration, and election.
+1956-08-09_167000759_1_page0.txt,voter_turnout,17 mentions of nomination, candidates, delegates, and election.
+1956-09-26_167002293_1_page0.txt,voter_turnout,24 mentions of campaigns, elections, votes, and turnout.
+1956-10-02_167003681_1_page0.txt,voter_turnout,19 mentions of elections, registration, votes, and voter apathy.
+1956-12-07_167005914_1_page0.txt,voter_turnout,19 mentions of campaigns, elections, candidates, and political activities.
 1956-11-09_167008316_1_page0.txt,other,
-1956-11-10_166980142_1_page0.txt,politics,Multiple mentions of election, party, voters, candidate, campaigns.
-1956-11-13_167052081_1_page0.txt,politics,Multiple mentions of election, party, candidates, vote, political.
-1956-11-17_167080687_1_page0.txt,politics,Multiple mentions of predictions, election, candidates, and polls.
-1956-11-20_167074206_1_page0.txt,politics,Multiple mentions of political parties, election, candidates, and national conventions.
-1956-11-22_167062881_1_page0.txt,politics,Multiple mentions of election, political education, campaign workers, and votes.
-1956-11-23_167025776_1_page0.txt,politics,Multiple mentions of election, campaign, surveys, predictions, candidates, and political reporters.
-1956-11-27_167054824_1_page0.txt,politics,Multiple mentions of election, candidates, voters, and political arms of unions.
-1956-11-29_167015571_1_page0.txt,politics,Multiple mentions of candidates, campaign, elections, parties, and political machine.
-1956-11-30_167046802_1_page0.txt,other,
-1956-12-07_167005914_1_page0.txt,politics,Multiple mentions of election, campaign, candidates, political activity, and Congress.
-1956-12-12_167107864_1_page0.txt,politics,Numerous mentions of votes, voting, and elections.
-1956-12-14_166991089_1_page0.txt,politics,Multiple mentions of political parties, campaign, election, nomination, and candidates.
-1956-12-18_167049731_1_page0.txt,politics,Multiple mentions of campaign, candidates, election, voters, and political context.
-1956-12-20_167045451_1_page0.txt,politics,Numerous mentions of voters, voting, elections, political, and politicians.
-1956-12-22_167097904_1_page0.txt,politics,Numerous mentions of political parties, Vice-President, President, votes, polls, campaign, and election outcomes.
+1956-10-31_167008470_1_page0.txt,voter_turnout,33 mentions of political activities, elections, candidates, and voter registration.
+1956-09-18_167011196_1_page0.txt,other,
 1956-12-26_167013872_1_page0.txt,other,
-1956-12-27_166981449_1_page0.txt,politics,Multiple mentions of politics, political ideas, and the political head of government.
+1956-09-15_167014181_1_page0.txt,voter_turnout,22 mentions of elections, campaigns, voter behavior, and efforts to get votes.
+1956-10-04_167015295_1_page0.txt,voter_turnout,17 mentions of elections, candidates, voter registration, and turnout.
+1956-10-27_167015426_1_page0.txt,voter_turnout,6 mentions of voting record and roll calls.
+1956-11-29_167015571_1_page0.txt,voter_turnout,8 mentions of elections, campaigns, and political expenditures.
+1956-10-08_167016859_1_page0.txt,voter_turnout,4 mentions of candidates, votes, and "scramble for votes."
+1956-09-07_167016888_1_page0.txt,voter_turnout,4 mentions of candidates, convention, and opponent.
+1956-09-21_167021069_1_page0.txt,voter_turnout,21 mentions of election, vote, voters, and getting people to the polls.
+1956-10-23_167022818_1_page0.txt,voter_turnout,6 mentions of Vice-President, President, and Senators as candidates.
+1956-10-09_167023665_1_page0.txt,voter_turnout,19 mentions of elections, candidates, turnout, and votes.
+1956-08-22_167024006_1_page0.txt,voter_turnout,21 mentions of campaigns, elections, candidates, and roll calls.
+1956-11-23_167025776_1_page0.txt,voter_turnout,16 mentions of elections, campaigns, candidates, and surveys.
+1956-08-21_167026995_1_page0.txt,voter_turnout,14 mentions of nominations, elections, candidates, and getting the vote out.
+1956-10-16_167027617_1_page0.txt,voter_turnout,16 mentions of elections, campaigns, candidates, and voting levels.
+1956-08-20_167030467_1_page0.txt,other,
+1956-09-11_167036433_1_page0.txt,voter_turnout,7 mentions of elections, election year, campaign, and candidates.
+1956-10-20_167038525_1_page0.txt,voter_turnout,13 mentions of campaigns, elections, candidates, and voting records.
+1956-10-18_167040314_1_page0.txt,voter_turnout,12 mentions of political, party, nominations, and campaign efforts.
+1956-12-20_167045451_1_page0.txt,voter_turnout,24 mentions of voting laws, election, registration, absentee ballots, and barriers to voting.
+1956-10-13_167046648_1_page0.txt,voter_turnout,21 mentions of voting age, participation levels, elections, and barriers to voting.
+1956-11-30_167046802_1_page0.txt,other,
+1956-12-18_167049731_1_page0.txt,voter_turnout,4 mentions of campaign, voters, and candidates.
+1956-11-13_167052081_1_page0.txt,voter_turnout,16 mentions of elections, vote, candidates, voter participation, and political efforts.
+1956-10-27_167015426_1_page0.txt,voter_turnout,9 mentions of voting record and roll calls.
+1956-11-29_167015571_1_page0.txt,voter_turnout,8 mentions of elections, campaigns, and political expenditures.
+1956-10-08_167016859_1_page0.txt,voter_turnout,5 mentions of candidates, votes, and "scramble for votes."
+1956-09-07_167016888_1_page0.txt,voter_turnout,4 mentions of candidates, convention, and opponent.
+1956-09-21_167021069_1_page0.txt,voter_turnout,21 mentions of election, vote, voters, and getting people to the polls.
+1956-10-23_167022818_1_page0.txt,voter_turnout,6 mentions of Vice-President, President, and Senators as candidates.
+1956-10-09_167023665_1_page0.txt,voter_turnout,19 mentions of elections, candidates, turnout, and votes.
+1956-08-22_167024006_1_page0.txt,voter_turnout,21 mentions of campaigns, elections, candidates, and roll calls.
+1956-11-23_167025776_1_page0.txt,voter_turnout,16 mentions of elections, campaigns, candidates, and surveys.
+1956-08-21_167026995_1_page0.txt,voter_turnout,14 mentions of nominations, elections, candidates, and getting the vote out.

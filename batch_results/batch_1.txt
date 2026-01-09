@@ -1,11 +1,10 @@
 new_filename,category,explanation
-1956-01-04_166874618_1_page0.txt,other,
-1956-01-05_166899746_1_page0.txt,other,
-1956-01-10_166876075_1_page0.txt,politics,4 mentions of Presidential year, Presidential, candidate, election.
-1956-01-13_166912641_1_page0.txt,politics,Multiple mentions of candidate, Democratic Party, nomination, political, delegates, primary, voted.
-1956-01-18_166873052_1_page0.txt,politics,3 mentions of plebiscite, voters, vote.
+1956-01-18_166873052_1_page0.txt,voter_turnout,3 mentions of plebiscite, voters, and vote.
 1956-01-19_166874249_1_page0.txt,other,
-1956-01-27_166884915_1_page0.txt,politics,Multiple mentions of election, candidacy, political, ballot box, vote, campaigns.
-1956-01-31_166876244_1_page0.txt,politics,Multiple mentions of nominate, candidate, election, campaign, party.
-1956-02-02_166888107_1_page0.txt,politics,5 mentions of politicians, elected, elections, voters, hustings.
-1956-02-07_166907655_1_page0.txt,other,
+1956-01-04_166874618_1_page0.txt,other,
+1956-01-10_166876075_1_page0.txt,voter_turnout,3 mentions of Presidential year and Republican candidate.
+1956-01-31_166876244_1_page0.txt,voter_turnout,9 mentions of elections, campaigns, candidates, votes, and participation.
+1956-02-10_166881514_1_page0.txt,voter_turnout,4 mentions of nominations, primary contests, and candidates.
+1956-02-02_166888107_1_page0.txt,voter_turnout,3 mentions of elections and voters' expressed preference.
+1956-03-01_166888260_1_page0.txt,other,
+1956-03-15_166889978_1_page0.txt,voter_turnout,4 mentions of bids for votes, candidates, and appeals.

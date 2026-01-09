@@ -1,11 +1,11 @@
 new_filename,category,explanation
-1956-03-20_166937059_1_page0.txt,other,
-1956-03-26_166904773_1_page0.txt,politics,2 primary campaigns, 2 candidates, 2 politicians, 1 votes, 1 Democratic Party.
+1956-01-13_166912641_1_page0.txt,voter_turnout,9 mentions of candidate selection, primary, and voting.
+1956-05-08_166912917_1_page0.txt,other,
+1956-04-13_166915845_1_page0.txt,voter_turnout,7 mentions of candidates, nomination, and campaign.
+1956-03-09_166917090_1_page0.txt,voter_turnout,21 mentions of nomination, candidates, votes, and polls.
+1956-05-15_166921781_1_page0.txt,other,
+1956-02-17_166922034_1_page0.txt,other,
 1956-03-27_166923452_1_page0.txt,other,
-1956-03-29_166909981_1_page0.txt,politics,Multiple mentions of votes, candidates, parties, elections, politicians and electing the President.
+1956-06-19_166927499_1_page0.txt,voter_turnout,5 mentions of votes, voters, and re-election chances.
+1956-04-19_166931315_1_page0.txt,voter_turnout,17 mentions of vote, primary results, and absentee vote.
 1956-04-03_166935666_1_page0.txt,other,
-1956-04-10_166951384_1_page0.txt,politics,4 mentions of political parties (non-Communist, Labor, Social Democrats).
-1956-04-13_166915845_1_page0.txt,politics,Multiple mentions of candidates, nomination, primary, campaign, politicians, and political themes.
-1956-04-17_166910108_1_page0.txt,politics,2 poll mentions, 1 politics, 1 party, 1 Presidency/Vice-Presidency mention.
-1956-04-19_166931315_1_page0.txt,politics,Multiple mentions of vote, candidates, Republican Party, Democratic vote, reelection, and primary votes.
-1956-04-25_166936535_1_page0.txt,politics,4 mentions of political parties, 1 mention of Democratic Chairman in an attack context.
