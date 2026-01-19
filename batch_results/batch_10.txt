@@ -1,10 +1,10 @@
-1956-10-16_167027617_1_page0.txt,voter_turnout,16 mentions of elections, campaigns, candidates, and voting levels.
+1956-10-16_167027617_1_page0.txt,voter_turnout,3 mentions of efforts to get people to vote, 3 mentions of efforts to discourage voting, 5 mentions of election statistics.
 1956-08-20_167030467_1_page0.txt,other,
-1956-09-11_167036433_1_page0.txt,voter_turnout,7 mentions of elections, election year, campaign, and candidates.
-1956-10-20_167038525_1_page0.txt,voter_turnout,13 mentions of campaigns, elections, candidates, and voting records.
-1956-10-18_167040314_1_page0.txt,voter_turnout,12 mentions of political, party, nominations, and campaign efforts.
-1956-12-20_167045451_1_page0.txt,voter_turnout,24 mentions of voting laws, election, registration, absentee ballots, and barriers to voting.
-1956-10-13_167046648_1_page0.txt,voter_turnout,21 mentions of voting age, participation levels, elections, and barriers to voting.
+1956-09-11_167036433_1_page0.txt,voter_turnout,1 mention of efforts to buy votes, 5 mentions of voting behavior and election relevance.
+1956-10-20_167038525_1_page0.txt,voter_turnout,1 mention of efforts to inform voters, 8 mentions of voting records and behavior.
+1956-10-18_167040314_1_page0.txt,voter_turnout,3 mentions of efforts to get people to vote, 1 mention of discouraging party workers, 4 mentions of election context.
+1956-12-20_167045451_1_page0.txt,voter_turnout,17 mentions of barriers to voting, 3 efforts to get people to vote, 1 effort to suppress voting, 2 registration statistics.
+1956-10-13_167046648_1_page0.txt,voter_turnout,23 mentions of voter turnout/eligibility statistics, 9 mentions of barriers to voting.
 1956-11-30_167046802_1_page0.txt,other,
-1956-12-18_167049731_1_page0.txt,voter_turnout,4 mentions of campaign, voters, and candidates.
-1956-11-13_167052081_1_page0.txt,voter_turnout,16 mentions of elections, vote, candidates, voter participation, and political efforts.
+1956-12-18_167049731_1_page0.txt,voter_turnout,3 mentions of voter persuasion and election campaign context.
+1956-11-13_167052081_1_page0.txt,voter_turnout,17 mentions of election outcomes, voter behavior and statistics, 1 mention of efforts to get people to vote.

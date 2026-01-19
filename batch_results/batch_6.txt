@@ -1,11 +1,11 @@
 new_filename,category,explanation
-1956-08-17_166972775_1_page0.txt,voter_turnout,11 mentions of voters, nominations, elections, and gaining/losing votes.
+1956-08-17_166972775_1_page0.txt,voter_turnout,8 mentions of voters, votes, and gaining/losing votes in elections.
 1956-06-07_166972889_1_page0.txt,other,
 1956-07-05_166973311_1_page0.txt,other,
-1956-07-03_166977307_1_page0.txt,voter_turnout,7 mentions of Presidential candidate, convention, endorsement, and political "blacklist."
-1956-08-07_166977911_1_page0.txt,voter_turnout,8 mentions of polls, election, canvasses, and voter preferences.
-1956-11-10_166980142_1_page0.txt,voter_turnout,13 mentions of election, voters, eligible voters, and efforts to get out vote.
+1956-07-03_166977307_1_page0.txt,voter_turnout,6 mentions of candidates, endorsements, and efforts to influence voting.
+1956-08-07_166977911_1_page0.txt,voter_turnout,6 mentions of polls, elections, and voter choices.
+1956-11-10_166980142_1_page0.txt,voter_turnout,13 mentions of voters, elections, and efforts to get people to vote.
 1956-06-13_166981229_1_page0.txt,other,
 1956-12-27_166981449_1_page0.txt,other,
-1956-09-29_166981483_1_page0.txt,voter_turnout,7 mentions of campaign, vote, primary contest, and Republican prospects.
-1956-10-12_166981548_1_page0.txt,voter_turnout,4 mentions of political overtones, political motive, and political campaign.
+1956-09-29_166981483_1_page0.txt,voter_turnout,5 mentions of efforts to get out the vote and election prospects.
+1956-10-12_166981548_1_page0.txt,other,

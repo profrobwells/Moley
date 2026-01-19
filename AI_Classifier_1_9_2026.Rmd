@@ -1,7 +1,7 @@
 ---
 title: "AI Classifier"
 output: null
-date: 1-7-2026
+date: 1-19-2026
 ---
 
 ```{r}
@@ -22,19 +22,19 @@ library(stringr)
 ```{r}
 chat <- chat_google_gemini()
 
-chat$chat("Tell me four jokes about data journalists")
+chat$chat("Tell me four jokes about local data journalists")
 ```
 
 ### Load LAT Data
 ```{r echo = F}
 #2501 articles in index
-lat_article_index <-  rio::import("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/lat_txt_index_renamed_7_23.csv") |> 
+lat_article_index <-  rio::import("https://www.dropbox.com/scl/fi/keibb551rna0cedqxasiu/lat_txt_index_renamed_7_23.csv?rlkey=5avoupjokl8j8xnre11sqxhmb&st=la36umz6&dl=1") |> 
   clean_names() |> 
   mutate(year = lubridate::year(date))
-  
+
 
 #284067 rows of text
-lat_articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/Indexes of Moley Articles/moley_lat_text_june_21.csv") |>
+lat_articles_text <-  rio::import("https://www.dropbox.com/scl/fi/etw3pxonox4tijdwr6gmn/moley_lat_text_june_21.csv?rlkey=9h5do6lnkgdy8gx1pyqpz79ui&st=6t73d92b&dl=1") |>
    clean_names() |>
     mutate(year = as.numeric(year)) |> 
   mutate(new_filename = paste0(date,"_",filename))
@@ -140,14 +140,10 @@ If an article meets none of the criteria, classify it as 'other'
 
 —-Start Categories Criteria—---
 
-VOTER TURNOUT: an article contains three or more,  in text, content, or theme, mentions of 
-Amount of people participating in voting during an election
+VOTER TURNOUT: an article contains four or more,  in text, content, or theme, mentions of 
 Voter registration drives or registration statistics
-Early voting, absentee voting, or mail-in ballot usage
-Voter turnout rates or participation levels
 Efforts to get people to vote in elections
-Barriers to voting or voter access issues (polling locations, ID requirements, wait times)
-Specific details about voter participation in an election
+Barriers to voting or voter access issues (accessing polling locations, voter ID requirements, wait times, etc.)
 Efforts supress or discourage people from voting in elections
 
 
@@ -199,6 +195,7 @@ Economic forecasts or recession/expansion predictions
 Currency markets and exchange rates
 National or global economic conditions and trends
 
+
 BUSINESS: an article contains three or more, in text, content, or theme, mentions of 
 Companies, Corporate entities, their operations, or strategic decisions
 Executives, Business leaders, appointments, departures, or leadership actions
@@ -230,6 +227,7 @@ If the article discusses, in text, theme, or content, industry-specific trends w
 If the article discusses, in text, theme, or content, stock market movements alone without broader economic analysis or context, classify it as 'business', among any other applicable categories
 If the article discusses, in text, theme, or content, labor issues such as strikes, unionization, worker disputes, classify it as ‘labor’, not ‘business’, among any other applicable categories
 If the article only mentions a company tangentially (e.g., 'Apple CEO attended a charity gala') without discussing business matters, it does not fall under ‘business’
+Multiple mentions of the same sectoral crisis (e.g., 'The Farm Vote,' 'Farm Revolt,' 'Farm Distress') count as one single thematic mention. To reach a classification of ECONOMY, the article must discuss at least three different economic topics.
 
 
 —-End Categories Criteria—---
