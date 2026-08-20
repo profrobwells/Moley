@@ -1,0 +1,51 @@
+new_filename,category,explanation
+1954-04-07_166623380_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-04-08_166625956_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-06-24_166626715_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-05-06_166626771_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-04-02_166627557_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-05-20_166629830_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-06-03_166633125_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-05-04_166635287_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-05-27_166635625_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-06-01_166638180_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-06-15_166639182_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-06-18_166639451_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-09_166640936_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-06-04_166641614_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-13_166641990_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-01_166647686_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-08-10_166647843_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-10_166650358_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-06_166651272_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-08-05_166654803_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-27_166655354_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-20_166655957_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-08-07_166656638_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-29_166656876_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-29_166657415_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-25_166659684_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-07_166660853_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-28_166661048_1_page0.txt,LABOR,Contains 3 references to labor leaders/bosses and AFL/CIO conventions.
+1954-07-31_166662114_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-30_166662962_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-21_166664528_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-08-17_166664617_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-08-12_166665782_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-07_166667456_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-10-29_166667585_1_page0.txt,LABOR,Contains 3 references to labor bosses and union members.
+1954-07-18_166673696_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-11_166674451_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-09_166674506_1_page0.txt,LABOR,Contains 3 references to the CIO, labor/union bosses.
+1954-09-15_166675391_1_page0.txt,LABOR,Contains 3 references to unions and the CIO.
+1954-09-16_166684024_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-11-30_166684098_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-12-21_166684922_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-10-08_166685133_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-23_166686500_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-10-26_166687130_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-10-19_166687600_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-11-18_166689019_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-11-29_166690441_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-11-11_166693601_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-10-15_166693909_1_page0.txt,other,No categories met the 3-mention threshold.

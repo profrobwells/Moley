@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1951-11-29_166283545_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-12-22_166284847_1_page0.txt,LABOR,Contains 3 references to union members/wage issues.
+1951-11-21_166286250_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-12-27_166287511_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-09-27_166287552_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-12-20_166287775_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-12-15_166288148_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-02-16_166288684_1_page0.txt,LABOR,Contains 3 mentions of union leaders/wages.
+1952-05-24_166289860_1_page0.txt,LABOR,Contains 3 mentions of union/workers in the steel dispute.
+1951-11-22_166292039_1_page0.txt,other,No categories met the 3-mention threshold.

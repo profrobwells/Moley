@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1951-09-25_166220692_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-04-17_166222187_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-07-10_166223211_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-04-07_166223380_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-03-13_166223420_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-02-06_166223965_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-07-31_166224969_1_page0.txt,LABOR,Contains 3 references to the AFL/TVA and labor union organizing.
+1951-08-28_166225647_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-03-17_166225944_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-03-09_166226904_1_page0.txt,other,No categories met the 3-mention threshold.

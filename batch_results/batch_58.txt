@@ -1,0 +1,21 @@
+new_filename,category,explanation
+1954-07-27_166655354_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-20_166655957_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-08-07_166656638_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-29_166656876_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-29_166657415_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-25_166659684_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-07-07_166660853_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-28_166661048_1_page0.txt,LABOR,Contains 3 references to labor leaders/bosses and AFL/CIO conventions.
+1954-07-31_166662114_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-30_166662962_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-21_166664528_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-08-17_166664617_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-08-12_166665782_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-07_166667456_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-10-29_166667585_1_page0.txt,LABOR,Contains 3 references to labor bosses and union members.
+1954-07-18_166673696_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-11_166674451_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-09-09_166674506_1_page0.txt,LABOR,Contains 3 references to the CIO, labor/union bosses.
+1954-09-15_166675391_1_page0.txt,LABOR,Contains 3 references to unions and the CIO.
+1954-09-16_166684024_1_page0.txt,other,No categories met the 3-mention threshold.

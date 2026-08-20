@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1951-07-04_166280112_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-08-16_166280788_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-02-07_166281047_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-11-01_166282310_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-11-20_166282599_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-11-07_166282637_1_page0.txt,LABOR,Contains 3 mentions of the CIO-PAC and campaign/working systems.
+1951-11-13_166282772_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-11-15_166283011_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-11-08_166283038_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-12-01_166283512_1_page0.txt,other,No categories met the 3-mention threshold.

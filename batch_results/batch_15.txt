@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1951-01-24_166186863_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-08-30_166187036_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-06-26_166187474_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-01-06_166189246_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-01-03_166191775_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-02-20_166193743_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-07-14_166194525_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-06-22_166195004_1_page0.txt,LABOR,Contains 3 mentions of union contracts/wage increases.
+1951-01-26_166195691_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-04-03_166196210_1_page0.txt,other,No categories met the 3-mention threshold.

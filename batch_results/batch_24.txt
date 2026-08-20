@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1951-09-01_166261134_1_page0.txt,LABOR,Contains 3 mentions of wage/Wages and Wage Stabilization Board/cost-of-living.
+1951-11-10_166261608_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-10-02_166262673_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-10-20_166263155_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-09-04_166263938_1_page0.txt,LABOR,Contains 5 mentions of labor union and Quill's TWU/AFL.
+1952-01-29_166264236_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-01-15_166264316_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-02-21_166265358_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-08-23_166267132_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-08-07_166267958_1_page0.txt,other,No categories met the 3-mention threshold.

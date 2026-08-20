@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1952-09-27_166427419_1_page0.txt,LABOR,Contains 4 references to collective bargaining, labor unions, and the AFL.
+1953-01-06_166427540_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-11-19_166428813_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-12-06_166429623_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-18_166429923_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-14_166430128_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-09-13_166430466_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-02_166430853_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-17_166432879_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-02-25_166436304_1_page0.txt,other,No categories met the 3-mention threshold.

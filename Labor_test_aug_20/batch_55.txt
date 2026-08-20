@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1954-04-07_166623380_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-04-08_166625956_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-06-24_166626715_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-05-06_166626771_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-04-02_166627557_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-05-20_166629830_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-06-03_166633125_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-05-04_166635287_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-05-27_166635625_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-06-01_166638180_1_page0.txt,other,No categories met the 3-mention threshold.

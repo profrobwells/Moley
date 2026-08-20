@@ -1,0 +1,21 @@
+new_filename,category,explanation
+1952-09-17_166360904_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-05-30_166360926_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-21_166362068_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-02-22_166362583_1_page0.txt,LABOR,Contains 3 references to the CIO, unionism, and company conflicts.
+1952-07-04_166363007_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-04-22_166367999_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-05-10_166369992_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-30_166370930_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-06-24_166371571_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-07-23_166371613_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-09-10_166373726_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-06-22_166375944_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-09-11_166378074_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-08-09_166378994_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-07-18_166379940_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-08-12_166380848_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-07-02_166381179_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-07-12_166381348_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-06-30_166384267_1_page0.txt,LABOR,Contains 3 references to labor/union groups and the CIO-PAC.
+1952-11-29_166384351_1_page0.txt,other,No categories met the 3-mention threshold.

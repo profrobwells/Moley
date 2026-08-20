@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1953-12-28_166554318_1_page0.txt,LABOR,Contains 3 references to the Taft-Hartley Act and other labor conflicts.
+1953-12-29_166555981_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-11-12_166558896_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-12-22_166559019_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-12-17_166559421_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-12-31_166562460_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-01-28_166562497_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-11-10_166563058_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-01-14_166563778_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-11-07_166565246_1_page0.txt,other,No categories met the 3-mention threshold.

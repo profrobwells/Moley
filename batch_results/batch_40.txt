@@ -1,0 +1,71 @@
+new_filename,category,explanation
+1952-04-11_166352921_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-03-08_166353161_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-05-06_166354877_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-04-01_166354996_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-05-22_166357659_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-05-28_166358350_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-06-03_166359191_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-05-21_166359502_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-05-27_166359887_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-04-26_166359941_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-09-17_166360904_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-05-30_166360926_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-21_166362068_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-02-22_166362583_1_page0.txt,LABOR,Contains 3 references to the CIO, unionism, and company conflicts.
+1952-07-04_166363007_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-04-22_166367999_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-05-10_166369992_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-30_166370930_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-06-24_166371571_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-07-23_166371613_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-09-10_166373726_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-06-22_166375944_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-09-11_166378074_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-08-09_166378994_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-07-18_166379940_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-08-12_166380848_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-07-02_166381179_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-07-12_166381348_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-06-30_166384267_1_page0.txt,LABOR,Contains 3 references to labor/union groups and the CIO-PAC.
+1952-11-29_166384351_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-09-18_166385422_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-11-26_166387165_1_page0.txt,LABOR,Contains 3 references to labor unions and the Wagner/Taft-Hartley Acts.
+1953-01-24_166387593_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-12-03_166389917_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-09_166391181_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-05-02_166391709_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-09-19_166392105_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-07-13_166392244_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-01-21_166395887_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-08-02_166397322_1_page0.txt,LABOR,Contains 3 references to labor leaders/bosses and union members.
+1952-11-01_166397736_1_page0.txt,LABOR,Contains 4 references to the Wage Stabilization Board/wage increases/union bosses.
+1952-07-25_166397973_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-08-08_166397984_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-01-16_166398676_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-06-13_166399096_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-12-26_166399296_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-11-13_166401211_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-12-23_166401623_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-11-22_166402042_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-12-20_166403314_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-08-14_166403790_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-01-01_166404887_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-06_166404969_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-01-29_166405896_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-08-16_166407436_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-02-14_166408680_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-11-11_166409091_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-06-14_166410690_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-02-07_166414214_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-11-07_166414361_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-02-05_166416019_1_page0.txt,LABOR,Contains 4 mentions of Taft-Hartley/union shop/labor relations.
+1952-12-04_166417202_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-11-06_166419765_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-12-16_166420547_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-12-18_166421381_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-03-05_166422217_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-09-23_166423398_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-12-12_166424560_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-11-20_166425113_1_page0.txt,other,No categories met the 3-mention threshold.
+1952-10-28_166426455_1_page0.txt,LABOR,Contains 3 references to the Taft-Hartley Act.

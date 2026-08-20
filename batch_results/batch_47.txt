@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1953-06-13_166507450_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-07-30_166509732_1_page0.txt,LABOR,Contains 3 mentions of union leaders/wages and supplemental compensation.
+1953-06-16_166509962_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-06-20_166513127_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-10-19_166514974_1_page0.txt,LABOR,Contains 3 references to labor unions and the work effort.
+1953-09-03_166516600_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-09-04_166518786_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-07-03_166519247_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-07-11_166521221_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-07-17_166521310_1_page0.txt,other,No categories met the 3-mention threshold.

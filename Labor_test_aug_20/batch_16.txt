@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1951-03-03_166196451_1_page0.txt,other,No categories met the 3-mention threshold.
+1950-12-02_166196523_1_page0.txt,LABOR,Contains 3 mentions of union leaders, workers, and weekly hours/turnover.
+1951-06-08_166198424_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-05-03_166198731_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-05-05_166199376_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-02-23_166199702_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-01-13_166199798_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-07-22_166200923_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-06-19_166202549_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-02-07_166202950_1_page0.txt,other,No categories met the 3-mention threshold.

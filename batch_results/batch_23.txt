@@ -1,0 +1,21 @@
+new_filename,category,explanation
+1951-09-06_166244613_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-08-14_166245280_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-08-21_166246778_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-10-18_166247406_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-05-11_166247587_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-12-25_166248204_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-05-01_166248239_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-07-24_166248503_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-05-18_166248737_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-07-12_166248847_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-06-29_166251849_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-05-08_166252358_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-12-07_166253918_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-10-24_166254371_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-12-18_166254597_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-09-08_166256843_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-11-27_166258364_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-10-25_166258750_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-10-30_166259510_1_page0.txt,other,No categories met the 3-mention threshold.
+1951-10-09_166260905_1_page0.txt,other,No categories met the 3-mention threshold.

@@ -1,7 +1,7 @@
 ---
 title: "AI Classifier"
 output: null
-date: 1-19-2026
+date: 8-20-2026
 ---
 
 ```{r}
@@ -58,7 +58,7 @@ processed_llm <- lat_articles_text %>%
   ) %>%
   ungroup() %>%
   # Filter for your target year
-  filter(year == "1956") %>%
+  filter(year >= 1950, year < 1960) %>%
   subset(select = -c(filename, sentence, document_url, pages, issn)) |> 
   # Final safety check: Ensure one row per article
   distinct(new_filename, .keep_all = TRUE) %>%
@@ -171,6 +171,60 @@ No other explanation is required for 'other'."
 
 ```
 
+### Economy
+
+```{r}
+chat_econ <- chat_google_gemini(system_prompt =  "You are an academic researcher performing context analysis on selected news articles. Analyze each article and classify it based on specified criteria.
+
+In this prompt, the phrases “category” and “classification” and any of their grammatical variations are synonymous. 
+
+An article should receive a classification if it meets the requirements for the category specified below. Each article must independently meet a threshold of three or more mentions of specified criteria to be included in a specific category.
+
+If an article meets none of the criteria, classify it as 'other'
+
+
+—-Start Categories Criteria—---
+
+ECONOMY:  an article contains three or more,  in text, content, or theme, mentions of 
+Macroeconomic issues or economic policy. That would include discussions of the federal debt, the labor market, economic growth or contraction
+Macroeconomic indicators (Examples: GDP, inflation, unemployment rates, economic growth)
+Monetary policy (Federal Reserve actions, interest rates)
+Policy that directly involves with the economy
+Trade policy (Examples: tariffs, trade agreements, import/export regulations)
+Economic forecasts or recession/expansion predictions
+Currency markets and exchange rates
+National or global economic conditions and trends
+
+If the article discusses, in text, theme, or content, policy debates or legislation without electoral context, then it can be marked as 'other', among any other applicable categories
+Multiple mentions of the same sectoral crisis (e.g., 'The Farm Vote,' 'Farm Revolt,' 'Farm Distress') count as one single thematic mention. To reach a classification of ECONOMY, the article must discuss at least three different economic topics.
+
+
+—-End Categories Criteria—---
+
+
+Return ONLY a CSV with exactly THREE columns and NO additional text:
+
+Column 1: new_filename (the article identifier)
+Column 2: category (one or more classifications separated by semicolons)
+Column 3: explanation (brief justification citing specific counts)
+
+- Include a header row: new_filename,category,explanation
+- No quotes around values unless they contain commas
+- Multiple categories in alphabetical order separated by semicolons
+- Explanation must specify the count for each assigned category
+- Maximum 15 words per explanation
+
+Examples:
+article2.txt,economy,`4 company strategy mentions, 2 GDP references'
+article3.txt,other, `No categories met the 2-mention threshold.” 
+
+No other explanation is required for 'other'.
+
+IMPORTANT: YOU MUST PROCESS EACH ENTRY IN THE SOURCE DATA. PREVIOUS CLASSIFICATIONS HAVE STOPPED ABOUT 3/4s through. EXAMINE EACH ENTRY IN THE DATA."
+)
+
+```
+
 ### Business
 
 ```{r}
@@ -185,17 +239,6 @@ If an article meets none of the criteria, classify it as 'other'
 
 —-Start Categories Criteria—---
 
-ECONOMY:  an article contains three or more,  in text, content, or theme, mentions of 
-Macroeconomic issues or economic policy.
-Macroeconomic indicators (Examples: GDP, inflation, unemployment rates, economic growth)
-Monetary policy (Federal Reserve actions, interest rates)
-Policy that directly involves with the economy
-Trade policy (Examples: tariffs, trade agreements, import/export regulations)
-Economic forecasts or recession/expansion predictions
-Currency markets and exchange rates
-National or global economic conditions and trends
-
-
 BUSINESS: an article contains three or more, in text, content, or theme, mentions of 
 Companies, Corporate entities, their operations, or strategic decisions
 Executives, Business leaders, appointments, departures, or leadership actions
@@ -209,7 +252,55 @@ Financial Dealings common to business (examples: Earnings, investments, funding,
 Industry, Sector trends, market analysis, competitive dynamics
 Terms as 'private enterprise', 'company', 'firm', 'business leaders', 'businessmen',
 
-LABOR CLASSIFICATION: an article contains three or more, in text, content, or theme,
+For the above categories, there are some topics that could create a classification “gray area”. For the purposes of this research, use the following descriptions to validate classifications.  Any article that any of these apply to can still be categorized as multiple categories.
+
+If the article discusses, in text, theme, or content, individual company financial performance, classify it as 'business', among any other applicable categories
+If the article discusses, in text, theme, or content, industry-specific trends without macroeconomic context → classify as 'business'
+If the article discusses, in text, theme, or content, stock market movements alone without broader economic analysis or context, classify it as 'business', among any other applicable categories
+If the article discusses, in text, theme, or content, labor issues such as strikes, unionization, worker disputes, classify it as ‘other’, not ‘business’, among any other applicable categories
+If the article only mentions a company tangentially (e.g., 'Apple CEO attended a charity gala') without discussing business matters, it does not fall under ‘business’
+
+—-End Categories Criteria—---
+
+
+Return ONLY a CSV with exactly THREE columns and NO additional text:
+
+Column 1: new_filename (the article identifier)
+Column 2: category (one or more classifications separated by semicolons)
+Column 3: explanation (brief justification citing specific counts)
+
+- Include a header row: new_filename,category,explanation
+- No quotes around values unless they contain commas
+- Multiple categories in alphabetical order separated by semicolons
+- Explanation must specify the count for each assigned category
+- Maximum 15 words per explanation
+
+Examples:
+article2.txt,business,`4 company strategy mentions, 2 GDP references'
+article3.txt,other, `No categories met the 2-mention threshold.” 
+
+No other explanation is required for 'other'.
+
+IMPORTANT: YOU MUST PROCESS EACH ENTRY IN THE SOURCE DATA. PREVIOUS CLASSIFICATIONS HAVE STOPPED ABOUT 3/4s through. EXAMINE EACH ENTRY IN THE DATA."
+)
+
+```
+### Labor
+
+```{r}
+chat_labor <- chat_google_gemini(system_prompt =  "You are an academic researcher performing context analysis on selected news articles. Analyze each article and classify it based on specified criteria.
+
+In this prompt, the phrases “category” and “classification” and any of their grammatical variations are synonymous. 
+
+An article should receive a classification if it meets the requirements for the category specified below. Each article must independently meet a threshold of three or more mentions of specified criteria to be included in a specific category.
+
+If an article meets none of the criteria, classify it as 'other'
+
+
+—-Start Categories Criteria—---
+
+
+LABOR: an article contains three or more, in text, content, or theme,
 
 Strikes or work stoppages
 Unionization efforts
@@ -220,15 +311,6 @@ Statements or actions by union leaders or labor organizations
 Terms such as 'AFL' and or 'CIO' (Congress of Industrial Organizations)
 
 For the above categories, there are some topics that could create a classification “gray area”. For the purposes of this research, use the following descriptions to validate classifications.  Any article that any of these apply to can still be categorized as multiple categories.
-
-If the article discusses, in text, theme, or content, policy debates or legislation without electoral context, then it can be marked as 'other', among any other applicable categories
-If the article discusses, in text, theme, or content, individual company financial performance, classify it as 'business', among any other applicable categories
-If the article discusses, in text, theme, or content, industry-specific trends without macroeconomic context → classify as 'business'
-If the article discusses, in text, theme, or content, stock market movements alone without broader economic analysis or context, classify it as 'business', among any other applicable categories
-If the article discusses, in text, theme, or content, labor issues such as strikes, unionization, worker disputes, classify it as ‘labor’, not ‘business’, among any other applicable categories
-If the article only mentions a company tangentially (e.g., 'Apple CEO attended a charity gala') without discussing business matters, it does not fall under ‘business’
-Multiple mentions of the same sectoral crisis (e.g., 'The Farm Vote,' 'Farm Revolt,' 'Farm Distress') count as one single thematic mention. To reach a classification of ECONOMY, the article must discuss at least three different economic topics.
-
 
 —-End Categories Criteria—---
 
@@ -255,7 +337,6 @@ IMPORTANT: YOU MUST PROCESS EACH ENTRY IN THE SOURCE DATA. PREVIOUS CLASSIFICATI
 )
 
 ```
-
 
 # LLM call & API pause
 ```{r}
@@ -288,7 +369,10 @@ run_biz_batch <- function(batch_data) {
 # The API Call
   #change variable according to text
 #  response <- chat_biz$chat(batch_text)
-  response <- chat_voter$chat(batch_text)
+response <- chat_labor$chat(batch_text)  
+#    response <- chat_econ$chat(batch_text)  
+  
+#  response <- chat_voter$chat(batch_text)
 #    response <- chat_politics$chat(batch_text)  
   
   
@@ -674,3 +758,22 @@ comparison_biz <- list(current_counts, oct20_counts, july24_counts) |>
 #   replace_na(list(current_count = 0, Oct20_count = 0, july24_count = 0)) |> 
 #   arrange(desc(current_count))
 ```
+
+
+#---------Notes on rate limit ---------------
+Aug 20
+unclear if it is using my robwells21032@gmail or robwells@umd.edu
+
+
+Waiting 5 seconds for rate limits...
+--- Processing Batch 67 of 120 ---
+Error in `map_chr()`:
+ℹ In index: 67.
+Caused by error in `req_perform_connection()`:
+! HTTP 429 Too Many Requests.
+ℹ You exceeded your current quota, please check your plan and billing details. For more
+  information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To
+  monitor your current usage, head to: https://ai.dev/rate-limit.  * Quota exceeded for metric:
+  generativelanguage.googleapis.com/generate_content_paid_tier_2_input_token_count, limit:
+  3000000, model: gemini-3.5-flash Please retry in 41.713333453s.
+Run `rlang::last_trace()` to see where the error occurred.

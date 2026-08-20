@@ -1,0 +1,11 @@
+new_filename,category,explanation
+1954-01-26_166579656_1_page0.txt,other,No categories met the 3-mention threshold.
+1953-12-03_166580089_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-02-16_166580225_1_page0.txt,LABOR,Contains 3 references to labor movement, labor leaders, and the CIO.
+1953-12-11_166581633_1_page0.txt,LABOR,Contains 4 mentions of the guaranteed annual wage, unions, and labor bosses.
+1954-03-18_166582909_1_page0.txt,LABOR,Contains 3 references to labor target, the NLRB, and unions.
+1954-01-12_166583500_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-02-04_166585587_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-03-04_166587290_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-03-02_166589748_1_page0.txt,other,No categories met the 3-mention threshold.
+1954-01-07_166590460_1_page0.txt,other,No categories met the 3-mention threshold.
