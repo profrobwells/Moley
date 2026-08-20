@@ -1,11 +1,11 @@
 new_filename,category,explanation
-1956-07-17_166984053_1_page0.txt,other,
-1956-07-02_166987194_1_page0.txt,other,
-1956-08-11_166987545_1_page0.txt,voter_turnout,5 mentions of efforts to get people to vote and barriers to voting.
-1956-09-04_166989848_1_page0.txt,other,
-1956-12-14_166991089_1_page0.txt,voter_turnout,3 mentions of efforts to get people to vote in elections.
-1956-08-31_166992300_1_page0.txt,other,
-1956-08-28_166992768_1_page0.txt,voter_turnout,4 mentions of efforts to get people to vote in elections.
-1956-09-05_166996171_1_page0.txt,voter_turnout,19 mentions of efforts to get people to vote, voter interest, and election outcomes.
-1956-09-24_166996599_1_page0.txt,voter_turnout,12 mentions of voter registration statistics and efforts to get people to vote.
-1956-10-06_166998763_1_page0.txt,voter_turnout,5 mentions of voter registration drives and efforts to get people to vote.
+1956-07-17_166984053_1_page0.txt,other,No mentions of voter turnout criteria
+1956-07-02_166987194_1_page0.txt,other,No mentions of voter turnout criteria
+1956-08-11_166987545_1_page0.txt,other,No mentions of voter turnout criteria
+1956-09-04_166989848_1_page0.txt,other,No mentions of voter turnout criteria
+1956-12-14_166991089_1_page0.txt,other,No mentions of voter turnout criteria
+1956-08-31_166992300_1_page0.txt,other,No mentions of voter turnout criteria
+1956-08-28_166992768_1_page0.txt,other,No mentions of voter turnout criteria
+1956-09-05_166996171_1_page0.txt,VOTER TURNOUT,`3 mentions of voter turnout or get-out-the-vote efforts`
+1956-09-24_166996599_1_page0.txt,VOTER TURNOUT,`3 mentions of voter registration or voter turnout efforts`
+1956-10-06_166998763_1_page0.txt,other,No mentions of voter turnout criteria

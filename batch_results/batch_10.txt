@@ -1,10 +1,11 @@
-1956-10-16_167027617_1_page0.txt,voter_turnout,3 mentions of efforts to get people to vote, 3 mentions of efforts to discourage voting, 5 mentions of election statistics.
-1956-08-20_167030467_1_page0.txt,other,
-1956-09-11_167036433_1_page0.txt,voter_turnout,1 mention of efforts to buy votes, 5 mentions of voting behavior and election relevance.
-1956-10-20_167038525_1_page0.txt,voter_turnout,1 mention of efforts to inform voters, 8 mentions of voting records and behavior.
-1956-10-18_167040314_1_page0.txt,voter_turnout,3 mentions of efforts to get people to vote, 1 mention of discouraging party workers, 4 mentions of election context.
-1956-12-20_167045451_1_page0.txt,voter_turnout,17 mentions of barriers to voting, 3 efforts to get people to vote, 1 effort to suppress voting, 2 registration statistics.
-1956-10-13_167046648_1_page0.txt,voter_turnout,23 mentions of voter turnout/eligibility statistics, 9 mentions of barriers to voting.
-1956-11-30_167046802_1_page0.txt,other,
-1956-12-18_167049731_1_page0.txt,voter_turnout,3 mentions of voter persuasion and election campaign context.
-1956-11-13_167052081_1_page0.txt,voter_turnout,17 mentions of election outcomes, voter behavior and statistics, 1 mention of efforts to get people to vote.
+new_filename,category,explanation
+1956-10-16_167027617_1_page0.txt,other,No mentions of voter turnout criteria
+1956-08-20_167030467_1_page0.txt,other,No mentions of voter turnout criteria
+1956-09-11_167036433_1_page0.txt,other,No mentions of voter turnout criteria
+1956-10-20_167038525_1_page0.txt,other,No mentions of voter turnout criteria
+1956-10-18_167040314_1_page0.txt,other,No mentions of voter turnout criteria
+1956-12-20_167045451_1_page0.txt,VOTER TURNOUT,`4 mentions of barriers to voting or voter access issues`
+1956-10-13_167046648_1_page0.txt,VOTER TURNOUT,`3 mentions of voter turnout or get-out-the-vote efforts`
+1956-12-30_167046802_1_page0.txt,other,No mentions of voter turnout criteria
+1956-12-18_167049731_1_page0.txt,other,No mentions of voter turnout criteria
+1956-11-13_167052081_1_page0.txt,other,No mentions of voter turnout criteria

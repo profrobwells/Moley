@@ -1,11 +1,11 @@
 new_filename,category,explanation
-1956-07-11_166959354_1_page0.txt,other,
-1956-07-26_166959488_1_page0.txt,voter_turnout,5 mentions of votes and voter appeal in elections.
-1956-06-21_166961475_1_page0.txt,other,
-1956-07-25_166961624_1_page0.txt,other,
-1956-07-30_166962149_1_page0.txt,other,
-1956-06-12_166965487_1_page0.txt,voter_turnout,17 mentions of election returns, votes, and voter behavior.
-1956-08-14_166967202_1_page0.txt,voter_turnout,10 mentions of voter groups, voting patterns, and election outcomes.
-1956-05-23_166967752_1_page0.txt,other,
-1956-07-20_166968775_1_page0.txt,voter_turnout,5 mentions of getting votes and voter behavior.
-1956-05-18_166972318_1_page0.txt,voter_turnout,7 mentions of voter turnout, stay-at-home votes, and election efforts.
+1956-07-11_166959354_1_page0.txt,other,No mentions of voter turnout criteria
+1956-07-26_166959488_1_page0.txt,other,No mentions of voter turnout criteria
+1956-06-21_166961475_1_page0.txt,other,No mentions of voter turnout criteria
+1956-07-25_166961624_1_page0.txt,other,No mentions of voter turnout criteria
+1956-07-30_166962149_1_page0.txt,other,No mentions of voter turnout criteria
+1956-06-12_166965487_1_page0.txt,other,No mentions of voter turnout criteria
+1956-08-14_166967202_1_page0.txt,other,No mentions of voter turnout criteria
+1956-05-23_166967752_1_page0.txt,other,No mentions of voter turnout criteria
+1956-07-20_166968775_1_page0.txt,other,No mentions of voter turnout criteria
+1956-05-18_166972318_1_page0.txt,VOTER TURNOUT,`4 mentions of voter turnout or get-out-the-vote efforts`

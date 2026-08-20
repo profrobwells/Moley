@@ -1,11 +1,11 @@
 new_filename,category,explanation
-1956-10-27_167015426_1_page0.txt,other,
-1956-11-29_167015571_1_page0.txt,other,
-1956-10-08_167016859_1_page0.txt,other,
-1956-09-07_167016888_1_page0.txt,other,
-1956-09-21_167021069_1_page0.txt,voter_turnout,7 mentions of efforts to get people to vote, 4 registration/turnout statistics, 1 barrier to voting.
-1956-10-23_167022818_1_page0.txt,other,
-1956-10-09_167023665_1_page0.txt,voter_turnout,1 mention of turnout, 1 election statistics, 1 candidate appeal.
-1956-08-22_167024006_1_page0.txt,voter_turnout,4 mentions of efforts to get people to vote in elections.
-1956-11-23_167025776_1_page0.txt,other,
-1956-08-21_167026995_1_page0.txt,voter_turnout,6 mentions of efforts to get people to vote, 1 registration mention, 1 barrier to voting.
+1956-10-27_167015426_1_page0.txt,other,No mentions of voter turnout criteria
+1956-11-29_167015571_1_page0.txt,other,No mentions of voter turnout criteria
+1956-10-08_167016859_1_page0.txt,other,No mentions of voter turnout criteria
+1956-09-07_167016888_1_page0.txt,other,No mentions of voter turnout criteria
+1956-09-21_167021069_1_page0.txt,VOTER TURNOUT,`4 mentions of voter turnout or get-out-the-vote efforts`
+1956-10-23_167022818_1_page0.txt,other,No mentions of voter turnout criteria
+1956-10-09_167023665_1_page0.txt,other,No mentions of voter turnout criteria
+1956-08-22_167024006_1_page0.txt,other,No mentions of voter turnout criteria
+1956-11-23_167025776_1_page0.txt,other,No mentions of voter turnout criteria
+1956-08-21_167026995_1_page0.txt,VOTER TURNOUT,`3 mentions of voter turnout or get-out-the-vote efforts`

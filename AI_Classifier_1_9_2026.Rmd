@@ -13,7 +13,7 @@ library(janitor)
 library(purrr)
 library(stringr)
 
-#Sys.setenv(GOOGLE_API_KEY = "")
+Sys.setenv(GOOGLE_API_KEY = "")
 
 ```
 
@@ -288,8 +288,8 @@ run_biz_batch <- function(batch_data) {
 # The API Call
   #change variable according to text
 #  response <- chat_biz$chat(batch_text)
-#  response <- chat_voter$chat(batch_text)
-    response <- chat_voter$chat(batch_text)  
+  response <- chat_voter$chat(batch_text)
+#    response <- chat_politics$chat(batch_text)  
   
   
 #-----------------------------------------------------------------------------  

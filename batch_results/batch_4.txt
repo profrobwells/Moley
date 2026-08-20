@@ -1,11 +1,11 @@
 new_filename,category,explanation
-1956-04-25_166936535_1_page0.txt,other,
-1956-06-26_166936987_1_page0.txt,other,
-1956-03-20_166937059_1_page0.txt,other,
-1956-05-04_166942067_1_page0.txt,other,
-1956-05-29_166942378_1_page0.txt,other,
-1956-06-14_166942731_1_page0.txt,voter_turnout,2 mentions of efforts to suppress voting, 1 mention of efforts to get people to vote, 1 mention of voter inaction
-1956-04-10_166951384_1_page0.txt,other,
-1956-05-24_166952012_1_page0.txt,other,
-1956-06-06_166953689_1_page0.txt,other,
-1956-05-31_166955164_1_page0.txt,other,
+1956-04-25_166936535_1_page0.txt,other,No mentions of voter turnout criteria
+1956-06-26_166936987_1_page0.txt,other,No mentions of voter turnout criteria
+1956-03-20_166937059_1_page0.txt,other,No mentions of voter turnout criteria
+1956-05-04_166942067_1_page0.txt,other,No mentions of voter turnout criteria
+1956-05-29_166942378_1_page0.txt,other,No mentions of voter turnout criteria
+1956-06-14_166942731_1_page0.txt,other,No mentions of voter turnout criteria
+1956-04-10_166951384_1_page0.txt,other,No mentions of voter turnout criteria
+1956-05-24_166952012_1_page0.txt,other,No mentions of voter turnout criteria
+1956-06-06_166953689_1_page0.txt,other,No mentions of voter turnout criteria
+1956-05-31_166955164_1_page0.txt,other,No mentions of voter turnout criteria

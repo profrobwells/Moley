@@ -1,11 +1,11 @@
 new_filename,category,explanation
-1956-03-16_166891660_1_page0.txt,other,
-1956-02-16_166896688_1_page0.txt,other,
-1956-01-05_166899746_1_page0.txt,other,
-1956-03-26_166904773_1_page0.txt,other,
-1956-03-07_166905237_1_page0.txt,voter_turnout,8 mentions of efforts to get people to vote in elections
-1956-02-21_166906514_1_page0.txt,other,
-1956-02-07_166907655_1_page0.txt,other,
-1956-03-29_166909981_1_page0.txt,other,
-1956-04-17_166910108_1_page0.txt,other,
-1956-02-28_166911519_1_page0.txt,other,
+1956-03-16_166891660_1_page0.txt,other,No mentions of voter turnout criteria
+1956-02-16_166896688_1_page0.txt,other,No mentions of voter turnout criteria
+1956-01-05_166899746_1_page0.txt,other,No mentions of voter turnout criteria
+1956-03-26_166904773_1_page0.txt,other,No mentions of voter turnout criteria
+1956-03-07_166905237_1_page0.txt,other,No mentions of voter turnout criteria
+1956-02-21_166906514_1_page0.txt,other,No mentions of voter turnout criteria
+1956-02-07_166907655_1_page0.txt,other,No mentions of voter turnout criteria
+1956-03-29_166909981_1_page0.txt,other,No mentions of voter turnout criteria
+1956-04-17_166910108_1_page0.txt,other,No mentions of voter turnout criteria
+1956-02-28_166911519_1_page0.txt,other,No mentions of voter turnout criteria
