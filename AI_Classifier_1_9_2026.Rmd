@@ -777,3 +777,41 @@ Caused by error in `req_perform_connection()`:
   generativelanguage.googleapis.com/generate_content_paid_tier_2_input_token_count, limit:
   3000000, model: gemini-3.5-flash Please retry in 41.713333453s.
 Run `rlang::last_trace()` to see where the error occurred.
+
+
+
+There is a crucial distinction behind why this happened: A paid consumer subscription (like Gemini Advanced / Google AI Pro) is completely separate from API billing.Your $20/month subscription only applies to the consumer web chat at gemini.google.com. Generating an API key in Google AI Studio or Google Cloud starts you on the Free Tier for the API, which carries very strict rate limits regardless of your personal Google account's subscription status.  1. Enable Pay-As-You-Go Billing for the APITo remove the restrictive Free Tier limits, you must explicitly link a billing account to your developer project in Google AI Studio:Go to Google AI Studio and open the Billing / Projects tab.  Click Set up billing on the project associated with your API key.  Add a payment method and prepay/link billing.  Upgrading to Tier 1 (Pay-As-You-Go) expands your throughput dramatically:  Free Tier: ~5–15 Requests Per Minute (RPM), capped at ~100 Requests Per Day (RPD) depending on the model.  Tier 1 Paid: 150–300 Requests Per Minute (RPM) and up to 1,500 Requests Per Day.  2. Multi-Dimensional Rate Limits (Why your pause failed)Even on a paid API tier, rate limits are checked across four separate metrics simultaneously:  RPM (Requests Per Minute)  TPM (Tokens Per Minute — input context + generated output)  RPD (Requests Per Day)  Rolling 10-Minute Spend Caps  If you send massive prompts or large datasets (like long text files or audio/video inputs), you likely hit the TPM (Tokens Per Minute) limit rather than the request count limit. A simple pause between requests prevents high RPM, but if each prompt is large, your total tokens per minute will still trigger a 429 RESOURCE_EXHAUSTED error.  3. Updating Your Script for ReliabilityRather than relying solely on fixed sleeps/pauses, wrap your script in Exponential Backoff logic. This automatically intercepts rate-limit errors and pauses dynamically until your token bucket resets.Python Example using tenacity or time.sleep:Pythonimport time
+from google.api_core.exceptions import ResourceExhausted
+
+xxx
+
+def call_gemini_with_retry(prompt, retries=5):
+    for attempt in range(retries):
+        try:
+            response = model.generate_content(prompt)
+            return response.text
+        except ResourceExhausted:
+            wait_time = (2 ** attempt) * 5  # Exponential wait: 5s, 10s, 20s, 40s...
+            print(f"Rate limit hit. Waiting {wait_time}s before retrying...")
+            time.sleep(wait_time)
+    raise Exception("Max retries exceeded")
+R Example using tryCatch:Rcall_gemini <- function(prompt, retries = 5) {
+  for (i in 1:retries) {
+    result <- tryCatch({
+      # Your Gemini API call code here
+      return(response)
+    }, error = function(e) {
+      if (grepl("429|RESOURCE_EXHAUSTED", e$message)) {
+        wait_time <- (2 ^ i) * 5
+        message(sprintf("Rate limit hit. Waiting %d seconds...", wait_time))
+        Sys.sleep(wait_time)
+        return(NULL)
+      } else {
+        stop(e)
+      }
+    })
+    if (!is.null(result)) return(result)
+  }
+  stop("Max retries exceeded.")
+}
+
