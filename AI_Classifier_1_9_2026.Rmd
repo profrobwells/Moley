@@ -13,7 +13,10 @@ library(janitor)
 library(purrr)
 library(stringr)
 
-Sys.setenv(GOOGLE_API_KEY = "")
+# set in rEnviron
+# usethis::edit_r_environ()
+# or try
+# Sys.setenv(GOOGLE_API_KEY = "")
 
 ```
 
@@ -58,7 +61,8 @@ processed_llm <- lat_articles_text %>%
   ) %>%
   ungroup() %>%
   # Filter for your target year
-  filter(year >= 1950, year < 1960) %>%
+  filter(year >= 1956, year < 1960) %>%
+  #filter(year == 1955) |> 
   subset(select = -c(filename, sentence, document_url, pages, issn)) |> 
   # Final safety check: Ensure one row per article
   distinct(new_filename, .keep_all = TRUE) %>%
@@ -338,7 +342,100 @@ IMPORTANT: YOU MUST PROCESS EACH ENTRY IN THE SOURCE DATA. PREVIOUS CLASSIFICATI
 
 ```
 
-# LLM call & API pause
+# New LLM call with exponential backoff
+
+```{r}
+# --- 2. RESET STORAGE ---
+if(dir.exists("batch_results")) unlink("batch_results", recursive = TRUE)
+dir.create("batch_results")
+
+# --- 3. THE RESUMABLE BATCH FUNCTION WITH RETRY LOGIC ---
+run_biz_batch <- function(batch_data, max_retries = 5) {
+  current_b <- unique(batch_data$batch_id)
+  total_b <- max(processed_llm$batch_id)
+  batch_file <- paste0("batch_results/batch_", current_b, ".txt")
+  
+  # IF FILE EXISTS: Load it and skip the API call
+  if(file.exists(batch_file)) {
+    message(paste0("Skipping Batch ", current_b, ": Already processed."))
+    return(readr::read_file(batch_file))
+  }
+  
+  # ELSE: Format batch payload
+  batch_text <- batch_data %>%
+    mutate(formatted = paste0("FILENAME: ", new_filename, "\nCONTENT: ", full_text)) %>%
+    pull(formatted) %>%
+    paste(collapse = "\n\n---ARTICLE SEPARATOR---\n\n")
+  
+  message(paste0("--- Processing Batch ", current_b, " of ", total_b, " ---"))
+  
+  # API CALL WITH EXPONENTIAL BACKOFF
+  response <- NULL
+  
+  for (attempt in 1:max_retries) {
+    response <- tryCatch({
+      # Active model call
+      chat_labor$chat(batch_text)
+    }, error = function(e) {
+      if (grepl("429|RESOURCE_EXHAUSTED|rate limit", e$message, ignore.case = TRUE)) {
+        wait_time <- (2 ^ attempt) * 5  # Waits 10s, 20s, 40s, 80s...
+        message(sprintf("Rate limit hit on Batch %d (Attempt %d/%d). Pausing %d seconds...", 
+                        current_b, attempt, max_retries, wait_time))
+        Sys.sleep(wait_time)
+        return(NULL)
+      } else {
+        stop(e) # Stop execution if it's a non-rate-limit error (e.g., authentication)
+      }
+    })
+    
+    # Exit retry loop if call succeeded
+    if (!is.null(response)) break
+  }
+  
+  if (is.null(response)) {
+    stop(sprintf("Failed to process Batch %d after %d retries.", current_b, max_retries))
+  }
+  
+  # SAVE immediately to disk
+  readr::write_file(response, batch_file)
+  
+  # Standard delay between batches
+  if (current_b < total_b) {
+    message("Waiting 5 seconds for baseline rate limits...")
+    Sys.sleep(5)
+  }
+  
+  return(response)
+}
+
+# --- 4. RUN THE LOOP ---
+raw_batch_results <- processed_llm %>%
+  group_split(batch_id) %>%
+  map_chr(run_biz_batch)
+
+# --- 5. COMBINE RESULTS ---
+final_output_text <- paste(raw_batch_results, collapse = "\n")
+
+# Save master backup
+write_lines(final_output_text, "final_classifications.csv")
+
+message("All articles processed successfully!")
+```
+
+```{r}
+
+results <- read_csv(final_output_text, show_col_types = FALSE) %>%
+  # Filter out repeated header rows from intermediate batches
+  filter(new_filename != "new_filename") %>%
+  # Remove any empty rows
+  filter(!is.na(new_filename))
+
+```
+
+
+
+
+# OLD LLM call & API pause
 ```{r}
 # --- 2. RESET STORAGE ---
 # Clear out previous runs to avoid mixing old duplicated data with this clean data
@@ -759,6 +856,123 @@ comparison_biz <- list(current_counts, oct20_counts, july24_counts) |>
 #   arrange(desc(current_count))
 ```
 
+#--------Labor one time fix -----------
+
+```{r}
+file_paths <- list.files(
+  path = "Labor_test_aug_20", 
+  pattern = "\\.txt$", 
+  full.names = TRUE
+)
+
+# Read and combine into one data frame
+labor <- read_csv(file_paths, show_col_types = FALSE)
+
+labor <- separate(labor, col = new_filename, into = c("date1", "filename", "x", "x1"), sep = "_") |> 
+  mutate(date = ymd(date1)) |> 
+  subset(select = -c(x, x1, date1)) |> 
+  distinct(filename, .keep_all = TRUE) |> 
+  mutate(year = year(date)) |> 
+  select(date, year, everything())
+
+
+#AI Suggestion
+library(tidyverse)
+
+# labor1 <- labor %>%
+#   # Split directly into date and filename, silently dropping extra underscore components
+#That is the main difference between the classic separate() function and the newer separate_wider_delim()!
+
+# separate() (Older style): When it encounters an NA or a row that doesn't match the delimiter, it silently returns NA across all the new output columns (date1, filename, x, x1) and keeps moving down the data frame without stopping execution.
+# 
+# separate_wider_delim() (Newer style): It enforces strict structure by default. If a row is missing values, has too few delimiters, or has NA, it throws an explicit error to prevent silent data corruption.
+# 
+# Since separate() handles missing or malformed rows gracefully by simply filling them with NA, your script passes through smoothly without crashing.
+#   separate_wider_delim(
+#     cols = new_filename,
+#     delim = "_",
+#     names = c("date", "filename"),
+#     too_many = "drop"
+#   ) %>%
+#   # Convert date string to Date object and reorder columns cleanly
+#   mutate(date = ymd(date)) %>%
+#   relocate(date, .after = filename) %>%
+#   # Retain unique entries per filename
+#   distinct(filename, .keep_all = TRUE)
+
+```
+
+```{r}
+
+results <- read_csv(final_output_text, show_col_types = FALSE) %>%
+  # Filter out repeated header rows from intermediate batches
+  filter(new_filename != "new_filename") %>%
+  # Remove any empty rows
+  filter(!is.na(category))|> 
+  separate_wider_delim(
+    cols = new_filename,
+    delim = "_",
+    names = c("date", "filename"),
+    too_many = "drop"
+  ) %>%
+  mutate(date = ymd(date)) %>%
+  mutate(year = year(date)) |> 
+  relocate(date, year, everything()) %>%
+  distinct(filename, .keep_all = TRUE) |> 
+  mutate(category = case_when(category=="labor" ~ "LABOR",
+                    TRUE ~ "other"))
+
+```
+```{r}
+labor1 <- labor |> 
+  filter(year <1955) |> 
+  arrange((date)) |> 
+  rbind(results) 
+  
+write_csv(labor1, "./output/labor_aug21.csv")
+
+```
+
+
+
+
+```{r}
+labor_pct <- labor1 %>%
+  # Count articles per category per year
+  count(year, category) %>%
+  # Calculate percentage within each year group
+  group_by(year) %>%
+  mutate(
+    total_articles = sum(n),
+    pct = (n / total_articles) * 100
+  ) %>%
+  ungroup()
+```
+
+
+```{r}
+
+
+ggplot(labor_pct, aes(x=year, y=pct, fill = category)) +
+  geom_col(position = "dodge",show.legend = FALSE) +
+  geom_text(
+    aes(label = paste0(category, "\n", round(pct, 1), "%")),
+    position = position_dodge(width = 0.9),
+    vjust = -0.2,
+    size = 3
+  ) +
+  scale_x_continuous(breaks=c(1950:1955)) +
+  scale_y_continuous(limits = c(0, 100), expand = expansion(mult = c(0, 0.15))) +
+   labs(title = "Frequency of Labor Mentions in Moley LAT Columns",
+       subtitle = "731 articles, 1950-55",
+       caption = "AI Gemini categorization. Graphic by Rob Wells, 8-21-2026",
+       y="Percent",
+       x="Year")
+
+```
+
+labor mentions double in an election year, 1952
+
 
 #---------Notes on rate limit ---------------
 Aug 20
@@ -780,7 +994,23 @@ Run `rlang::last_trace()` to see where the error occurred.
 
 
 
-There is a crucial distinction behind why this happened: A paid consumer subscription (like Gemini Advanced / Google AI Pro) is completely separate from API billing.Your $20/month subscription only applies to the consumer web chat at gemini.google.com. Generating an API key in Google AI Studio or Google Cloud starts you on the Free Tier for the API, which carries very strict rate limits regardless of your personal Google account's subscription status.  1. Enable Pay-As-You-Go Billing for the APITo remove the restrictive Free Tier limits, you must explicitly link a billing account to your developer project in Google AI Studio:Go to Google AI Studio and open the Billing / Projects tab.  Click Set up billing on the project associated with your API key.  Add a payment method and prepay/link billing.  Upgrading to Tier 1 (Pay-As-You-Go) expands your throughput dramatically:  Free Tier: ~5–15 Requests Per Minute (RPM), capped at ~100 Requests Per Day (RPD) depending on the model.  Tier 1 Paid: 150–300 Requests Per Minute (RPM) and up to 1,500 Requests Per Day.  2. Multi-Dimensional Rate Limits (Why your pause failed)Even on a paid API tier, rate limits are checked across four separate metrics simultaneously:  RPM (Requests Per Minute)  TPM (Tokens Per Minute — input context + generated output)  RPD (Requests Per Day)  Rolling 10-Minute Spend Caps  If you send massive prompts or large datasets (like long text files or audio/video inputs), you likely hit the TPM (Tokens Per Minute) limit rather than the request count limit. A simple pause between requests prevents high RPM, but if each prompt is large, your total tokens per minute will still trigger a 429 RESOURCE_EXHAUSTED error.  3. Updating Your Script for ReliabilityRather than relying solely on fixed sleeps/pauses, wrap your script in Exponential Backoff logic. This automatically intercepts rate-limit errors and pauses dynamically until your token bucket resets.Python Example using tenacity or time.sleep:Pythonimport time
+There is a crucial distinction behind why this happened: A paid consumer subscription (like Gemini Advanced / Google AI Pro) is completely separate from API billing.Your $20/month subscription only applies to the consumer web chat at gemini.google.com. Generating an API key in Google AI Studio or Google Cloud starts you on the Free Tier for the API, which carries very strict rate limits regardless of your personal Google account's subscription status.  1. Enable Pay-As-You-Go Billing for the API
+To remove the restrictive Free Tier limits, you must explicitly link a billing account to your developer project in Google AI Studio:
+Go to Google AI Studio and open the Billing / Projects tab.  
+Click Set up billing on the project associated with your API key. 
+Add a payment method and prepay/link billing.  
+
+Upgrading to Tier 1 (Pay-As-You-Go) expands your throughput dramatically:  Free Tier: ~5–15 Requests Per Minute (RPM), capped at ~100 Requests Per Day (RPD) depending on the model.  
+
+Tier 1 Paid: 150–300 Requests Per Minute (RPM) and up to 1,500 Requests Per Day.  
+
+2. Multi-Dimensional Rate Limits (Why your pause failed)Even on a paid API tier, rate limits are checked across four separate metrics simultaneously:  RPM (Requests Per Minute)  TPM (Tokens Per Minute — input context + generated output)  RPD (Requests Per Day)  Rolling 10-Minute Spend Caps 
+
+If you send massive prompts or large datasets (like long text files or audio/video inputs), you likely hit the TPM (Tokens Per Minute) limit rather than the request count limit. A simple pause between requests prevents high RPM, but if each prompt is large, your total tokens per minute will still trigger a 429 RESOURCE_EXHAUSTED error.  
+
+3. Updating Your Script for Reliability
+
+Rather than relying solely on fixed sleeps/pauses, wrap your script in Exponential Backoff logic. This automatically intercepts rate-limit errors and pauses dynamically until your token bucket resets.Python Example using tenacity or time.sleep:Pythonimport time
 from google.api_core.exceptions import ResourceExhausted
 
 xxx
@@ -795,7 +1025,11 @@ def call_gemini_with_retry(prompt, retries=5):
             print(f"Rate limit hit. Waiting {wait_time}s before retrying...")
             time.sleep(wait_time)
     raise Exception("Max retries exceeded")
-R Example using tryCatch:Rcall_gemini <- function(prompt, retries = 5) {
+    
+    
+R Example using try
+
+Catch:Rcall_gemini <- function(prompt, retries = 5) {
   for (i in 1:retries) {
     result <- tryCatch({
       # Your Gemini API call code here

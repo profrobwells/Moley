@@ -1,11 +1,11 @@
 new_filename,category,explanation
-1950-01-24_166011572_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-01-20_166014493_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-02-16_166024926_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-02-01_166026163_1_page0.txt,LABOR,Contains 3 mentions of union and collective bargaining.
-1950-01-17_166027441_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-05-18_166033836_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-01-02_166034899_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-01-12_166036521_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-03-21_166037832_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-03-02_166038051_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-18_166873052_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-19_166874249_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-04_166874618_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-10_166876075_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-31_166876244_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-10_166881514_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-27_166884915_1_page0.txt,labor,4 references to CIO, organized labor, and trade unionists
+1956-02-02_166888107_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-01_166888260_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-15_166889978_1_page0.txt,other,No categories met the 3-mention threshold.

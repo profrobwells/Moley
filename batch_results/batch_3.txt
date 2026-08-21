@@ -1,11 +1,11 @@
 new_filename,category,explanation
-1950-05-30_166062037_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-01-11_166062566_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-05-02_166062898_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-05-31_166063934_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-04-20_166064427_1_page0.txt,LABOR,Contains 3 mentions of union/strike or collective bargaining.
-1950-04-04_166065621_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-07-12_166066365_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-07-26_166067560_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-08-29_166068910_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-07-10_166069292_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-13_166912641_1_page0.txt,labor,4 references to labor bosses, union leaders, and union membership
+1956-05-08_166912917_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-13_166915845_1_page0.txt,labor,7 references to labor leaders, AFL, CIO, and collective bargaining
+1956-03-09_166917090_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-15_166921781_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-17_166922034_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-27_166923452_1_page0.txt,labor,6 references to AFL-CIO, strikes, and union leaders
+1956-06-19_166927499_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-19_166931315_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-03_166935666_1_page0.txt,labor,7 references to union shop, labor laws, and union membership

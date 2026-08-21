@@ -1,11 +1,21 @@
 new_filename,category,explanation
-1950-01-04_166072701_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-07-24_166073332_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-02-09_166074634_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-03-30_166074785_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-05-24_166076083_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-01-08_166077202_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-04-05_166077470_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-04-19_166077779_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-06-16_166078782_1_page0.txt,other,No categories met the 3-mention threshold.
-1950-04-14_166080754_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-01-13_166912641_1_page0.txt,labor,4 references to labor bosses, union leaders, and union membership
+1956-05-08_166912917_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-13_166915845_1_page0.txt,labor,5 references to laborites, labor movement, AFL, CIO, and labor leaders
+1956-03-09_166917090_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-15_166921781_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-02-17_166922034_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-27_166923452_1_page0.txt,labor,6 references to labor movement, AFL, CIO, merger, and strikes
+1956-06-19_166927499_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-19_166931315_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-04-03_166935666_1_page0.txt,labor,7 references to union shop, labor unions, and union membership
+1956-04-25_166936535_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-06-26_166936987_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-03-20_166937059_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-04_166942067_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-05-29_166942378_1_page0.txt,labor,6 references to compulsory unionism, unions, and union-shop contracts
+1956-06-14_166942731_1_page0.txt,labor,3 references to American Labor Party, labor in politics, and labor leaders
+1956-04-10_166951384_1_page0.txt,labor,3 references to Social Democrats, labor party, and secret police
+1956-05-24_166952012_1_page0.txt,other,No categories met the 3-mention threshold.
+1956-06-06_166953689_1_page0.txt,labor,3 references to organized labor, labor policies, and union vote
+1956-05-31_166955164_1_page0.txt,other,No categories met the 3-mention threshold.
