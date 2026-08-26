@@ -58,7 +58,7 @@ article_index <-  rio::import("matching with extract-Perspective_full_index_1967
          date = as.Date(pubdate, format="%b %d, %Y"))
 
 #136596 rows of text
-articles_text <-  read_csv("/Users/gizmofo/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/moley_cleaned_perspective_text.csv") |> 
+articles_text <-  read_csv("/Users/robwells/Library/CloudStorage/Dropbox/Current_Projects/Moley project 2024/moley_cleaned_perspective_text_july_2025.csv") |> 
     mutate(year = as.numeric(year),
          date = as.Date(pubdate, format="%b %d, %Y"))
 ```
@@ -290,29 +290,64 @@ my_corpus <- corpus(articles_text, text_field = "sentence")
 # Tokenize 
 my_tokens <- tokens(my_corpus)
 # KWIC with 20 words on each side
-business_kwic <- kwic(my_tokens, "business", window = 100)
+#business_kwic <- kwic(my_tokens, "business", window = 100)
+# avery <- kwic(my_tokens, phrase(c("avery", "montgomery ward")), window = 50, valuetype = "regex") %>% as.data.frame() 
+reuther <- kwic(my_tokens, phrase(c("reuther")), window = 50, valuetype = "regex") %>% as.data.frame() 
 
 # quanteda_test2 <- kwic(my_tokens, phrase(c("journalist", "reporter", "newspaper", "killer", "murdered", "killed", "investigate crimes against")), window = 50, valuetype = "regex") %>% as.data.frame() 
 
-kwic_biz <- data.frame(
-  docname = business_kwic$docname,
- filename = docvars(my_corpus, "filename")[as.numeric(gsub("text", "", business_kwic$docname))],
-  year = docvars(my_corpus, "year")[as.numeric(gsub("text", "", business_kwic$docname))],
-  pre = business_kwic$pre,
-  keyword = business_kwic$keyword,
-  post = business_kwic$post,
+kwic_reuther <- data.frame(
+  #change filename below as needed
+  docname = reuther$docname,
+ filename = docvars(my_corpus, "filename")[as.numeric(gsub("text", "", reuther$docname))],
+  year = docvars(my_corpus, "year")[as.numeric(gsub("text", "", reuther$docname))],
+  pre = reuther$pre,
+  keyword = reuther$keyword,
+  post = reuther$post,
   stringsAsFactors = FALSE
 ) |> 
-  filter(str_detect(pre, "politic")) |> 
   arrange(year)
 
-write.table(kwic_biz, "business_kwic.txt", 
+write.table(kwic_reuther, "reuther.txt", 
             sep = "\t", 
             row.names = FALSE, 
             quote = FALSE,
             fileEncoding = "UTF-8")
 
 ```
+
+### Reuther analysis
+```{r}
+kwic_reuther |> 
+  distinct(docname, .keep_all = TRUE) |> 
+  count(docname, year)
+
+
+```
+
+
+115 references to reuther in 110 Newsweek columns
+
+### Reuther mentions visualized
+```{r}
+kwic_reuther |> 
+  group_by(year) |> 
+  summarise(n_articles = n_distinct(docname)) |> 
+  ggplot(aes(x = year, y = n_articles, fill = factor(year))) +
+  geom_col(show.legend = FALSE) +
+  scale_x_continuous(breaks = seq(1942, 1966, by = 2)) +
+  labs(
+    title = "Walter Reuther Mentions in Moley Coverage",
+    subtitle = "Number of Unique Newsweek Columns Mentioning Reuther per Year",
+    y = "Article Count", 
+    x = NULL,
+    caption = "n=1,487 Newsweek articles, Graphic by Rob Wells"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+
+```
+
 
 
 ### KWIC Conservative Group Mentions
