@@ -1,0 +1,164 @@
+---
+title: "Moley speech analysis"
+author: "Wells"
+date: "2026-09-18"
+output: html_document
+---
+```{r}
+library(tidyverse)
+```
+
+# Import cleaned index of 657 speeches
+```{r}
+index <- read_csv("Updated_moley_speeches_index.csv")
+
+#clean to create separate column just with the venue names
+df <- index %>%
+  mutate(subject_clean = str_trim(str_remove(subject, fixed(date))))
+
+```
+
+#Business Terms
+```{r}
+#Gemini 3.6 Flash constructed this regular expression
+business_speech_pattern <- "(?i)\\b(?!(republican|democrat(ic)?|gop|socialist|communist|newsweek))((ad(vertiser[s]?|vertising)?|buying|purchasing|economic|business|sales\\s+(exec(utive)?[s]?|manager[s]?|club[s]?|assoc(iation[s]?)?|group[s]?)|marketing)\\s+(club[s]?|office[s]?|agent[s]?|group[s]?|assoc(iation[s]?)?)?|chamber[s]?\\s+of\\s+commerce|bank(er[s]?|ing)?(\\s+assoc(iation[s]?)?)?|financial(\\s+(group[s]?|sector))?|assoc(iation[s]?)?\\s+of\\s+commerce|(industry|trade|national|hardware|cost[s]?|manufactur(er[s]?|ing|ers[''’]?)|brewers[''’]?|credit\\s+men[''’]?s?|underwriters[''’]?|life|oil|petroleum|telephone|variety\\s+stores|builders[''’]?|printers|beer|wholesalers[''’]?|druggists[''’]?|cattle|stock\\s+growers|dairy|fruit|vegetable|electrical|publishers[''’]?|forging|gas|management|corset|brassiere|finance)(\\s+[\\w''’]+)*\\s+(assoc(iation[s]?)?|club[s]?|union[s]?|board|league))\\b"
+
+```
+
+
+#categorize business entities
+
+```{r}
+df <- df %>%
+  mutate(business_speech = grepl(business_speech_pattern, subject_clean, perl = TRUE))
+```
+
+
+# Remove 'Republican Club' from results
+```{r}
+
+df <- df |> 
+  mutate(business_speech = case_when(
+    str_detect(subject_clean, regex("republican.*club", ignore_case = TRUE)) ~ FALSE,
+    TRUE ~ business_speech
+  ))
+
+```
+
+
+# Count
+```{r}
+ df |> 
+  count(business_speech) |> 
+  mutate(pct = n/sum(n))
+
+
+```
+
+About 30% of Moley's speeches were to business groups, according to an analysis of his records. fn
+
+fn: See "speech analysis 9-18-2026.Rmd" which analyzed the Hoover Institution finding aid for Moley's papers. It examined 657 index entries for speeches and talks for references to presentations to business and economic groups such as the National Association of Manufacturers; it captured 197 entries, or 30%. AI disclosure: #Gemini 3.6 Flash constructed the regular expression to search for the business groups. The search terms were validated after five iterations of human review.
+
+# To Political Groups
+
+```{r}
+political_speech_pattern <- "(?i)\\b((republican|democrat(ic)?|gop|young\\s+(republican|democrat)[s]?|willkie|dewey|eisenhower|nixon|goldwater|campaign|political|un-american\\s+activities|house|senate|congress(ional)?)\\b.*\\b(club[s]?|assoc(iation[s]?)?|committee[s]?|forum[s]?|hearing[s]?|conference[s]?|address|speech|rally|headquarters|dinner)|(women[''’]?s\\s+national\\s+republican\\s+club)|((house|senate|congressional)\\s+(committee|subcommittee|hearing[s]?))|(young\\s+(republican|democrat)[s]?))\\b"
+
+
+```
+
+#Classify political
+```{r}
+
+df <- df %>%
+  mutate(political_speech = grepl(political_speech_pattern, subject_clean, perl = TRUE))
+
+```
+
+
+# Count political
+```{r}
+ df |> 
+  count(political_speech) |> 
+  mutate(pct = n/sum(n))
+
+```
+
+#Error check - both true? They are not!
+
+```{r}
+
+error <- df |> 
+  filter(political_speech == TRUE & business_speech ==TRUE)
+
+```
+
+# Review political results
+
+```{r}
+political <- df |> 
+  filter(political_speech == TRUE) |> 
+  select(subject_clean, date, political_speech, business_speech)
+
+```
+
+
+Moley delivered 50 speeches or 7.6% of all his speeches to political groups. Almost all were to Republican gatherings, and the two for Democrats were a 1940 speech for Virginia Democrats for Wilkie, and a 1936 speech to Young Democrats. 
+
+fn
+See "speech analysis 9-18-2026.Rmd" which analyzed the Hoover Institution finding aid for Moley's papers. It examined 657 index entries for speeches and talks for references to presentations to political groups such as the Republican Women's Association; it captured 50 entries, or 7.6% of all speeches listed. AI disclosure: #Gemini 3.6 Flash constructed the regular expression to search for the political groups. The search terms were validated after two iterations of human review.
+
+
+
+
+#---------------------
+# Notes
+
+
+All groups
+```{r}
+summary <- df |> 
+  select(subject_clean, date, business_speech) |> 
+  group_by(subject_clean) |> 
+  arrange(desc(business_speech))
+
+summary
+
+```
+
+
+
+
+Missed
+```{r}
+missed <- df |> 
+  filter(grepl("association", subject_clean, ignore.case = TRUE)) |> 
+  filter(business_speech == FALSE)
+
+
+print(missed$subject_clean)
+
+
+```
+business_speech_pattern <- "(?i)\\b(advertising club|chamber[s]? of commerce|banker[s]? association|banking|financial|sales executive|marketing group|industry association|trade association|business club|national association of manufacturers|united states brewers' association|national coffee association|american institute of banking)\\b"
+
+
+business_speech_pattern <- "(?i)\\b(ad(vertising)?\\s+club|chamber[s]?\\s+of\\s+commerce|bank(er[s]?|ing)?(\\s+association)?|financial(\\s+group[s]?|\\s+sector)?|sales(\\s+executive[s]?|\\s+management)?|marketing(\\s+group[s]?|\\s+club[s]?|\\s+association[s]?)?|industry\\s+assoc(iation[s]?)?|trade\\s+assoc(iation[s]?)?|business\\s+club[s]?|nat(ional)?\\s+assoc(iation)?\\s+of\\s+manuf|brewers['']?\\s+assoc|coffee\\s+assoc|amer(ican)?\\s+inst(itute)?\\s+of\\s+banking)\\b"
+
+
+business_speech_pattern <- "(?i)\\b((ad(vertiser[s]?|vertising)?|buying|purchasing|economic|business|sales|marketing)\\s+(club[s]?|office[s]?|agent[s]?|group[s]?|association[s]?)?|chamber[s]?\\s+of\\s+commerce|bank(er[s]?|ing)?(\\s+assoc(iation[s]?)?)?|financial(\\s+(group[s]?|sector))?|(industry|trade|national|hardware|cost[s]?|manufactur(er[s]?|ing))(\\s+\\w+)*\\s+(assoc(iation[s]?)?|club[s]?|union[s]?))\\b"
+
+
+business_speech_pattern <- "(?i)\\b((ad(vertiser[s]?|vertising)?|buying|purchasing|economic|business|sales|marketing)\\s+(club[s]?|office[s]?|agent[s]?|group[s]?|assoc(iation[s]?)?)?|chamber[s]?\\s+of\\s+commerce|bank(er[s]?|ing)?(\\s+assoc(iation[s]?)?)?|financial(\\s+(group[s]?|sector))?|assoc(iation[s]?)?\\s+of\\s+commerce|(industry|trade|national|hardware|cost[s]?|manufactur(er[s]?|ing)|brewers[''’]?|credit\\s+men[''’]?|underwriters[''’]?|life|oil|petroleum|telephone|variety\\s+stores|builders[''’]?|printers|beer|wholesalers[''’]?|druggists[''’]?|cattle|stock\\s+growers|dairy|fruit|vegetable|electrical|publishers[''’]?|forging|gas|management)(\\s+[\\w''’]+)*\\s+(assoc(iation[s]?)?|club[s]?|union[s]?|board|league))\\b"
+
+business_speech_pattern <- "(?i)\\b((ad(vertiser[s]?|vertising)?|buying|purchasing|economic|business|sales|marketing)\\s+(club[s]?|office[s]?|agent[s]?|group[s]?|assoc(iation[s]?)?)?|chamber[s]?\\s+of\\s+commerce|bank(er[s]?|ing)?(\\s+assoc(iation[s]?)?)?|financial(\\s+(group[s]?|sector))?|assoc(iation[s]?)?\\s+of\\s+commerce|(industry|trade|national|hardware|cost[s]?|manufactur(er[s]?|ing|ers[''’]?)|brewers[''’]?|credit\\s+men[''’]?s?|underwriters[''’]?|life|oil|petroleum|telephone|variety\\s+stores|builders[''’]?|printers|beer|wholesalers[''’]?|druggists[''’]?|cattle|stock\\s+growers|dairy|fruit|vegetable|electrical|publishers[''’]?|forging|gas|management|corset|brassiere|finance)(\\s+[\\w''’]+)*\\s+(assoc(iation[s]?)?|club[s]?|union[s]?|board|league))\\b"
+
+
+
+full_index <- read_csv("full_moley_index.csv")
+
+full_index2 <- read_csv("complete_moley_index.csv")
+
+full_index3 <- read_csv("raymond_moley_index.csv")
+```
+
