@@ -8,15 +8,118 @@ output: html_document
 library(tidyverse)
 ```
 
-# Import cleaned index of 657 speeches
-```{r}
-index <- read_csv("Updated_moley_speeches_index.csv")
 
-#clean to create separate column just with the venue names
-df <- index %>%
-  mutate(subject_clean = str_trim(str_remove(subject, fixed(date))))
+```{r}
+#import full index: 6563 items
+#This imports Hoover_search_BACKUP_JAN_10_Hoover Moley Search Requests Aug 8 2024 copy.xlsx - complete_moley_index.csv
+
+letters <- read_csv("Hoover_moley_index_9_2026.csv") |> 
+  janitor::clean_names() |> 
+  mutate(box = as.character(box)) |> 
+  mutate(subject = paste0(first, " ",last))
+
+#267 rows with content
+letters1 <- letters |> 
+  filter(august_priority_1_5 !="NA" | notes != "NA" | select != "NA")
+
+#766 speeches
+speeches <- letters |> 
+  filter(grepl("speech|address|remarks", subject, ignore.case = TRUE)) |> 
+  select(year_notes, year, subject, box, index, folder, location) |> 
+  rename(date = year_notes) |> 
+  mutate(year1 = year) |> 
+    mutate(
+    year = case_when(
+      # 1. Extract existing 4-digit years (e.g., "1939", "1950s", "1949-1950")
+      str_detect(date, "\\b(19|20)\\d{2}\\b") ~ 
+        as.numeric(str_extract(date, "\\b(19|20)\\d{2}\\b")),
+      
+      # 2. Extract 2-digit years from dash-separated dates (e.g., "1-Oct-40", "24-Feb-32")
+      str_detect(date, "-\\d{2}$") ~ 
+        1900 + as.numeric(str_extract(date, "\\d{2}$")),
+      
+      # 3. Everything else (NA, "n.d.", "copy", plain text without years) becomes NA
+      TRUE ~ NA_real_
+    )
+  )
 
 ```
+
+#cleaning - speeches - years
+```{r}
+speeches |> 
+  count(year) |> 
+  arrange(desc(n))
+#38 lack a year
+
+
+```
+
+
+```{r}
+fix <- speeches |> 
+  select(year, date, subject) |> 
+  filter(is.na(year))
+
+
+```
+
+
+```{r}
+fix <- fix %>%
+  #Gemini constructed this cleaning sequence
+  mutate(
+    year = case_when(
+      # 1. Extract existing 4-digit years (e.g., "1939", "1950s", "1949-1950")
+      str_detect(date, "\\b(19|20)\\d{2}\\b") ~ 
+        as.numeric(str_extract(date, "\\b(19|20)\\d{2}\\b")),
+      
+      # 2. Extract 2-digit years from dash-separated dates (e.g., "1-Oct-40", "24-Feb-32")
+      str_detect(date, "-\\d{2}$") ~ 
+        1900 + as.numeric(str_extract(date, "\\d{2}$")),
+      
+      # 3. Everything else (NA, "n.d.", "copy", plain text without years) becomes NA
+      TRUE ~ NA_real_
+    )
+  )
+
+
+fix |> 
+  count(year) |> 
+  arrange(desc(n))
+```
+
+# Count of speeches
+```{r}
+speeches |> 
+  count(year) |> 
+  filter(year != "NA") |> 
+  arrange(desc(n))
+```
+
+
+
+#Graphic: all speeches
+
+```{r}
+
+speeches |> 
+  count(year) |> 
+  filter(year != "NA") |> 
+   ggplot() +
+  geom_col(aes(x=year, y=n, fill=n)) +
+   theme(axis.text.x = element_text(angle=90))  +
+   scale_x_continuous(breaks=c(1914, 1920, 1930, 1940, 1950, 1960,1970)) +
+  theme(legend.position = "none") +
+    labs(title = "Raymond Moley Speeches",
+       subtitle = "766 speeches 1914-1968",
+       caption = "38 speeches lacked date entry. Graphic by Rob Wells, 9-19-2026",
+       y="Count",
+       x="Year")
+  
+ # Moley speeches 1914-1968 9_19_2026
+```
+
 
 #Business Terms
 ```{r}
@@ -29,17 +132,17 @@ business_speech_pattern <- "(?i)\\b(?!(republican|democrat(ic)?|gop|socialist|co
 #categorize business entities
 
 ```{r}
-df <- df %>%
-  mutate(business_speech = grepl(business_speech_pattern, subject_clean, perl = TRUE))
+speeches <- speeches %>%
+  mutate(business_speech = grepl(business_speech_pattern, subject, perl = TRUE))
 ```
 
 
 # Remove 'Republican Club' from results
 ```{r}
 
-df <- df |> 
+speeches <- speeches |> 
   mutate(business_speech = case_when(
-    str_detect(subject_clean, regex("republican.*club", ignore_case = TRUE)) ~ FALSE,
+    str_detect(subject, regex("republican.*club", ignore_case = TRUE)) ~ FALSE,
     TRUE ~ business_speech
   ))
 
@@ -48,16 +151,16 @@ df <- df |>
 
 # Count
 ```{r}
- df |> 
+ speeches |> 
   count(business_speech) |> 
   mutate(pct = n/sum(n))
 
 
 ```
 
-About 30% of Moley's speeches were to business groups, according to an analysis of his records. fn
+About 26% of Moley's speeches were to business groups, according to an analysis of his records. fn
 
-fn: See "speech analysis 9-18-2026.Rmd" which analyzed the Hoover Institution finding aid for Moley's papers. It examined 657 index entries for speeches and talks for references to presentations to business and economic groups such as the National Association of Manufacturers; it captured 197 entries, or 30%. AI disclosure: #Gemini 3.6 Flash constructed the regular expression to search for the business groups. The search terms were validated after five iterations of human review.
+fn: See "speech analysis 9-18-2026.Rmd" which analyzed the Hoover Institution finding aid for Moley's papers. It examined 766 index entries for speeches and talks for references to presentations to business and economic groups such as the National Association of Manufacturers; it captured 198 entries, or 26%. AI disclosure: #Gemini 3.6 Flash constructed the regular expression to search for the business groups. The search terms were validated after five iterations of human review.
 
 # To Political Groups
 
@@ -70,15 +173,15 @@ political_speech_pattern <- "(?i)\\b((republican|democrat(ic)?|gop|young\\s+(rep
 #Classify political
 ```{r}
 
-df <- df %>%
-  mutate(political_speech = grepl(political_speech_pattern, subject_clean, perl = TRUE))
+speeches <- speeches %>%
+  mutate(political_speech = grepl(political_speech_pattern, subject, perl = TRUE))
 
 ```
 
 
 # Count political
 ```{r}
- df |> 
+ speeches |> 
   count(political_speech) |> 
   mutate(pct = n/sum(n))
 
@@ -88,7 +191,7 @@ df <- df %>%
 
 ```{r}
 
-error <- df |> 
+error <- speeches |> 
   filter(political_speech == TRUE & business_speech ==TRUE)
 
 ```
@@ -96,17 +199,17 @@ error <- df |>
 # Review political results
 
 ```{r}
-political <- df |> 
+political <- speeches |> 
   filter(political_speech == TRUE) |> 
-  select(subject_clean, date, political_speech, business_speech)
+  select(subject, date, political_speech, business_speech)
 
 ```
 
 
-Moley delivered 50 speeches or 7.6% of all his speeches to political groups. Almost all were to Republican gatherings, and the two for Democrats were a 1940 speech for Virginia Democrats for Wilkie, and a 1936 speech to Young Democrats. 
+Moley delivered 51 speeches or 7% of all his speeches to political groups. Almost all were to Republican gatherings, and the two for Democrats were a 1940 speech for Virginia Democrats for Wilkie, and a 1936 speech to Young Democrats. 
 
 fn
-See "speech analysis 9-18-2026.Rmd" which analyzed the Hoover Institution finding aid for Moley's papers. It examined 657 index entries for speeches and talks for references to presentations to political groups such as the Republican Women's Association; it captured 50 entries, or 7.6% of all speeches listed. AI disclosure: #Gemini 3.6 Flash constructed the regular expression to search for the political groups. The search terms were validated after two iterations of human review.
+See "speech analysis 9-18-2026.Rmd" which analyzed the Hoover Institution finding aid for Moley's papers. It examined 766 index entries for speeches and talks for references to presentations to political groups such as the Republican Women's Association; it captured 51 entries, or 7% of all speeches listed. AI disclosure: #Gemini 3.6 Flash constructed the regular expression to search for the political groups. The search terms were validated after two iterations of human review.
 
 
 
@@ -114,12 +217,22 @@ See "speech analysis 9-18-2026.Rmd" which analyzed the Hoover Institution findin
 #---------------------
 # Notes
 
+# Import cleaned index of 657 speeches
+```{r}
+index <- read_csv("Updated_moley_speeches_index.csv")
+
+#clean to create separate column just with the venue names
+df <- index %>%
+  mutate(subject = str_trim(str_remove(subject, fixed(date))))
+
+```
+
 
 All groups
 ```{r}
-summary <- df |> 
-  select(subject_clean, date, business_speech) |> 
-  group_by(subject_clean) |> 
+summary <- speeches |> 
+  select(subject, date, business_speech) |> 
+  group_by(subject) |> 
   arrange(desc(business_speech))
 
 summary
@@ -131,12 +244,12 @@ summary
 
 Missed
 ```{r}
-missed <- df |> 
-  filter(grepl("association", subject_clean, ignore.case = TRUE)) |> 
+missed <- speeches |> 
+  filter(grepl("association", subject, ignore.case = TRUE)) |> 
   filter(business_speech == FALSE)
 
 
-print(missed$subject_clean)
+print(missed$subject)
 
 
 ```

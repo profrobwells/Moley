@@ -213,6 +213,11 @@ letters <- rio::import("/Users/robwells/Library/CloudStorage/Dropbox/Current_Pro
   janitor::clean_names() |> 
   mutate(box = as.character(box))
 
+
+letters <- rio::import("Hoover_search_BACKUP_JAN_10_Hoover Moley Search Requests Aug 8 2024 copy.xlsx - complete_moley_index.csv") |> 
+  janitor::clean_names() |> 
+  mutate(box = as.character(box))
+
 #130 rows with content
 letters1 <- letters |> 
   filter(august_priority_1_5 !="NA" | notes != "NA" | select != "NA")
