@@ -746,6 +746,91 @@ ggplot(nixon_goldwater_sentiments, aes(sentiment, pct_total, fill=president)) +
 
 ```
 
+# Goldwater Articles Over Time
+
+```{r}
+goldwater_index <- articles_text %>%
+  filter(!is.na(sentence)) %>%
+  group_by(filename, year, date) %>%
+  summarize(mentions = sum(str_detect(sentence, "Goldwater"), na.rm = TRUE)) %>%
+  filter(mentions >= 3)
+
+goldwater_major_articles <- articles_text |> 
+  inner_join(goldwater_index, by = c("filename", "date", "year"))
+
+goldwater_major_article_index <- goldwater_major_articles |> 
+  select(year, date, title, abstract, filename) |> 
+  distinct(filename, .keep_all = TRUE) |> 
+  arrange(date)
+  
+
+
+write_csv(goldwater_major_article_index, "goldwater_major_article_index.csv")
+
+```
+
+```{r}
+#Gemini Flash constructed this segment
+major <- goldwater_major_articles |> 
+  filter(!is.na(sentence)) |> 
+  group_by(filename) |> 
+  summarise(
+    full_text = str_c(sentence, collapse = " "),
+    across(everything(), first) # Keeps metadata columns (title, store_id, etc.)
+  ) |> 
+  arrange(date)
+
+
+# Now create the text file with locations highlighted
+file_conn <- file("verify_goldwater.txt", "w")
+
+for (i in 1:nrow(major)) {
+  row_data <- major[i, ]
+
+  writeLines(paste0("Title: ", row_data$title), file_conn)
+  writeLines(paste0("Date: ", row_data$date), file_conn)
+  writeLines(paste0("Text: ", row_data$full_text), file_conn)
+
+  # Wrap the full text
+  wrapped_text <- strwrap(row_data$full_text, width = 80)
+  wrapped_text[1] <- paste0("Full Context: ", wrapped_text[1])
+  writeLines(wrapped_text, file_conn)
+
+  if (i < nrow(major)) {
+    writeLines("\n==================================================\n", file_conn)
+  }
+}
+
+close(file_conn)
+```
+
+
+
+### Combined Goldwater timeline with letters
+```{r}
+letters <- rio::import("https://docs.google.com/spreadsheets/d/1iSlvIQ_QcCOTpFd-GOD0zaIp1afdGNi-xWfbDVotMC0/edit?usp=sharing")
+
+letters <- letters |> 
+  clean_names() |> 
+  mutate(date1 = ymd(date)) |> 
+  mutate(old_date = date) |> 
+  subset(select = -c(date)) |> 
+  rename(date = date1)
+
+goldwater_timeline <- goldwater_major_article_index |> 
+  rename(subject = abstract) |> 
+  mutate(author = "Newsweek_Perspective_column") |> 
+  full_join(letters) |> 
+ subset(select = -c(year)) |> 
+  select(date, author, subject, recipient, everything()) |> 
+  arrange(date)
+
+write_csv(goldwater_timeline, "goldwater_timeline.csv")
+
+```
+
+
+
 # Words in headlines
 Count the words in the Perspective column headlines
 ```{r}
