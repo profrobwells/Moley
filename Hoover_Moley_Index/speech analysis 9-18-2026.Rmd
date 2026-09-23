@@ -1,7 +1,7 @@
 ---
 title: "Moley speech analysis"
 author: "Wells"
-date: "2026-09-18"
+date: "2026-09-23"
 output: html_document
 ---
 ```{r}
@@ -53,40 +53,6 @@ speeches |>
 #38 lack a year
 
 
-```
-
-
-```{r}
-fix <- speeches |> 
-  select(year, date, subject) |> 
-  filter(is.na(year))
-
-
-```
-
-
-```{r}
-fix <- fix %>%
-  #Gemini constructed this cleaning sequence
-  mutate(
-    year = case_when(
-      # 1. Extract existing 4-digit years (e.g., "1939", "1950s", "1949-1950")
-      str_detect(date, "\\b(19|20)\\d{2}\\b") ~ 
-        as.numeric(str_extract(date, "\\b(19|20)\\d{2}\\b")),
-      
-      # 2. Extract 2-digit years from dash-separated dates (e.g., "1-Oct-40", "24-Feb-32")
-      str_detect(date, "-\\d{2}$") ~ 
-        1900 + as.numeric(str_extract(date, "\\d{2}$")),
-      
-      # 3. Everything else (NA, "n.d.", "copy", plain text without years) becomes NA
-      TRUE ~ NA_real_
-    )
-  )
-
-
-fix |> 
-  count(year) |> 
-  arrange(desc(n))
 ```
 
 # Count of speeches
@@ -273,5 +239,40 @@ full_index <- read_csv("full_moley_index.csv")
 full_index2 <- read_csv("complete_moley_index.csv")
 
 full_index3 <- read_csv("raymond_moley_index.csv")
+```
+
+
+
+```{r}
+fix <- speeches |> 
+  select(year, date, subject) |> 
+  filter(is.na(year))
+
+
+```
+
+
+```{r}
+fix <- fix %>%
+  #Gemini constructed this cleaning sequence
+  mutate(
+    year = case_when(
+      # 1. Extract existing 4-digit years (e.g., "1939", "1950s", "1949-1950")
+      str_detect(date, "\\b(19|20)\\d{2}\\b") ~ 
+        as.numeric(str_extract(date, "\\b(19|20)\\d{2}\\b")),
+      
+      # 2. Extract 2-digit years from dash-separated dates (e.g., "1-Oct-40", "24-Feb-32")
+      str_detect(date, "-\\d{2}$") ~ 
+        1900 + as.numeric(str_extract(date, "\\d{2}$")),
+      
+      # 3. Everything else (NA, "n.d.", "copy", plain text without years) becomes NA
+      TRUE ~ NA_real_
+    )
+  )
+
+
+fix |> 
+  count(year) |> 
+  arrange(desc(n))
 ```
 
