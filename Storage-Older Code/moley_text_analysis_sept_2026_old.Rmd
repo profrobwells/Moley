@@ -9,14 +9,12 @@ This project aims to perform a basic narrative and topic analysis of the journal
 
 The goal of this project is to **measure patterns in wording, verbiage, themes, and sentiment** of Raymond Moley's poltitical reporting over time. This research will support a larger effort in analyzing the **influence of journalism and polticial activism on American elections, voting, and democracy at large**. 
 
-I am focusing on the time period of Moley's work in the Los Angeles Times and Newsweek, from **1937-1969**, with **4063 articles**  analyzed. 
+I am focusing on the time period of Moley's work from **1937-1968**, with **1400 articles**  analyzed. 
 
-There are 4063 articles in the index of Moley Newsweek and LAT columns.
-The earliest year of publication is 1937, and the latest is 1969.
-The average year of publication is 1953, with the majority of articles written in 1951.
-
-The article text has 4049 articles. That's less than the 4063 entries in the article index. The difference was due to about 14 failed AI scans.
-The article text dataframe is huge, with 400170 rows and 9 columns.
+The index has 1562 articles
+The earliest year of publication is 1937, and the latest is 1967.
+The average year of publication is 1952, with the majority of articles written in 1938.
+The article text has 1487 articles. That's less than the 1562 entries in the article index. The difference was due to about 75 failed AI scans.
 
 # Load Libraries
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -82,10 +80,9 @@ LAT_text <-  read_csv("/Users/robwells/Library/CloudStorage/Dropbox/Current_Proj
       filename = new_filename)
 ```
 #combine lat and newsweek indexes
-4063 articles
 ```{r}
 
-index_combo <- article_index |> 
+combo <- article_index |> 
   full_join(lat)
 
 text_combo <- articles_text |> 
@@ -102,28 +99,27 @@ text_combo |>
   distinct(filename, .keep_all = TRUE) |> 
   count(pubtitle)
 
-#write_csv(text_combo, "./data/lat_newsweek_text_combo_9_23.csv")
-#write_csv(index_combo, "./data/lat_newsweek_INDEX_combo_9_23.csv")
 
 ```
 
 
 
 
-## Statistics about the combo index 
+## Statistics about the index 
 ```{r}
-nrows <- nrow(index_combo)
-ncols <- ncol(index_combo)
 
-mean_year <- round(mean(index_combo$year, na.rm = TRUE),0)
+nrows <- nrow(article_index)
+ncols <- ncol(article_index)
 
-min_year <- min(index_combo$year)
+mean_year <- round(mean(article_index$year, na.rm = TRUE),0)
 
-max_year <- max(index_combo$year)
+min_year <- min(article_index$year)
+
+max_year <- max(article_index$year)
 
 
 year_counts <- 
-  index_combo %>%
+  article_index %>%
   count(year)
 
 max_count <- max(year_counts$n)
@@ -132,7 +128,7 @@ max_years <- year_counts %>%
   filter(year_counts$n == max_count)
                   
 
-glue::glue("There are {nrows} articles in the index of Moley Newsweek and LAT columns.");
+glue::glue("There are {nrows} articles in the index of Moley Newsweek columns.");
 
 glue::glue("The earliest year of publication is {as.integer(min_year)}, and the latest is {max_year}.")
 
@@ -145,10 +141,10 @@ glue::glue("The average year of publication is {as.integer(mean_year)}, with the
 
 ## Statistics about the extracted text
 ```{r echo = F}
-nrows1 <- nrow(text_combo)
-ncols1 <- ncol(text_combo)
+nrows1 <- nrow(articles_text)
+ncols1 <- ncol(articles_text)
 
-articles <- text_combo |> 
+articles <- articles_text |> 
   distinct(filename) |> 
   count()
 
@@ -164,7 +160,7 @@ glue::glue("The article text dataframe is huge, with {nrows1} rows and {ncols1} 
 ```{r}
 
 #Here is a chart, Figure x, that counts columns by year
-count_year <- text_combo %>% 
+count_year <- articles_text %>% 
   distinct(filename, .keep_all = TRUE) |> 
 count(year) %>% 
 #Sandwich it onto a simple ggplot
@@ -174,7 +170,7 @@ count(year) %>%
   scale_x_continuous(breaks = seq(1935, 1970, by = 5))+
   labs(title = "Moley Newsweek Columns By Year, 1937-1967", 
        subtitle = "Extracted Text Only",
-       caption = "n=4,063  articles. Graphic by Rob Wells, 9/23/2026",
+       caption = "n=1,487  articles. Graphic by Rob Wells, 2/14/2025",
        y="Count of Pages",
        x="Year")
 
@@ -187,7 +183,7 @@ count_year
 
 # Bigrams
 ```{r}
-bigrams <- text_combo %>% mutate(sentence= str_squish(sentence)) |> 
+bigrams <- articles_text %>% mutate(sentence= str_squish(sentence)) |> 
   mutate(text = tolower(sentence)) |>  
   mutate(text = gsub("\\d+", "", text)) |>
   mutate(text = str_replace_all(text, "raymond", "")) %>% 
@@ -195,8 +191,6 @@ bigrams <- text_combo %>% mutate(sentence= str_squish(sentence)) |>
   mutate(text = str_replace_all(text, "image", "")) %>%
   mutate(text = str_replace_all(text, "perspective", "")) %>%
   mutate(text = str_replace_all(text, "registered u.s. patent office", "")) %>%
-  mutate(text = str_replace_all(text, "copyright owner", "")) %>%
-  mutate(text = str_replace_all(text, "reproduction prohibited", "")) %>%
   mutate(text = str_replace_all(text, "- ", "")) %>%
   mutate(text = str_replace_all(text, " -", "")) %>%
   mutate(text = str_replace_all(text, " - ", "")) %>%
@@ -253,16 +247,18 @@ ggplot(top_20_bigrams, aes(n, reorder(bigram, n), fill=n)) +
   theme(legend.position="none") +
   geom_text(aes(label=n), hjust=-0.2, size=3) +
   labs(title = "Raymond Moley Common Phrases, 1937-1967",
-       subtitle = "Analysis of 4,063 Newsweek, LAT columns",
+       subtitle = "Analysis of 1,487 Newsweek columns",
        x = "Count",
        y = "Bigrams",
-       caption = "Source: Newsweek. Graphic by Rob Wells and Bridget Lang, 9-24-2026")
+       caption = "Source: Newsweek. Graphic by Rob Wells and Bridget Lang, 2-14-2024")
 ```
 
 
 Counting Word instances
 ```{r}
-text_combo %>%
+
+
+articles_text %>%
   # First ensure sentence is character and lowercase
   mutate(sentence = as.character(sentence),
          sentence = tolower(sentence)) %>%
@@ -286,14 +282,16 @@ text_combo %>%
     names_to = "politician",
     values_to = "count"
   ) %>%
-  mutate(percentage = formattable::percent(count / 4063,0)) %>%
-  arrange(desc(percentage))
+  mutate(
+    percentage = count / 1487) * 100  # Using actual number of articles
+  ) %>%
+  arrange(desc(count))
 ```
 
 ## Business Coverage
 
 ```{r}
-business_articles2 <- text_combo %>%
+business_articles2 <- articles_text %>%
   filter(!is.na(sentence)) %>%
   group_by(filename, year, date) %>%
   summarize(mentions = sum(str_detect(sentence, "business"), na.rm = TRUE)) %>%
@@ -303,9 +301,9 @@ business_articles2 <- text_combo %>%
 
 ```{r}
 
-business_mentions <- text_combo %>%
+business_mentions <- articles_text %>%
   filter(!is.na(sentence)) %>%
-  filter(str_detect(sentence, "business")) 
+  filter(str_detect(sentence, "business")) |> 
   
 
 print(paste("Total number of sentences mentioning business:", nrow(business_mentions)))
@@ -313,22 +311,25 @@ print(paste("Total number of sentences mentioning business:", nrow(business_ment
 
 #### Statism
 ```{r}
-statism<- text_combo %>%
+statism<- articles_text %>%
   filter(!is.na(sentence)) %>%
   group_by(filename, year, date) %>%
    summarize(mentions = sum(str_detect(sentence, "statism"), na.rm = TRUE)) %>%
    filter(mentions >= 1) |> 
   arrange(date)
-
-print(paste("The search shows Moley used the term 'statism' in", nrow(statism), "instances in various Newsweek and LAT columns."))
 ```
+
+The search shows Moley used the term "statism" in about 27 different Perspective columns, beginning in 1941.
 
 
 #### KWIC search, with metadata
 
 ```{r}
+# 
+
+
 # Create corpus
-my_corpus <- corpus(text_combo, text_field = "sentence")
+my_corpus <- corpus(articles_text, text_field = "sentence")
 # Tokenize 
 my_tokens <- tokens(my_corpus)
 # KWIC with 20 words on each side
@@ -338,29 +339,17 @@ reuther <- kwic(my_tokens, phrase(c("reuther")), window = 50, valuetype = "regex
 
 # quanteda_test2 <- kwic(my_tokens, phrase(c("journalist", "reporter", "newspaper", "killer", "murdered", "killed", "investigate crimes against")), window = 50, valuetype = "regex") %>% as.data.frame() 
 
-# Map docvars directly using document identifiers
-# Gemini Flash used to extract and place pubtitle into the output
-kwic_reuther <- reuther %>%
-  mutate(
-    pubtitle = docvars(my_corpus, "pubtitle")[match(docname, docnames(my_corpus))],
-    year     = docvars(my_corpus, "year")[match(docname, docnames(my_corpus))],
-    filename = docvars(my_corpus, "filename")[match(docname, docnames(my_corpus))]
-  ) %>%
-  select(docname, filename, year, pubtitle, pre, keyword, post) %>%
+kwic_reuther <- data.frame(
+  #change filename below as needed
+  docname = reuther$docname,
+ filename = docvars(my_corpus, "filename")[as.numeric(gsub("text", "", reuther$docname))],
+  year = docvars(my_corpus, "year")[as.numeric(gsub("text", "", reuther$docname))],
+  pre = reuther$pre,
+  keyword = reuther$keyword,
+  post = reuther$post,
+  stringsAsFactors = FALSE
+) |> 
   arrange(year)
-
-# kwic_reuther <- data.frame(
-#   #change filename below as needed
-#   docname = reuther$docname,
-#  filename = docvars(my_corpus, "filename")[as.numeric(gsub("text", "", reuther$docname))],
-#   year = docvars(my_corpus, "year")[as.numeric(gsub("text", "", reuther$docname))],
-#  pubtitle = reuther$pubtitle,
-#   pre = reuther$pre,
-#   keyword = reuther$keyword,
-#   post = reuther$post,
-#   stringsAsFactors = FALSE
-# ) |> 
-#   arrange(year)
 
 write.table(kwic_reuther, "reuther.txt", 
             sep = "\t", 
@@ -372,29 +361,30 @@ write.table(kwic_reuther, "reuther.txt",
 
 ### Reuther analysis
 ```{r}
-wr <- kwic_reuther |> 
+kwic_reuther |> 
   distinct(docname, .keep_all = TRUE) |> 
   count(docname, year)
 
-print(paste("Moley referred to UAW President Walter Reuther in",nrow(wr), "articles Newsweek and the LAT. Of that, 110 references to Reuther were in Newsweek columns"))
+
 ```
 
+
+115 references to reuther in 110 Newsweek columns
 
 ### Reuther mentions visualized
 ```{r}
 kwic_reuther |> 
-  group_by(year, pubtitle) |> 
+  group_by(year) |> 
   summarise(n_articles = n_distinct(docname)) |> 
-  ungroup() |> 
-  ggplot(aes(x = year, y = n_articles, fill = pubtitle)) +
-  geom_col() +
+  ggplot(aes(x = year, y = n_articles, fill = factor(year))) +
+  geom_col(show.legend = FALSE) +
   scale_x_continuous(breaks = seq(1942, 1966, by = 2)) +
   labs(
     title = "Walter Reuther Mentions in Moley Coverage",
-    subtitle = "Number of Unique Newsweek, LAT Columns Mentioning Reuther per Year",
+    subtitle = "Number of Unique Newsweek Columns Mentioning Reuther per Year",
     y = "Article Count", 
     x = NULL,
-    caption = "n=4,063 Newsweek, LAT articles, Graphic by Rob Wells"
+    caption = "n=1,487 Newsweek articles, Graphic by Rob Wells"
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
@@ -406,7 +396,7 @@ kwic_reuther |>
 ### KWIC Conservative Group Mentions
 ```{r}
 # Create corpus
-my_corpus <- corpus(text_combo, text_field = "sentence")
+my_corpus <- corpus(articles_text, text_field = "sentence")
 # Tokenize 
 my_tokens <- tokens(my_corpus)
 # KWIC with 20 words on each side
@@ -439,7 +429,7 @@ write.table(groups_kwic, "groups_kwic.txt",
 ## Presidential Candidate Coverage
 ###Nixon
 ```{r}
-nixon_articles2 <- text_combo %>%
+nixon_articles2 <- articles_text %>%
   filter(!is.na(sentence)) %>%
   group_by(filename, year, date) %>%
   summarize(mentions = sum(str_detect(sentence, "Nixon"), na.rm = TRUE)) %>%
@@ -448,7 +438,7 @@ nixon_articles2 <- text_combo %>%
 
 # Let's also check the intermediate steps to debug:
 # First check if we're finding any Nixon mentions at all
-nixon_mentions <- text_combo %>%
+nixon_mentions <- articles_text %>%
   filter(!is.na(sentence)) %>%
   filter(str_detect(sentence, "Nixon"))
 
@@ -456,7 +446,7 @@ print(paste("Total number of sentences mentioning Nixon:", nrow(nixon_mentions))
 ```
 ###Goldwater
 ```{r}
-goldwater_articles2 <- text_combo %>%
+goldwater_articles2 <- articles_text %>%
   filter(!is.na(sentence)) %>%
   group_by(filename, year, date) %>%
   summarize(mentions = sum(str_detect(sentence, "Goldwater"), na.rm = TRUE)) %>%
@@ -465,7 +455,7 @@ goldwater_articles2 <- text_combo %>%
 
 # Let's also check the intermediate steps to debug:
 # First check if we're finding any Nixon mentions at all
-goldwater_mentions <- text_combo %>%
+goldwater_mentions <- articles_text %>%
   filter(!is.na(sentence)) %>%
   filter(str_detect(sentence, "Goldwater"))
 
@@ -473,7 +463,7 @@ print(paste("Total number of sentences mentioning Goldwater:", nrow(goldwater_me
 ```
 ###Roosevelt
 ```{r}
-roosevelt_articles2 <- text_combo %>%
+roosevelt_articles2 <- articles_text %>%
   filter(!is.na(sentence)) %>%
   group_by(filename, year, date) %>%
   summarize(mentions = sum(str_detect(sentence, "Roosevelt"), na.rm = TRUE)) %>%
@@ -482,7 +472,7 @@ roosevelt_articles2 <- text_combo %>%
 
 # Let's also check the intermediate steps to debug:
 # First check if we're finding any Nixon mentions at all
-roosevelt_mentions <- text_combo %>%
+roosevelt_mentions <- articles_text %>%
   filter(!is.na(sentence)) %>%
   filter(str_detect(sentence, "Roosevelt"))
 
@@ -490,7 +480,7 @@ print(paste("Total number of sentences mentioning Roosevelt:", nrow(roosevelt_me
 ```
 ###Eisenhower
 ```{r}
-eisenhower_articles2 <- text_combo %>%
+eisenhower_articles2 <- articles_text %>%
   filter(!is.na(sentence)) %>%
   group_by(filename, year, date) %>%
   summarize(mentions = sum(str_detect(sentence, "Eisenhower"), na.rm = TRUE)) %>%
@@ -499,7 +489,7 @@ eisenhower_articles2 <- text_combo %>%
 
 # Let's also check the intermediate steps to debug:
 # First check if we're finding any Nixon mentions at all
-eisenhower_mentions <- text_combo %>%
+eisenhower_mentions <- articles_text %>%
   filter(!is.na(sentence)) %>%
   filter(str_detect(sentence, "Eisenhower"))
 
@@ -507,7 +497,7 @@ print(paste("Total number of sentences mentioning eisenhower:", nrow(eisenhower_
 ```
 ###Dewey
 ```{r}
-dewey_articles2 <- text_combo %>%
+dewey_articles2 <- articles_text %>%
   filter(!is.na(sentence)) %>%
    group_by(filename, year, date) %>%
   summarize(mentions = sum(str_detect(sentence, "Dewey"), na.rm = TRUE)) %>%
@@ -516,7 +506,7 @@ dewey_articles2 <- text_combo %>%
 
 # Let's also check the intermediate steps to debug:
 # First check if we're finding any Nixon mentions at all
-dewey_mentions <- text_combo %>%
+dewey_mentions <- articles_text %>%
   filter(!is.na(sentence)) %>%
   filter(str_detect(sentence, "Dewey"))
 
@@ -540,7 +530,7 @@ ggplot(aes(y=total, x= year, fill=politician)) +
        subtitle = "Two or more mentions of politician in Newsweek",
         y = "Count of Politician Mentions", 
         x = "",
-        caption = "n=4,063 Newsweek, LAT articles, Graphic by Rob Wells") +
+        caption = "n=1,487 Newsweek articles, Graphic by Rob Wells") +
   theme(axis.text.x = element_text(angle = 45, vjust=0.5)) 
 
 
@@ -550,23 +540,23 @@ ggplot(aes(y=total, x= year, fill=politician)) +
 
 
 ```{r echo = F}
-nixon_articles <- text_combo %>%
+nixon_articles <- articles_text %>%
   filter(str_detect(sentence, "Nixon")) %>%
   select(filename, year) %>%
   distinct(filename, year)
 
 
-goldwater_articles <- text_combo %>%
+goldwater_articles <- articles_text %>%
   filter(str_detect(sentence, "Goldwater")) %>%
   select(filename, year) %>%
   distinct(filename, year)
 
-roosevelt_articles <- text_combo %>%
+roosevelt_articles <- articles_text %>%
   filter(str_detect(sentence, "Roosevelt")) %>%
   select(filename, year) %>%
   distinct(filename, year)
 
-dewey_articles <- text_combo %>%
+dewey_articles <- articles_text %>%
   filter(str_detect(sentence, "Dewey")) %>%
   select(filename, year) %>%
   distinct(filename, year)
@@ -583,7 +573,7 @@ afinn_sentiments <- get_sentiments("afinn")
 
 ```{r echo = F, results = 'hide', error=F, warning=F, message=F}
 
-dewey_text <- text_combo %>%
+dewey_text <- articles_text %>%
   select(filename, year, sentence) %>%
   filter(filename %in% dewey_articles$filename)
 
@@ -647,7 +637,7 @@ ggplot(dewey_text_tokenized, aes(x= year, y=total_score, fill=total_score)) +
 
 ```{r}
 
-nixon_text <- text_combo %>%
+nixon_text <- articles_text %>%
   select(filename, year, sentence) %>%
   filter(filename %in% nixon_articles$filename)
 
@@ -680,7 +670,7 @@ ggplot(nixon_sentiments_all, aes(sentiment, pct_total, fill=pct_total)) +
 ### Nixon Sentiment Over Time
 
 ```{r}
-nixon_text <- text_combo %>%
+nixon_text <- articles_text %>%
   select(filename, year, sentence) %>%
   filter(filename %in% nixon_articles$filename)
 
@@ -742,7 +732,7 @@ ggplot(nixon_dewey_sentiments, aes(sentiment, pct_total, fill=president)) +
 
 ```{r echo = F, results = 'hide', error=F, warning=F, message=F}
 
-goldwater_text <- text_combo %>%
+goldwater_text <- articles_text %>%
   select(filename, year, sentence) %>%
   filter(filename %in% goldwater_articles$filename)
 
@@ -802,26 +792,26 @@ ggplot(nixon_goldwater_sentiments, aes(sentiment, pct_total, fill=president)) +
 # Goldwater Articles Over Time
 
 ```{r}
-goldwater_index <- text_combo %>%
+goldwater_index <- articles_text %>%
   filter(!is.na(sentence)) %>%
   group_by(filename, year, date) %>%
   summarize(mentions = sum(str_detect(sentence, "Goldwater"), na.rm = TRUE)) %>%
   filter(mentions >= 3)
 
-goldwater_major_articles <- text_combo |> 
+goldwater_major_articles <- articles_text |> 
   inner_join(goldwater_index, by = c("filename", "date", "year"))
 
-goldwater_major_index_combo <- goldwater_major_articles |> 
-  select(year, date, title, abstract, filename, pubtitle) |> 
+goldwater_major_article_index <- goldwater_major_articles |> 
+  select(year, date, title, abstract, filename) |> 
   distinct(filename, .keep_all = TRUE) |> 
   arrange(date)
   
 
 
-#write_csv(goldwater_major_index_combo, "goldwater_major_index_combo.csv")
+write_csv(goldwater_major_article_index, "goldwater_major_article_index.csv")
 
 ```
-# Print out major Goldwater articles to read
+
 ```{r}
 #Gemini Flash constructed this segment
 major <- goldwater_major_articles |> 
@@ -842,7 +832,6 @@ for (i in 1:nrow(major)) {
 
   writeLines(paste0("Title: ", row_data$title), file_conn)
   writeLines(paste0("Date: ", row_data$date), file_conn)
-  writeLines(paste0("Publication: ", row_data$pubtitle), file_conn)
   writeLines(paste0("Text: ", row_data$full_text), file_conn)
 
   # Wrap the full text
@@ -871,12 +860,12 @@ letters <- letters |>
   subset(select = -c(date)) |> 
   rename(date = date1)
 
-goldwater_timeline <- goldwater_major_index_combo |> 
+goldwater_timeline <- goldwater_major_article_index |> 
   rename(subject = abstract) |> 
-  mutate(author = "Moley article") |> 
+  mutate(author = "Newsweek_Perspective_column") |> 
   full_join(letters) |> 
  subset(select = -c(year)) |> 
-  select(date, author, pubtitle, subject, recipient, everything()) |> 
+  select(date, author, subject, recipient, everything()) |> 
   arrange(date)
 
 write_csv(goldwater_timeline, "goldwater_timeline.csv")
@@ -889,7 +878,7 @@ write_csv(goldwater_timeline, "goldwater_timeline.csv")
 Count the words in the Perspective column headlines
 ```{r}
 
-headlines_tokens <- index_combo |> 
+headlines_tokens <- article_index |> 
   mutate(text= str_squish(title), 
       text = tolower(text),
       text = str_remove_all(text, "[[:punct:]]")) |> 
@@ -973,7 +962,7 @@ maxqda_binary |>
 Join with index
 ```{r}
 maxqda_merged <- maxqda_binary |> 
-  inner_join(index_combo, by=c("date_new"="date"))
+  inner_join(article_index, by=c("date_new"="date"))
 
 write.csv(maxqda_merged, "./data/maxqda_merged.csv")
 ```
@@ -983,7 +972,7 @@ Join with articles
 
 ```{r}
 maxqda_articles <- maxqda_binary |> 
-  inner_join(text_combo, by=c("date_new" = "date", "year" = "year"))
+  inner_join(articles_text, by=c("date_new" = "date", "year" = "year"))
 
 
 ```
@@ -1252,7 +1241,7 @@ udmodel <- udpipe_load_model(udmodel$file_model)
 ```{r}
 # Process the text and extract adjectives
 # This will create a data frame with POS tags
-annotated_text_moley <- udpipe_annotate(udmodel, x = text_combo$sentence, doc_id = text_combo$filename)
+annotated_text_moley <- udpipe_annotate(udmodel, x = articles_text$sentence, doc_id = articles_text$filename)
 annotated_df_moley <- as.data.frame(annotated_text_moley)
 ```
 
@@ -1364,7 +1353,7 @@ spacy_initialize(model = "en_core_web_sm")
 # Extract named entities from your corpus
 # Replace 'your_text_data' with your actual dataframe name
 entities_moley <- spacy_parse(
-  x = text_combo$sentence,  # Your text column
+  x = articles_text$sentence,  # Your text column
   tag = FALSE,              # Don't need POS tags
   lemma = FALSE,            # Don't need lemmas
   entity = TRUE,            # DO extract entities
@@ -1373,7 +1362,7 @@ entities_moley <- spacy_parse(
 
 # Extract just the named entities
 named_entities <- spacy_extract_entity(
-  x =  text_combo$sentence,
+  x =  articles_text$sentence,
   type = "all"  # Extract all entity types
 )
 
@@ -1585,7 +1574,7 @@ pairs_by_article_kh <- adj_noun_pairs_kh %>%
 #rsw comment - again, fix the y axis to scale as percentages. 
 ```{r echo = F, results = 'hide', error=F, warning=F, message=F}
 
-all_text_tokenized <- text_combo %>% 
+all_text_tokenized <- articles_text %>% 
   select(sentence) %>% 
   mutate(sentence = str_replace_all(sentence, "- ", "")) %>% 
   unnest_tokens(word, sentence) %>% 
@@ -1614,7 +1603,7 @@ ggplot(sentiments_all, aes(sentiment, percent, fill=percent)) +
 #rsw comment; great idea. the bars need to be in chronological sequence, though. An easier way would be to mutate a new decade variable and visualize that instead.
 ```{r echo = F, results = 'hide', error=F, warning=F, message=F}
 #fourties
-fourties_text <- text_combo %>% 
+fourties_text <- articles_text %>% 
   filter((round(year / 10) * 10) == 1940)
 
 fourties_text_tokenized <- fourties_text %>% 
@@ -1634,7 +1623,7 @@ fourties_sentiments <- fourties_sentiments %>%
   mutate(decade = "Fourties")
 
 #fifties
-fifties_text <- text_combo %>% 
+fifties_text <- articles_text %>% 
   filter((round(year / 10) * 10) == 1950)
 
 fifties_text_tokenized <- fifties_text %>% 
@@ -1654,7 +1643,7 @@ fifties_sentiments <- fifties_sentiments %>%
   mutate(decade = "Fifties")
 
 #sixties
-sixties_text <- text_combo %>% 
+sixties_text <- articles_text %>% 
   filter((round(year / 10) * 10) == 1960)
 
 sixties_text_tokenized <- sixties_text %>% 
@@ -1716,7 +1705,7 @@ kable(head(political_terms, 20), caption="Sample of Political Terms")
 #Unigrams
 ```{r}
 
-unigrams <- text_combo %>% mutate(sentence= str_squish(sentence)) |> 
+unigrams <- articles_text %>% mutate(sentence= str_squish(sentence)) |> 
   mutate(text = tolower(sentence)) |>  
   mutate(text = gsub("\\d+", "", text)) |>
   mutate(text = str_replace_all(text, "raymond", "")) %>% 
