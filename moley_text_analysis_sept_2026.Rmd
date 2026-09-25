@@ -528,6 +528,23 @@ politicians <- rbind(nixon_articles2, goldwater_articles2, roosevelt_articles2, 
 
 #write.csv(politicians, "politicians_mentions_feb21.csv")
 ```
+
+
+## Count articles involving politicians
+```{r}
+politicians |> 
+  group_by(politician) |> 
+  distinct(filename) |> 
+  count() |> 
+  arrange(desc(n))
+
+
+```
+
+
+
+
+
 ###Candidates visualized
 ```{r}
 politicians |> 
